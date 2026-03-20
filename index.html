@@ -1293,6 +1293,14 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:20px 0;}
           <label class="form-label">Email <span class="req">*</span></label>
           <input type="email" id="newUserEmail" class="form-input" placeholder="jane@eli.health" />
         </div>
+        <div class="form-group">
+          <label class="form-label">Role</label>
+          <select id="newUserRole" class="form-input">
+            <option value="user">User</option>
+            <option value="admin">Admin</option>
+            <option value="catalog">Catalog</option>
+          </select>
+        </div>
       </div>
       <div class="form-label" style="margin-bottom:8px;">Department Access</div>
       <div class="add-user-depts" id="newUserDepts">
@@ -3880,7 +3888,7 @@ async function submitAddUser() {
       body: JSON.stringify({
         action: 'addUser',
         adminEmail: currentUser.email,
-        email, name, role: 'user', access
+        email, name, role: document.getElementById('newUserRole')?.value || 'user', access
       })
     });
     const data = await res.json();
