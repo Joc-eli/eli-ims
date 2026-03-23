@@ -726,6 +726,7 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:20px 0;}
   <button class="nav-link" onclick="showPage('ncscrap')" id="nav-ncscrap"><span class="nav-icon">⚠️</span> NC &amp; Scrap Log</button>
   <button class="nav-link" onclick="showPage('batchtrace')" id="nav-batchtrace"><span class="nav-icon">📊</span> Batch Traceability</button>
   <button class="nav-link" onclick="showPage('sds')" id="nav-sds"><span class="nav-icon">📄</span> SDS &amp; COA Register</button>
+  <button class="nav-link" onclick="showPage('suppliers')" id="nav-suppliers"><span class="nav-icon">🏢</span> Supplier Directory</button>
   <div class="sidebar-section-label" id="sidebar-admin-label" style="margin-top:8px;display:none;">Admin</div>
   <button class="nav-link" onclick="showPage('catalog')" id="nav-catalog" style="display:none">
     <span class="nav-icon">📋</span> Parts Catalog
@@ -875,7 +876,8 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:20px 0;}
 
         <div class="form-group">
           <label class="form-label">Vendor / Supplier <span class="req">*</span></label>
-          <input type="text" class="form-input" id="in-supplier" placeholder="e.g. Porex, Sigma Aldrich…" required oninput="checkAslStatus()" />
+          <input type="text" class="form-input" id="in-supplier" list="supplierAutocomplete" placeholder="e.g. Porex, Sigma Aldrich…" required oninput="checkAslStatus()" />
+          <datalist id="supplierAutocomplete"></datalist>
           <div id="in-aslWarning" style="display:none;margin-top:6px;padding:6px 10px;border-radius:8px;font-size:11px;font-weight:600;"></div>
         </div>
 
@@ -1675,6 +1677,130 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:20px 0;}
       <div style="display:flex;gap:10px;margin-top:16px;">
         <button class="btn btn-primary" onclick="submitSdsRecord()">Save Record</button>
         <button class="btn btn-secondary" onclick="closeModal('addSdsModal')">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     SUPPLIER DIRECTORY PAGE
+══════════════════════════════════════════════════════ -->
+<div class="page" id="page-suppliers">
+  <div class="page-header">
+    <div>
+      <h1>🏢 Supplier Directory</h1>
+      <p class="subtitle">Approved &amp; department supplier lists · Per SOP-05 / FRM-05-01</p>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-secondary btn-sm" onclick="showPage('inventory')">← Back to Inventory</button>
+      <button class="btn btn-primary btn-sm" onclick="openAddSupplierModal()">＋ Add Supplier</button>
+    </div>
+  </div>
+
+  <!-- Department tabs -->
+  <div style="display:flex;gap:4px;margin-bottom:16px;flex-wrap:wrap;">
+    <button class="mtype-tab active" id="sup-tab-Manufacturing" onclick="switchSupplierTab('Manufacturing')" style="padding:8px 16px;border:1px solid var(--border);border-radius:8px;background:#fff;cursor:pointer;font-size:13px;font-weight:600;">🏭 Manufacturing</button>
+    <button class="mtype-tab" id="sup-tab-Assay R&D" onclick="switchSupplierTab('Assay R&D')" style="padding:8px 16px;border:1px solid var(--border);border-radius:8px;background:#fff;cursor:pointer;font-size:13px;font-weight:600;">🔬 Assay R&amp;D</button>
+    <button class="mtype-tab" id="sup-tab-Hardware R&D" onclick="switchSupplierTab('Hardware R&D')" style="padding:8px 16px;border:1px solid var(--border);border-radius:8px;background:#fff;cursor:pointer;font-size:13px;font-weight:600;">🔧 Hardware R&amp;D</button>
+    <button class="mtype-tab" id="sup-tab-Marketing" onclick="switchSupplierTab('Marketing')" style="padding:8px 16px;border:1px solid var(--border);border-radius:8px;background:#fff;cursor:pointer;font-size:13px;font-weight:600;">📣 Marketing</button>
+    <button class="mtype-tab" id="sup-tab-Office" onclick="switchSupplierTab('Office')" style="padding:8px 16px;border:1px solid var(--border);border-radius:8px;background:#fff;cursor:pointer;font-size:13px;font-weight:600;">🏢 Office</button>
+  </div>
+
+  <!-- Search -->
+  <div class="toolbar" style="margin-bottom:16px;">
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="supSearch" class="search-input" placeholder="Search supplier name, contact, or website…" oninput="renderSupplierTable()" />
+    </div>
+  </div>
+
+  <!-- Supplier Table -->
+  <div class="table-wrap">
+    <table class="catalog-table">
+      <thead>
+        <tr>
+          <th>Supplier Name</th>
+          <th>Contact</th>
+          <th>Email</th>
+          <th>Phone</th>
+          <th>Website</th>
+          <th style="text-align:center;">Lead Time (days)</th>
+          <th>ASL Status</th>
+          <th>Criticality</th>
+          <th>Notes</th>
+        </tr>
+      </thead>
+      <tbody id="supTbody">
+        <tr><td colspan="9" style="text-align:center;padding:30px;color:var(--soft-hash);">Select a department tab to view suppliers</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="form-hint" style="margin-top:12px;">
+    Manufacturing suppliers must be on the Approved Supplier List (ASL) per SOP-05. Other departments can add their own suppliers freely.
+  </div>
+</div>
+
+<!-- Add/Edit Supplier Modal -->
+<div class="modal-overlay" id="addSupplierModal">
+  <div class="modal" style="max-width:620px;">
+    <div class="modal-header">
+      <h3 id="sup-modal-title">Add Supplier</h3>
+      <button class="modal-close" onclick="closeModal('addSupplierModal')">✕</button>
+    </div>
+    <div style="padding:20px;">
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Supplier Name <span class="req">*</span></label>
+          <input type="text" class="form-input" id="sup-name" placeholder="e.g. Porex, Sigma Aldrich" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Department <span class="req">*</span></label>
+          <select class="form-select" id="sup-dept">
+            <option value="Manufacturing">🏭 Manufacturing</option>
+            <option value="Assay R&D">🔬 Assay R&amp;D</option>
+            <option value="Hardware R&D">🔧 Hardware R&amp;D</option>
+            <option value="Marketing">📣 Marketing</option>
+            <option value="Office">🏢 Office</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Contact Name</label>
+          <input type="text" class="form-input" id="sup-contact" placeholder="e.g. Gabe Connell" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input type="email" class="form-input" id="sup-email" placeholder="e.g. gabe@filtrationgroup.com" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Phone</label>
+          <input type="text" class="form-input" id="sup-phone" placeholder="e.g. +1 555-123-4567" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Website</label>
+          <input type="url" class="form-input" id="sup-website" placeholder="https://www.supplier.com" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Lead Time (days)</label>
+          <input type="number" class="form-input" id="sup-leadTime" min="0" placeholder="e.g. 14" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Criticality (ASL)</label>
+          <select class="form-select" id="sup-criticality">
+            <option value="">— Not on ASL —</option>
+            <option value="Critical">Critical</option>
+            <option value="Not Critical">Not Critical</option>
+          </select>
+        </div>
+        <div class="form-group full">
+          <label class="form-label">Notes</label>
+          <textarea class="form-input" id="sup-notes" rows="2" placeholder="Items supplied, payment terms, quality notes…"></textarea>
+        </div>
+      </div>
+      <div id="sup-error" class="form-error" style="display:none;"></div>
+      <div style="display:flex;gap:10px;margin-top:16px;">
+        <button class="btn btn-primary" onclick="submitSupplier()">Save Supplier</button>
+        <button class="btn btn-secondary" onclick="closeModal('addSupplierModal')">Cancel</button>
       </div>
     </div>
   </div>
@@ -2769,6 +2895,14 @@ function onDeptChange() {
   // Rebuild parts dropdown filtered for this department
   buildPartsDropdown('in-partName', dept);
 
+  // Populate supplier autocomplete from supplier directory
+  const datalist = document.getElementById('supplierAutocomplete');
+  if (datalist) {
+    const deptSuppliers = supplierDirectory.filter(s => s.dept === dept);
+    const allNames = [...new Set(deptSuppliers.map(s => s.name))];
+    datalist.innerHTML = allNames.map(n => `<option value="${n}">`).join('');
+  }
+
   onItemChange();
   checkAslStatus();
 }
@@ -2839,6 +2973,9 @@ function showPage(name) {
   }
   if (name === 'sds') {
     loadSdsRecords();
+  }
+  if (name === 'suppliers') {
+    initSupplierDirectory();
   }
   if (name === 'catalog') {
     loadCatalogPage();
@@ -4013,6 +4150,7 @@ function showMainApp() {
   updateTopbar();
   applyPermissions();
   loadInventory();
+  initSupplierDirectory(); // Load supplier directory for autocomplete
   startIdleTimer();
 }
 
@@ -5120,6 +5258,186 @@ function loadSdsRecords() {
   } else {
     renderSdsTable();
   }
+}
+
+// ══════════════════════════════════════════════════════
+// SUPPLIER DIRECTORY
+// ══════════════════════════════════════════════════════
+let supplierDirectory = [];
+let supplierCurrentTab = 'Manufacturing';
+let editingSupplierIdx = null;
+
+// Seed with ASL suppliers for Manufacturing
+const SEED_SUPPLIERS = [
+  { name:'Ahlstrom', dept:'Manufacturing', contact:'Jasmine VanArtsdalen', email:'Jasmine.VanArtsdalen@ahlstrom.com', phone:'', website:'https://www.ahlstrom.com', leadTime:30, criticality:'Critical', notes:'Conjugate pads, sample pads, absorbent pads (Grade 222, 6614, A205)' },
+  { name:'Sartorius', dept:'Manufacturing', contact:'Michael Murphy', email:'Michael.Murphy@SARTORIUS.com', phone:'', website:'https://www.sartorius.com', leadTime:21, criticality:'Critical', notes:'Nitrocellulose membranes (CN95)' },
+  { name:'Porex', dept:'Manufacturing', contact:'Gabe Connell', email:'gabe.connell@filtrationgroup.com', phone:'', website:'https://www.porex.com', leadTime:28, criticality:'Critical', notes:'A205 pads, sample pads, collection pads' },
+  { name:'Kenosha', dept:'Manufacturing', contact:'Anthony Leembruggen', email:'sales@kenoshatapes.com', phone:'+31 (0)20 453 9124', website:'https://www.kenoshatapes.com', leadTime:42, criticality:'Critical', notes:'Backing cards, cover tape' },
+  { name:'Seehope Silicone', dept:'Manufacturing', contact:'Jerry Zhang', email:'jerry@seehope.com', phone:'', website:'', leadTime:60, criticality:'Critical', notes:'Cartridge parts (upper/lower housing, transfer strip)' },
+  { name:'Stephen Gould', dept:'Manufacturing', contact:'Bob B Challinor', email:'V.Challinor@stephengould.com', phone:'', website:'https://www.stephengould.com', leadTime:21, criticality:'Critical', notes:'4-Pack boxes, mailer boxes' },
+  { name:'Food Pak', dept:'Manufacturing', contact:'Andrew Noon', email:'Anoon@foodpak.com', phone:'', website:'', leadTime:14, criticality:'Critical', notes:'Test pouches' },
+  { name:'Nanocomposix', dept:'Manufacturing', contact:'Customer Service', email:'nanocomposix@fortislife.com', phone:'', website:'https://nanocomposix.com', leadTime:14, criticality:'Critical', notes:'NCX conjugate diluent' },
+  { name:'Uline', dept:'Manufacturing', contact:'Ziad Marcos', email:'Ziad.Marcos@uline.ca', phone:'', website:'https://www.uline.ca', leadTime:3, criticality:'Not Critical', notes:'Desiccants, packaging supplies' },
+  { name:'Sigma Aldrich', dept:'Assay R&D', contact:'', email:'', phone:'', website:'https://www.sigmaaldrich.com', leadTime:7, criticality:'Not Critical', notes:'Reagents, buffers, chemicals (HEPES, BSA, Tween 20, EDC, etc.)' },
+  { name:'BioShop', dept:'Assay R&D', contact:'', email:'', phone:'', website:'https://www.bioshopcanada.com', leadTime:5, criticality:'Not Critical', notes:'Sodium hydroxide, HCl, BSA, DMSO' },
+  { name:'Thermo Fisher', dept:'Assay R&D', contact:'', email:'', phone:'', website:'https://www.thermofisher.com', leadTime:7, criticality:'Not Critical', notes:'DI water, NHS-PEG12-Biotin, general lab supplies' },
+  { name:'Attogene', dept:'Assay R&D', contact:'Lance Ford', email:'lford@attogene.com', phone:'', website:'https://www.attogene.com', leadTime:14, criticality:'Critical', notes:'40nm unconjugated gold' },
+  { name:'CalBioReagents', dept:'Assay R&D', contact:'Patrick Fitzgerald', email:'fitzgerald@calbioreagents.com', phone:'', website:'https://www.calbioreagents.com', leadTime:14, criticality:'Critical', notes:'Anti-cortisol MAB (M344)' },
+  { name:'Bioventix', dept:'Assay R&D', contact:'Peter Harrison', email:'peter.harrison@bioventix.com', phone:'', website:'https://www.bioventix.com', leadTime:21, criticality:'Critical', notes:'Sheep anti-progesterone FAB' },
+  { name:'Conju-Probe', dept:'Assay R&D', contact:'Sarah/Dustin', email:'sales@conju-probe.com', phone:'', website:'https://www.conju-probe.com', leadTime:14, criticality:'Critical', notes:'P4-11-PEG12-NHS (CP-5012)' },
+  { name:'BBI Solutions', dept:'Assay R&D', contact:'Michael Scanlon', email:'Michael.Scanlon@bbisolutions.com', phone:'', website:'https://www.bbisolutions.com', leadTime:14, criticality:'Critical', notes:'Poly streptavidin' },
+  { name:'Transcat', dept:'Manufacturing', contact:'Nicholas Bountroukas', email:'nicholas.x.bountroukas@transcat.ca', phone:'', website:'https://www.transcat.ca', leadTime:14, criticality:'Critical', notes:'Calibration services (balances, pipettes, centrifuges)' },
+  { name:'HEPA', dept:'Manufacturing', contact:'Danny Yee', email:'hepamtl@hepainc.com', phone:'514.871.9990', website:'https://www.hepainc.com', leadTime:7, criticality:'Critical', notes:'Cleanroom calibration' },
+  { name:'AirCare', dept:'Manufacturing', contact:'Phil Kong', email:'phil@aircareautomation.com', phone:'', website:'', leadTime:7, criticality:'Critical', notes:'Cleanroom sensor servicing' },
+  { name:'ABS', dept:'Manufacturing', contact:'Albert Avila', email:'albert@absolutebioservice.com', phone:'', website:'', leadTime:7, criticality:'Critical', notes:'BioDot calibration' },
+];
+
+function initSupplierDirectory() {
+  // Load from backend or use seed data
+  if (typeof APPS_SCRIPT_URL !== 'undefined' && APPS_SCRIPT_URL && APPS_SCRIPT_URL !== 'YOUR_APPS_SCRIPT_URL_HERE') {
+    fetch(APPS_SCRIPT_URL + '?action=getSuppliers')
+      .then(r => r.json())
+      .then(data => {
+        if (data.suppliers && data.suppliers.length) {
+          supplierDirectory = data.suppliers;
+        } else {
+          supplierDirectory = [...SEED_SUPPLIERS];
+        }
+        renderSupplierTable();
+      })
+      .catch(() => { supplierDirectory = [...SEED_SUPPLIERS]; renderSupplierTable(); });
+  } else {
+    supplierDirectory = [...SEED_SUPPLIERS];
+    renderSupplierTable();
+  }
+}
+
+function switchSupplierTab(dept) {
+  supplierCurrentTab = dept;
+  document.querySelectorAll('[id^="sup-tab-"]').forEach(btn => btn.classList.remove('active'));
+  const tabBtn = document.getElementById('sup-tab-' + dept);
+  if (tabBtn) tabBtn.classList.add('active');
+  renderSupplierTable();
+}
+
+function renderSupplierTable() {
+  const searchVal = (document.getElementById('supSearch')?.value || '').toLowerCase();
+  let rows = '';
+  let count = 0;
+
+  supplierDirectory.forEach((s, idx) => {
+    if (s.dept !== supplierCurrentTab) return;
+    if (searchVal && !s.name.toLowerCase().includes(searchVal) &&
+        !(s.contact || '').toLowerCase().includes(searchVal) &&
+        !(s.email || '').toLowerCase().includes(searchVal) &&
+        !(s.website || '').toLowerCase().includes(searchVal)) return;
+
+    count++;
+
+    const critBadge = s.criticality === 'Critical' ? '<span class="asl-badge critical">Critical</span>' :
+                      s.criticality === 'Not Critical' ? '<span class="asl-badge not-critical">Non-Critical</span>' :
+                      '<span style="color:var(--soft-hash);font-size:11px;">—</span>';
+    const aslStatus = s.criticality ? '<span class="active-badge">On ASL</span>' : '<span style="color:var(--soft-hash);font-size:11px;">Not on ASL</span>';
+    const websiteLink = s.website ? `<a href="${s.website}" target="_blank" style="color:#7c3aed;font-size:12px;text-decoration:underline;">${s.website.replace(/^https?:\/\/(www\.)?/,'').replace(/\/$/,'')}</a>` : '—';
+    const leadDisplay = s.leadTime ? s.leadTime : '—';
+
+    rows += `<tr style="cursor:pointer;" onclick="openEditSupplier(${idx})">
+      <td><strong>${s.name}</strong></td>
+      <td>${s.contact || '—'}</td>
+      <td style="font-size:12px;">${s.email ? `<a href="mailto:${s.email}" style="color:#7c3aed;" onclick="event.stopPropagation();">${s.email}</a>` : '—'}</td>
+      <td style="font-size:12px;">${s.phone || '—'}</td>
+      <td style="font-size:12px;max-width:160px;overflow:hidden;text-overflow:ellipsis;">${websiteLink}</td>
+      <td style="text-align:center;">${leadDisplay}</td>
+      <td style="text-align:center;">${aslStatus}</td>
+      <td style="text-align:center;">${critBadge}</td>
+      <td style="font-size:12px;color:var(--soft-hash);max-width:200px;overflow:hidden;text-overflow:ellipsis;">${s.notes || ''}</td>
+    </tr>`;
+  });
+
+  if (!count) rows = `<tr><td colspan="9" style="text-align:center;padding:30px;color:var(--soft-hash);">No suppliers for ${supplierCurrentTab}. Click "＋ Add Supplier" to add one.</td></tr>`;
+  document.getElementById('supTbody').innerHTML = rows;
+}
+
+function openAddSupplierModal() {
+  editingSupplierIdx = null;
+  document.getElementById('sup-modal-title').textContent = 'Add Supplier';
+  ['sup-name','sup-contact','sup-email','sup-phone','sup-website','sup-leadTime','sup-notes'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  document.getElementById('sup-dept').value = supplierCurrentTab;
+  document.getElementById('sup-criticality').value = '';
+  document.getElementById('sup-error').style.display = 'none';
+  document.getElementById('addSupplierModal').classList.add('open');
+}
+
+function openEditSupplier(idx) {
+  editingSupplierIdx = idx;
+  const s = supplierDirectory[idx];
+  document.getElementById('sup-modal-title').textContent = 'Edit Supplier — ' + s.name;
+  document.getElementById('sup-name').value = s.name || '';
+  document.getElementById('sup-dept').value = s.dept || 'Manufacturing';
+  document.getElementById('sup-contact').value = s.contact || '';
+  document.getElementById('sup-email').value = s.email || '';
+  document.getElementById('sup-phone').value = s.phone || '';
+  document.getElementById('sup-website').value = s.website || '';
+  document.getElementById('sup-leadTime').value = s.leadTime || '';
+  document.getElementById('sup-criticality').value = s.criticality || '';
+  document.getElementById('sup-notes').value = s.notes || '';
+  document.getElementById('sup-error').style.display = 'none';
+  document.getElementById('addSupplierModal').classList.add('open');
+}
+
+function submitSupplier() {
+  const errEl = document.getElementById('sup-error');
+  const name = document.getElementById('sup-name').value.trim();
+  if (!name) { errEl.textContent = 'Supplier name is required'; errEl.style.display = ''; return; }
+
+  const record = {
+    name,
+    dept: document.getElementById('sup-dept').value,
+    contact: document.getElementById('sup-contact').value.trim(),
+    email: document.getElementById('sup-email').value.trim(),
+    phone: document.getElementById('sup-phone').value.trim(),
+    website: document.getElementById('sup-website').value.trim(),
+    leadTime: parseInt(document.getElementById('sup-leadTime').value) || 0,
+    criticality: document.getElementById('sup-criticality').value,
+    notes: document.getElementById('sup-notes').value.trim(),
+    updatedBy: currentUser?.email || 'Unknown',
+    updatedAt: new Date().toISOString()
+  };
+
+  if (editingSupplierIdx !== null) {
+    supplierDirectory[editingSupplierIdx] = record;
+    showToast('✓ Supplier updated');
+  } else {
+    supplierDirectory.push(record);
+    showToast('✓ Supplier added');
+  }
+
+  saveSupplierToBackend(record);
+  closeModal('addSupplierModal');
+  renderSupplierTable();
+}
+
+function saveSupplierToBackend(record) {
+  if (typeof APPS_SCRIPT_URL !== 'undefined' && APPS_SCRIPT_URL && APPS_SCRIPT_URL !== 'YOUR_APPS_SCRIPT_URL_HERE') {
+    fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'saveSupplier', ...record })
+    }).catch(e => console.warn('Supplier save error:', e));
+  }
+}
+
+// Get all supplier names for a given department (used for autocomplete)
+function getSuppliersForDept(dept) {
+  return supplierDirectory.filter(s => s.dept === dept).map(s => s.name);
+}
+
+// Get all unique supplier names across all depts
+function getAllSupplierNames() {
+  return [...new Set(supplierDirectory.map(s => s.name))];
 }
 
 function downloadPartMapping() {
