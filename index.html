@@ -1244,7 +1244,7 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:20px 0;}
       </div>
 
       <!-- ── SECTION: Documentation (SDS, COA, COO) ── -->
-      <div class="disp-section" id="in-docSection" style="border:1px solid var(--border);border-radius:10px;padding:20px;margin-top:16px;background:#fefefe;">
+      <div class="disp-section" id="in-docSection" style="border:1px solid var(--border);border-radius:10px;padding:20px;margin-top:16px;background:#fefefe;display:none;">
         <div style="font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--soft-hash);margin-bottom:14px;">Documentation — SDS, COA &amp; COO</div>
         <div class="form-grid" style="grid-template-columns:1fr 1fr 1fr;">
           <div class="form-group">
@@ -3006,12 +3006,10 @@ function onDeptChange() {
     onMaterialTypeChange();
   }
 
-  // Show/hide SDS/COA/COO section — only for Mfg, Assay R&D, Hardware R&D
-  const docSection = document.getElementById('in-docSection');
-  if (docSection) {
-    const docDepts = ['Manufacturing','Assay R&D','Hardware R&D'];
-    docSection.style.display = docDepts.includes(dept) ? '' : 'none';
-  }
+  // Update SDS/COA/COO visibility based on dept + part type
+  const selectedPart = document.getElementById('in-partName')?.value;
+  const partData = PARTS[selectedPart];
+  updateDocSectionVisibility(partData?.type);
 
   // Rebuild parts dropdown filtered for this department
   buildPartsDropdown('in-partName', dept);
@@ -3855,8 +3853,20 @@ function onItemChange() {
     if (leadTimeEl) leadTimeEl.value = ov.leadTime !== undefined && ov.leadTime !== null ? ov.leadTime : (data.leadTime || '');
     // Show/hide supplier field based on material type
     onMaterialTypeChange();
+
+    // Show/hide SDS/COA/COO — only for Reagent, Material, and In-House types in lab/mfg depts
+    updateDocSectionVisibility(data.type);
   }
   updateLotPreview();
+}
+
+function updateDocSectionVisibility(partType) {
+  const docSection = document.getElementById('in-docSection');
+  if (!docSection) return;
+  const dept = document.getElementById('in-department')?.value || '';
+  const docDepts = ['Manufacturing','Assay R&D','Hardware R&D'];
+  const docTypes = ['Reagent','Material','In-House'];
+  docSection.style.display = (docDepts.includes(dept) && docTypes.includes(partType || '')) ? '' : 'none';
 }
 
 function onMaterialTypeChange() {
