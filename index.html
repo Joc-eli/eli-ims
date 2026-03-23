@@ -2319,7 +2319,9 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:20px 0;}
       <p class="subtitle">Reagents, buffers, strips &amp; components made internally · Track raw materials, aliquots &amp; storage</p>
     </div>
     <div style="display:flex;gap:8px;">
+      <button class="btn btn-secondary btn-sm" onclick="openScanQRInput()">📷 Scan QR</button>
       <button class="btn btn-primary btn-sm" onclick="openNewBatchModal()">+ Record New Batch</button>
+      <button class="btn btn-ghost btn-sm" onclick="openIhpEditLog()" title="View edit history">📝 Log</button>
     </div>
   </div>
 
@@ -2356,13 +2358,43 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:20px 0;}
             <th>Aliquots</th>
             <th>Raw Materials</th>
             <th>Produced By</th>
+            <th>Cycle Count</th>
             <th></th>
           </tr>
         </thead>
         <tbody id="ihpBody">
-          <tr><td colspan="13"><div class="table-placeholder"><p>No in-house items yet</p></div></td></tr>
+          <tr><td colspan="14"><div class="table-placeholder"><p>No in-house items yet</p></div></td></tr>
         </tbody>
       </table>
+    </div>
+  </div>
+
+  <!-- Archived Lots -->
+  <div class="table-card" style="margin-top:24px;">
+    <div style="padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+      <span style="font-size:12px;font-weight:600;color:var(--soft-hash);letter-spacing:.05em;text-transform:uppercase;">📦 Archived / Depleted Lots</span>
+      <button class="btn btn-ghost btn-sm" onclick="toggleArchivedLots()" id="ihp-archive-toggle">Show</button>
+    </div>
+    <div id="ihpArchivedWrap" style="display:none;">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Item Name</th>
+              <th>Lot / Batch #</th>
+              <th>Dept</th>
+              <th>Date Made</th>
+              <th>Initial Qty</th>
+              <th>Raw Materials</th>
+              <th>Produced By</th>
+              <th>Archived Date</th>
+            </tr>
+          </thead>
+          <tbody id="ihpArchivedBody">
+            <tr><td colspan="8"><div class="table-placeholder"><p>No archived lots</p></div></td></tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 </div>
@@ -2480,7 +2512,10 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:20px 0;}
     <div style="margin-top:16px;border:1px solid var(--border);border-radius:10px;padding:14px;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
         <span style="font-weight:700;font-size:13px;color:var(--graphite);">📦 Raw Materials Used</span>
-        <button class="btn btn-secondary btn-sm" onclick="addRawMaterialRow()">+ Add Material</button>
+        <div style="display:flex;gap:6px;">
+          <button class="btn btn-ghost btn-sm" onclick="scanRawMaterial()">📷 Scan QR</button>
+          <button class="btn btn-secondary btn-sm" onclick="addRawMaterialRow()">+ Add Material</button>
+        </div>
       </div>
       <div class="form-hint" style="margin-bottom:10px;">Select raw materials from inventory. Quantities will be auto-deducted on submit.</div>
       <div id="ihp-rawMaterials">
@@ -6082,6 +6117,7 @@ function submitQuarantineAction() {
 // ═════════════════════════════════════════════════════════
 let ihpBatches = []; // local store of in-house batches
 let ihpCurrentDept = 'All';
+let ihpEditLog = []; // { timestamp, batchNum, product, field, oldValue, newValue, editedBy }
 
 function loadIhpDemoData() {
   if (ihpBatches.length) return;
@@ -6134,7 +6170,7 @@ function renderIhpTable() {
 
   const tbody = document.getElementById('ihpBody');
   if (!rows.length) {
-    tbody.innerHTML = '<tr><td colspan="13"><div class="table-placeholder"><div style="font-size:28px;">🧫</div><p>No in-house items found</p><small>Click "+ Record New Batch" to add one</small></div></td></tr>';
+    tbody.innerHTML = '<tr><td colspan="14"><div class="table-placeholder"><div style="font-size:28px;">🧫</div><p>No in-house items found</p><small>Click "+ Record New Batch" to add one</small></div></td></tr>';
     return;
   }
   tbody.innerHTML = rows.map((b, idx) => {
@@ -6158,9 +6194,9 @@ function renderIhpTable() {
       : '<span style="color:var(--soft-hash);font-size:11px;">—</span>';
 
     return `<tr>
-      <td><div class="qr-thumb-wrap" id="ihpqr-${idx}"></div></td>
-      <td class="td-part-name">${b.product}</td>
-      <td class="td-mono" style="font-size:11px;">${b.batchNum}</td>
+      <td><div class="qr-thumb-wrap" id="ihpqr-${idx}" onclick="openIhpQR(${idx})" style="cursor:pointer;" title="Click to view QR info card"></div></td>
+      <td class="td-part-name" ondblclick="inlineEditIhp(${idx},'product',this)" title="Double-click to edit" style="cursor:pointer;">${b.product}</td>
+      <td class="td-mono" style="font-size:11px;cursor:pointer;" ondblclick="inlineEditIhp(${idx},'batchNum',this)" title="Double-click to edit">${b.batchNum}</td>
       <td><span class="mtype-badge inhouse">${typeLabel}</span></td>
       <td>${deptBadgeHTML(b.dept)}</td>
       <td>${locBadge}</td>
@@ -6170,11 +6206,19 @@ function renderIhpTable() {
       <td>${aliquotHTML}</td>
       <td title="${rmSummary}" style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px;color:var(--soft-hash);">${rmShort || '—'}</td>
       <td style="font-size:12px;">${b.producedBy}</td>
+      <td><select class="form-select" style="font-size:11px;padding:3px 6px;min-width:85px;" onchange="setIhpCountFreq(${idx},this.value)">
+  <option value="Weekly" ${(b._countFreq || 'Monthly')==='Weekly'?'selected':''}>Weekly</option>
+  <option value="Monthly" ${(b._countFreq || 'Monthly')==='Monthly'?'selected':''}>Monthly</option>
+  <option value="Quarterly" ${(b._countFreq || 'Monthly')==='Quarterly'?'selected':''}>Quarterly</option>
+  <option value="Bi-Yearly" ${(b._countFreq || 'Monthly')==='Bi-Yearly'?'selected':''}>Bi-Yearly</option>
+  <option value="Yearly" ${(b._countFreq || 'Monthly')==='Yearly'?'selected':''}>Yearly</option>
+</select></td>
       <td style="white-space:nowrap;display:flex;gap:4px;align-items:center;">
         <button class="btn btn-ghost btn-sm" title="QR Code" onclick="openIhpQR(${idx})">QR</button>
         <button class="btn btn-ghost btn-sm" title="View details" onclick="openIhpDetail(${idx})">📋</button>
         <button class="btn btn-ghost btn-sm" title="Update quantity" onclick="openUpdateBatchQty(${idx})">✏️</button>
         ${b.aliquotCount > 0 ? `<button class="btn btn-ghost btn-sm" title="Update aliquots" onclick="openUpdateAliquots(${idx})">🧪</button>` : ''}
+        <button class="btn btn-ghost btn-sm" title="Archive this lot" onclick="archiveIhpBatch(${idx})">📦</button>
       </td>
     </tr>`;
   }).join('');
@@ -6185,6 +6229,8 @@ function renderIhpTable() {
       makeQR(`ihpqr-${idx}`, b.qrUrl || `https://ims.eli.health/lot/${b.batchNum}`, 40);
     });
   });
+
+  renderArchivedLots();
 }
 
 function openIhpDetail(idx) {
@@ -6432,6 +6478,7 @@ function submitNewBatch() {
 function openUpdateBatchQty(idx) {
   const batch = ihpBatches[idx];
   if (!batch) return;
+  const oldRemaining = batch.remaining;
   const newQty = prompt(`Update remaining quantity for ${batch.product}\nBatch: ${batch.batchNum}\nCurrent: ${batch.remaining} ${batch.unit}`, batch.remaining);
   if (newQty === null) return;
   const parsed = parseInt(newQty);
@@ -6439,6 +6486,7 @@ function openUpdateBatchQty(idx) {
   batch.remaining = parsed;
   const invItem = inventoryData.find(r => r['Lot Number'] === batch.batchNum);
   if (invItem) invItem['Quantity'] = parsed;
+  logIhpEdit(idx, 'remaining', oldRemaining, parsed);
   renderIhpTable();
   showToast(`Updated ${batch.batchNum} → ${parsed} ${batch.unit} remaining`);
 }
@@ -6446,11 +6494,13 @@ function openUpdateBatchQty(idx) {
 function openUpdateAliquots(idx) {
   const batch = ihpBatches[idx];
   if (!batch) return;
+  const oldCount = batch.aliquotRemaining;
   const newCount = prompt(`Update aliquots remaining for ${batch.product}\nBatch: ${batch.batchNum}\nCurrent: ${batch.aliquotRemaining} of ${batch.aliquotCount} (${batch.aliquotSize} ${batch.aliquotUnit} each)\n\nTotal remaining: ${(batch.aliquotRemaining||0) * (batch.aliquotSize||0)} ${batch.aliquotUnit}`, batch.aliquotRemaining);
   if (newCount === null) return;
   const parsed = parseInt(newCount);
   if (isNaN(parsed) || parsed < 0) { showToast('Invalid count','error'); return; }
   batch.aliquotRemaining = parsed;
+  logIhpEdit(idx, 'aliquotRemaining', oldCount, parsed);
   renderIhpTable();
   const newTotal = parsed * (batch.aliquotSize||0);
   showToast(`Updated: ${parsed} aliquots remaining → ${newTotal} ${batch.aliquotUnit} total`);
@@ -6477,6 +6527,159 @@ function openIhpQR(idx) {
     'Supplier Name': 'Eli Health',
   };
   openQRModal(row);
+}
+
+function inlineEditIhp(idx, field, td) {
+  const b = ihpBatches[idx];
+  if (!b) return;
+  const oldVal = b[field] || '';
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.value = oldVal;
+  input.className = 'form-input';
+  input.style.cssText = 'font-size:12px;padding:3px 6px;width:100%;min-width:80px;';
+  td.textContent = '';
+  td.appendChild(input);
+  input.focus();
+  input.select();
+  const save = () => {
+    const newVal = input.value.trim();
+    if (newVal && newVal !== oldVal) {
+      b[field] = newVal;
+      // Update main inventory too
+      const invItem = inventoryData.find(r => r['Lot Number'] === (field === 'batchNum' ? oldVal : b.batchNum));
+      if (invItem) {
+        if (field === 'product') invItem['Part Name'] = newVal;
+        if (field === 'batchNum') invItem['Lot Number'] = newVal;
+      }
+      logIhpEdit(idx, field, oldVal, newVal);
+    }
+    renderIhpTable();
+  };
+  input.addEventListener('blur', save);
+  input.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); save(); } if (e.key === 'Escape') renderIhpTable(); });
+}
+
+function logIhpEdit(idx, field, oldVal, newVal) {
+  const b = ihpBatches[idx];
+  ihpEditLog.unshift({
+    timestamp: new Date().toISOString(),
+    batchNum: b.batchNum,
+    product: b.product,
+    field: field,
+    oldValue: String(oldVal),
+    newValue: String(newVal),
+    editedBy: currentUser?.name || 'Unknown'
+  });
+}
+
+function openIhpEditLog() {
+  const logs = ihpEditLog.slice(0, 50);
+  const logHTML = logs.length ? logs.map(l => {
+    const fieldLabel = {product:'Item Name',batchNum:'Lot/Batch#',remaining:'Current Qty',aliquotRemaining:'Aliquots Remaining',dept:'Department',location:'Location',storageType:'Storage Type',shelf:'Shelf',box:'Box/Position',expDate:'Expiration',notes:'Notes',_countFreq:'Cycle Count Freq'}[l.field] || l.field;
+    return `<div style="display:grid;grid-template-columns:120px 1fr;gap:4px;padding:8px 12px;background:var(--white);border:1px solid var(--border);border-radius:8px;font-size:12px;margin-bottom:6px;">
+      <span style="color:var(--soft-hash);">${new Date(l.timestamp).toLocaleString()}</span>
+      <div>
+        <strong>${l.product}</strong> <span class="td-mono" style="font-size:10px;">${l.batchNum}</span><br>
+        <span style="color:var(--soft-hash);">${fieldLabel}:</span> <span style="text-decoration:line-through;color:#991b1b;">${l.oldValue}</span> → <span style="color:#166534;font-weight:600;">${l.newValue}</span><br>
+        <span style="color:var(--soft-hash);font-size:11px;">by ${l.editedBy}</span>
+      </div>
+    </div>`;
+  }).join('') : '<div style="font-size:12px;color:var(--soft-hash);padding:12px;">No edits recorded yet.</div>';
+
+  document.getElementById('ihpd-title').textContent = '📝 Edit Traceability Log';
+  document.getElementById('ihpd-content').innerHTML = `<div style="max-height:400px;overflow-y:auto;">${logHTML}</div>`;
+  document.getElementById('ihpDetailModal').classList.add('open');
+}
+
+function openScanQRInput() {
+  const code = prompt('Scan or enter the QR code / Lot Number:');
+  if (!code) return;
+  const trimmed = code.trim();
+  // Check in-house inventory first
+  const ihpIdx = ihpBatches.findIndex(b => b.batchNum === trimmed || b.qrUrl === trimmed || b.qrUrl?.endsWith(trimmed));
+  if (ihpIdx >= 0) { openIhpQR(ihpIdx); return; }
+  // Check main inventory
+  const invItem = inventoryData.find(r => r['Lot Number'] === trimmed || r['QR URL'] === trimmed);
+  if (invItem) { openQRModal(invItem); return; }
+  showToast('Item not found: ' + trimmed, 'error');
+}
+
+function setIhpCountFreq(idx, freq) {
+  const b = ihpBatches[idx];
+  if (!b) return;
+  const oldFreq = b._countFreq || 'Monthly';
+  b._countFreq = freq;
+  // Also set it on the main inventory item
+  const invItem = inventoryData.find(r => r['Lot Number'] === b.batchNum);
+  if (invItem) invItem._countFreq = freq;
+  logIhpEdit(idx, '_countFreq', oldFreq, freq);
+}
+
+let ihpArchivedBatches = [];
+
+function toggleArchivedLots() {
+  const wrap = document.getElementById('ihpArchivedWrap');
+  const btn = document.getElementById('ihp-archive-toggle');
+  if (wrap.style.display === 'none') {
+    wrap.style.display = '';
+    btn.textContent = 'Hide';
+    renderArchivedLots();
+  } else {
+    wrap.style.display = 'none';
+    btn.textContent = 'Show';
+  }
+}
+
+function archiveIhpBatch(idx) {
+  const b = ihpBatches[idx];
+  if (!b) return;
+  if (!confirm(`Archive "${b.product}" (${b.batchNum})? This marks it as depleted.`)) return;
+  b._archivedDate = todayISO();
+  ihpArchivedBatches.push(b);
+  ihpBatches.splice(idx, 1);
+  renderIhpTable();
+  renderArchivedLots();
+  showToast(`Archived: ${b.batchNum}`);
+}
+
+function renderArchivedLots() {
+  const tbody = document.getElementById('ihpArchivedBody');
+  const filtered = ihpCurrentDept === 'All' ? ihpArchivedBatches : ihpArchivedBatches.filter(b => b.dept === ihpCurrentDept);
+  if (!filtered.length) {
+    tbody.innerHTML = '<tr><td colspan="8"><div class="table-placeholder"><p>No archived lots</p></div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = filtered.map(b => {
+    const rmSummary = b.rawMaterials.map(r => `${r.name} (${r.qtyUsed} ${r.unit})`).join(', ');
+    const rmShort = rmSummary.length > 40 ? rmSummary.slice(0,37)+'…' : rmSummary;
+    return `<tr style="opacity:0.7;">
+      <td class="td-part-name">${b.product}</td>
+      <td class="td-mono" style="font-size:11px;">${b.batchNum}</td>
+      <td>${deptBadgeHTML(b.dept)}</td>
+      <td style="font-size:12px;">${formatDate(b.date)}</td>
+      <td style="color:var(--soft-hash);">${b.qty} ${b.unit}</td>
+      <td title="${rmSummary}" style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px;color:var(--soft-hash);">${rmShort || '—'}</td>
+      <td style="font-size:12px;">${b.producedBy}</td>
+      <td style="font-size:12px;">${b._archivedDate ? formatDate(b._archivedDate) : '—'}</td>
+    </tr>`;
+  }).join('');
+}
+
+function scanRawMaterial() {
+  const code = prompt('Scan or enter the raw material QR code / Lot Number:');
+  if (!code) return;
+  const trimmed = code.trim();
+  const invItem = inventoryData.find(r => r['Lot Number'] === trimmed || r['QR URL'] === trimmed);
+  if (invItem) {
+    addRawMaterialRow({ lot: invItem['Lot Number'], available: invItem['Quantity'] + ' on hand', unit: 'units' });
+    // Auto-select the lot in the new row
+    const lastSel = document.querySelector('[id^="rm-sel-"]:last-of-type') || document.getElementById('rm-sel-'+rawMatRowId);
+    if (lastSel) lastSel.value = invItem['Lot Number'];
+    showToast(`Found: ${invItem['Part Name']} — Lot ${invItem['Lot Number']}`);
+  } else {
+    showToast('Material not found: ' + trimmed, 'error');
+  }
 }
 
 // ═════════════════════════════════════════════════════════
