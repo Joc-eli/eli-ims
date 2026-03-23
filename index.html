@@ -76,15 +76,9 @@ input,select,textarea{font-family:inherit;}
 /* ── Stats Strip ──────────────────────────────────── */
 /* ── Department Tabs ── */
 .dept-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px;}
-.dept-tab{padding:7px 14px;border-radius:20px;border:1.5px solid var(--border);background:var(--white);font-size:12px;font-weight:600;color:var(--soft-hash);cursor:pointer;transition:all .12s;letter-spacing:.01em;}
-.dept-tab:hover{border-color:var(--graphite);color:var(--graphite);}
-.dept-tab.active{background:var(--black);color:var(--white);border-color:var(--black);}
-.dept-tab.active.dept-rd{background:#2563eb;border-color:#2563eb;}
-.dept-tab.active.dept-mfg{background:#7c3aed;border-color:#7c3aed;}
-.dept-tab.active.dept-hw{background:#d97706;border-color:#d97706;}
-.dept-tab.active.dept-mkt{background:#059669;border-color:#059669;}
-.dept-tab.active.dept-office{background:#dc2626;border-color:#dc2626;}
-.dept-tab.active.dept-other{background:#6b7280;border-color:#6b7280;}
+.dept-tab{padding:8px 18px;border-radius:8px;border:1.5px solid var(--border);background:var(--white);font-size:13px;font-weight:600;color:var(--graphite);cursor:pointer;transition:all .12s;letter-spacing:.01em;}
+.dept-tab:hover{border-color:var(--graphite);background:#f3f0ff;}
+.dept-tab.active{background:var(--graphite);color:var(--white);border-color:var(--graphite);}
 /* ── Dept badge in table ── */
 .dept-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;}
 .dept-badge.dept-rd{background:#dbeafe;color:#1d4ed8;}
@@ -270,7 +264,7 @@ tbody td{padding:11px 14px;color:var(--graphite);vertical-align:middle;}
 /* ── Modal ────────────────────────────────────────── */
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;align-items:center;justify-content:center;}
 .modal-overlay.open{display:flex;}
-.modal-box{background:var(--white);border-radius:var(--radius);padding:28px 32px;width:100%;max-width:440px;margin:16px;box-shadow:0 20px 60px rgba(0,0,0,.18);position:relative;}
+.modal-box{background:var(--white);border-radius:var(--radius);padding:28px 32px;width:100%;max-width:440px;margin:16px;box-shadow:0 20px 60px rgba(0,0,0,.18);position:relative;max-height:calc(100vh - 32px);overflow-y:auto;}
 .modal-close{position:absolute;top:14px;right:16px;background:none;border:none;font-size:20px;color:var(--soft-hash);cursor:pointer;transition:color .1s;}
 .modal-close:hover{color:var(--black);}
 .modal-title{font-size:17px;font-weight:600;color:var(--black);margin-bottom:18px;}
@@ -724,6 +718,7 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:20px 0;}
   <div class="sidebar-section-label" style="margin-top:8px;">Traceability</div>
   <button class="nav-link" onclick="showPage('production')" id="nav-production"><span class="nav-icon">🧪</span> Production Lots</button>
   <button class="nav-link" onclick="showPage('ncscrap')" id="nav-ncscrap"><span class="nav-icon">⚠️</span> NC &amp; Scrap Log</button>
+  <button class="nav-link" onclick="showPage('quarantine')" id="nav-quarantine"><span class="nav-icon">🔒</span> Quarantine Hold</button>
   <button class="nav-link" onclick="showPage('batchtrace')" id="nav-batchtrace"><span class="nav-icon">📊</span> Batch Traceability</button>
   <button class="nav-link" onclick="showPage('sds')" id="nav-sds"><span class="nav-icon">📄</span> SDS &amp; COA Register</button>
   <button class="nav-link" onclick="showPage('suppliers')" id="nav-suppliers"><span class="nav-icon">🏢</span> Supplier Directory</button>
@@ -780,7 +775,6 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:20px 0;}
     <button class="mtype-tab"        id="mtab-Raw"        onclick="switchMtype('Raw Material')">🌿 Raw Material</button>
     <button class="mtype-tab"        id="mtab-InHouse"    onclick="switchMtype('In-House Material')">🔬 In-House</button>
     <button class="mtype-tab"        id="mtab-Finished"   onclick="switchMtype('Finished Product')">📦 Finished Product</button>
-    <button class="mtype-tab"        id="mtab-Buffer"     onclick="switchMtype('Buffer')">🧪 Buffer</button>
   </div>
 
   <div class="stats-strip">
@@ -923,9 +917,9 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:20px 0;}
             <input type="date" class="form-input" id="in-dateReceived" required />
           </div>
           <div class="form-group">
-            <label class="form-label">Expiration Date</label>
+            <label class="form-label" id="in-expirationLabel">Expiration Date <span class="req" id="in-expirationReq">*</span></label>
             <input type="date" class="form-input" id="in-expirationDate" />
-            <div class="form-hint">Leave blank if no expiration</div>
+            <div class="form-hint" id="in-expirationHint">Required for raw materials, in-house, and finished products (yyyy-mm-dd)</div>
           </div>
         </div>
 
@@ -1016,8 +1010,7 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:20px 0;}
                 <option value="Raw Material">🌿 Raw Material</option>
                 <option value="In-House Material">🔬 In-House Material</option>
                 <option value="Finished Product">📦 Finished Product</option>
-                <option value="Buffer">🧪 Buffer</option>
-              </select>
+                              </select>
             </div>
 
             <div class="form-group">
@@ -1250,10 +1243,10 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:20px 0;}
         Select an inspection category above to load the checklist
       </div>
 
-      <!-- ── SECTION: Documentation (SDS & COA) ───── -->
-      <div class="disp-section" style="border:1px solid var(--border);border-radius:10px;padding:20px;margin-top:16px;background:#fefefe;">
-        <div style="font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--soft-hash);margin-bottom:14px;">Documentation — SDS &amp; COA</div>
-        <div class="form-grid">
+      <!-- ── SECTION: Documentation (SDS, COA, COO) ── -->
+      <div class="disp-section" id="in-docSection" style="border:1px solid var(--border);border-radius:10px;padding:20px;margin-top:16px;background:#fefefe;">
+        <div style="font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--soft-hash);margin-bottom:14px;">Documentation — SDS, COA &amp; COO</div>
+        <div class="form-grid" style="grid-template-columns:1fr 1fr 1fr;">
           <div class="form-group">
             <label class="form-label">Safety Data Sheet (SDS) <span class="req">*</span></label>
             <div class="radio-group" style="margin-bottom:8px;">
@@ -1277,29 +1270,40 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:20px 0;}
               <div class="form-hint">Lot number printed on the COA, if different from the item lot</div>
             </div>
           </div>
+          <div class="form-group">
+            <label class="form-label">Certificate of Origin (COO)</label>
+            <div class="radio-group" style="margin-bottom:8px;">
+              <div class="radio-opt"><input type="radio" name="cooReceived" id="cooYes" value="Yes" onchange="document.getElementById('in-cooRefWrap').style.display=''" /><label for="cooYes">Received</label></div>
+              <div class="radio-opt"><input type="radio" name="cooReceived" id="cooNA" value="N/A" checked onchange="document.getElementById('in-cooRefWrap').style.display='none'" /><label for="cooNA">N/A</label></div>
+            </div>
+            <div id="in-cooRefWrap" style="display:none;">
+              <input type="text" class="form-input" id="in-cooCountry" placeholder="Country of origin" style="max-width:250px;" />
+              <div class="form-hint">Country of origin listed on the certificate</div>
+            </div>
+          </div>
         </div>
-        <div class="form-hint" style="margin-top:8px;color:#92400e;">Ask the supplier for an SDS and COA with every shipment. SDS tracks are maintained in the SDS Register.</div>
+        <div class="form-hint" style="margin-top:8px;color:#92400e;">Ask the supplier for an SDS, COA, and COO with every shipment. SDS tracks are maintained in the SDS Register.</div>
       </div>
 
       <!-- ── SECTION: Quality Status ───────────────── -->
       <div class="disp-section">
         <div class="section-mini-title">Quality Status <span class="req">*</span></div>
-        <div class="disp-options" style="flex-wrap:wrap;gap:8px;">
-          <div class="disp-opt released" style="flex:1;min-width:180px;">
+        <div class="disp-options" style="flex-wrap:wrap;gap:8px;align-items:stretch;">
+          <div class="disp-opt released" style="flex:1;min-width:180px;display:flex;">
             <input type="radio" name="qualityStatus" id="qsApprProd" value="Approved for Production Use" checked />
-            <label for="qsApprProd">✓ Approved for Production Use</label>
+            <label for="qsApprProd" style="flex:1;display:flex;align-items:center;justify-content:center;text-align:center;">✓ Approved for Production Use</label>
           </div>
-          <div class="disp-opt" style="flex:1;min-width:180px;border-color:#93c5fd;background:#eff6ff;">
+          <div class="disp-opt" style="flex:1;min-width:180px;display:flex;border-color:#93c5fd;background:#eff6ff;">
             <input type="radio" name="qualityStatus" id="qsApprCal" value="Approved for Calibration" />
-            <label for="qsApprCal" style="color:#1d4ed8;">✓ Approved for Calibration</label>
+            <label for="qsApprCal" style="flex:1;display:flex;align-items:center;justify-content:center;text-align:center;color:#1d4ed8;">✓ Approved for Calibration</label>
           </div>
-          <div class="disp-opt" style="flex:1;min-width:180px;border-color:#fcd34d;background:#fffbeb;">
+          <div class="disp-opt" style="flex:1;min-width:180px;display:flex;border-color:#fcd34d;background:#fffbeb;">
             <input type="radio" name="qualityStatus" id="qsQuarantine" value="Quarantine" />
-            <label for="qsQuarantine" style="color:#92400e;">⚠ Quarantine</label>
+            <label for="qsQuarantine" style="flex:1;display:flex;align-items:center;justify-content:center;text-align:center;color:#92400e;">⚠ Quarantine</label>
           </div>
-          <div class="disp-opt reject" style="flex:1;min-width:180px;">
+          <div class="disp-opt reject" style="flex:1;min-width:180px;display:flex;">
             <input type="radio" name="qualityStatus" id="qsDoNotUse" value="Do Not Use" />
-            <label for="qsDoNotUse">✕ Do Not Use</label>
+            <label for="qsDoNotUse" style="flex:1;display:flex;align-items:center;justify-content:center;text-align:center;">✕ Do Not Use</label>
           </div>
         </div>
       </div>
@@ -1468,8 +1472,7 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:20px 0;}
       <option value="Raw Material">🌿 Raw Material</option>
       <option value="In-House Material">🔬 In-House Material</option>
       <option value="Finished Product">📦 Finished Product</option>
-      <option value="Buffer">🧪 Buffer</option>
-    </select>
+          </select>
   </div>
 
   <div id="traceGroupsContainer">
@@ -1541,10 +1544,11 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:20px 0;}
     </div>
   </div>
 
-  <!-- Tab toggle: Manufacturing vs R&D -->
-  <div style="display:flex;gap:4px;margin-bottom:16px;">
-    <button class="mtype-tab active" id="sds-tab-mfg" onclick="switchSdsTab('mfg')" style="padding:8px 20px;border:1px solid var(--border);border-radius:8px;background:#fff;cursor:pointer;font-size:13px;font-weight:600;">🏭 Manufacturing</button>
-    <button class="mtype-tab" id="sds-tab-rd" onclick="switchSdsTab('rd')" style="padding:8px 20px;border:1px solid var(--border);border-radius:8px;background:#fff;cursor:pointer;font-size:13px;font-weight:600;">🔬 R&amp;D</button>
+  <!-- Tab toggle: Department -->
+  <div style="display:flex;gap:4px;margin-bottom:16px;flex-wrap:wrap;">
+    <button class="dept-tab active" id="sds-tab-mfg" onclick="switchSdsTab('Manufacturing')">🏭 Manufacturing</button>
+    <button class="dept-tab" id="sds-tab-assayrd" onclick="switchSdsTab('Assay R&amp;D')">🔬 Assay R&amp;D</button>
+    <button class="dept-tab" id="sds-tab-hwrd" onclick="switchSdsTab('Hardware R&amp;D')">🔧 Hardware R&amp;D</button>
   </div>
 
   <!-- Search & filters -->
@@ -1611,7 +1615,8 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:20px 0;}
           <label class="form-label">Department <span class="req">*</span></label>
           <select class="form-select" id="sds-dept">
             <option value="Manufacturing">🏭 Manufacturing</option>
-            <option value="R&D">🔬 R&amp;D</option>
+            <option value="Assay R&D">🔬 Assay R&amp;D</option>
+            <option value="Hardware R&D">🔧 Hardware R&amp;D</option>
           </select>
         </div>
         <div class="form-group">
@@ -1689,7 +1694,7 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:20px 0;}
   <div class="page-header">
     <div>
       <h1>🏢 Supplier Directory</h1>
-      <p class="subtitle">Approved &amp; department supplier lists · Per SOP-05 / FRM-05-01</p>
+      <p class="subtitle" id="sup-subtitle">Approved supplier list · Per SOP-05 / FRM-05-01</p>
     </div>
     <div style="display:flex;gap:8px;">
       <button class="btn btn-secondary btn-sm" onclick="showPage('inventory')">← Back to Inventory</button>
@@ -1699,11 +1704,11 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:20px 0;}
 
   <!-- Department tabs -->
   <div style="display:flex;gap:4px;margin-bottom:16px;flex-wrap:wrap;">
-    <button class="mtype-tab active" id="sup-tab-Manufacturing" onclick="switchSupplierTab('Manufacturing')" style="padding:8px 16px;border:1px solid var(--border);border-radius:8px;background:#fff;cursor:pointer;font-size:13px;font-weight:600;">🏭 Manufacturing</button>
-    <button class="mtype-tab" id="sup-tab-Assay R&D" onclick="switchSupplierTab('Assay R&D')" style="padding:8px 16px;border:1px solid var(--border);border-radius:8px;background:#fff;cursor:pointer;font-size:13px;font-weight:600;">🔬 Assay R&amp;D</button>
-    <button class="mtype-tab" id="sup-tab-Hardware R&D" onclick="switchSupplierTab('Hardware R&D')" style="padding:8px 16px;border:1px solid var(--border);border-radius:8px;background:#fff;cursor:pointer;font-size:13px;font-weight:600;">🔧 Hardware R&amp;D</button>
-    <button class="mtype-tab" id="sup-tab-Marketing" onclick="switchSupplierTab('Marketing')" style="padding:8px 16px;border:1px solid var(--border);border-radius:8px;background:#fff;cursor:pointer;font-size:13px;font-weight:600;">📣 Marketing</button>
-    <button class="mtype-tab" id="sup-tab-Office" onclick="switchSupplierTab('Office')" style="padding:8px 16px;border:1px solid var(--border);border-radius:8px;background:#fff;cursor:pointer;font-size:13px;font-weight:600;">🏢 Office</button>
+    <button class="dept-tab active" id="sup-tab-Manufacturing" onclick="switchSupplierTab('Manufacturing')">🏭 Manufacturing</button>
+    <button class="dept-tab" id="sup-tab-AssayRD" onclick="switchSupplierTab('Assay R&amp;D')">🔬 Assay R&amp;D</button>
+    <button class="dept-tab" id="sup-tab-HardwareRD" onclick="switchSupplierTab('Hardware R&amp;D')">🔧 Hardware R&amp;D</button>
+    <button class="dept-tab" id="sup-tab-Marketing" onclick="switchSupplierTab('Marketing')">📣 Marketing</button>
+    <button class="dept-tab" id="sup-tab-Office" onclick="switchSupplierTab('Office')">🏢 Office</button>
   </div>
 
   <!-- Search -->
@@ -1932,8 +1937,7 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:20px 0;}
       <option value="Raw Material">Raw Material</option>
       <option value="In-House Material">In-House</option>
       <option value="Finished Product">Finished Product</option>
-      <option value="Buffer">Buffer</option>
-    </select>
+          </select>
     <label class="show-archived-toggle">
       <input type="checkbox" id="showArchivedToggle" onchange="toggleShowArchived()" />
       <span>Show Archived</span>
@@ -1978,8 +1982,8 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:20px 0;}
       <div class="form-group"><label class="form-label">Supplier</label><input type="text" id="np-supplier" class="form-input" placeholder="e.g. Sigma Aldrich"/></div>
       <div class="form-group"><label class="form-label">Chemistry</label><select id="np-chemistry" class="form-select"><option value="N/A">N/A</option><option value="Cortisol">Cortisol</option><option value="Progesterone">Progesterone</option><option value="Testosterone">Testosterone</option></select></div>
       <div class="form-group"><label class="form-label">Category</label><select id="np-category" class="form-select"><option value="A">A — Verify Only</option><option value="B">B — Sampling Plan</option><option value="C">C — 100% Inspection</option></select></div>
-      <div class="form-group"><label class="form-label">Type</label><select id="np-type" class="form-select"><option value="Material">Material</option><option value="Cartridge">Cartridge</option><option value="Packaging">Packaging</option><option value="Reagent">Reagent</option><option value="Buffer">Buffer</option><option value="Consumable">Consumable</option><option value="In-House">In-House</option><option value="Finished Product">Finished Product</option></select></div>
-      <div class="form-group"><label class="form-label">Material Type</label><select id="np-materialType" class="form-select"><option value="Raw Material">Raw Material</option><option value="In-House Material">In-House Material</option><option value="Finished Product">Finished Product</option><option value="Buffer">Buffer</option></select></div>
+      <div class="form-group"><label class="form-label">Type</label><select id="np-type" class="form-select"><option value="Material">Material</option><option value="Cartridge">Cartridge</option><option value="Packaging">Packaging</option><option value="Reagent">Reagent</option><option value="Consumable">Consumable</option><option value="In-House">In-House</option><option value="Finished Product">Finished Product</option></select></div>
+      <div class="form-group"><label class="form-label">Material Type</label><select id="np-materialType" class="form-select"><option value="Raw Material">Raw Material</option><option value="In-House Material">In-House Material</option><option value="Finished Product">Finished Product</option></select></div>
       <div class="form-group"><label class="form-label">Unit</label><select id="np-unit" class="form-select"><option value="each">each</option><option value="strips">strips</option><option value="bags">bags</option><option value="parts">parts</option><option value="rolls">rolls</option><option value="boxes">boxes</option><option value="pads">pads</option><option value="sheets">sheets</option><option value="bottles">bottles</option><option value="vials">vials</option><option value="tubes">tubes</option><option value="kits">kits</option><option value="packs">packs</option><option value="filters">filters</option><option value="swabs">swabs</option><option value="cartons">cartons</option><option value="L">L</option><option value="mL">mL</option><option value="uL">µL</option><option value="g">g</option><option value="mg">mg</option><option value="ug">µg</option></select></div>
       <div class="form-group"><label class="form-label">Min Stock Qty</label><input type="number" id="np-minQty" class="form-input" min="0" placeholder="0"/></div>
       <div class="form-group"><label class="form-label">Lead Time (days)</label><input type="number" id="np-leadTime" class="form-input" min="0" placeholder="0"/></div>
@@ -2050,8 +2054,8 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:20px 0;}
       <div class="form-group"><label class="form-label">Supplier</label><input type="text" id="pe-supplier" class="form-input" /></div>
       <div class="form-group"><label class="form-label">Chemistry</label><select id="pe-chemistry" class="form-select"><option value="N/A">N/A</option><option value="Cortisol">Cortisol</option><option value="Progesterone">Progesterone</option><option value="Testosterone">Testosterone</option></select></div>
       <div class="form-group"><label class="form-label">Category</label><select id="pe-category" class="form-select"><option value="A">A — Verify Only</option><option value="B">B — Sampling Plan</option><option value="C">C — 100% Inspection</option></select></div>
-      <div class="form-group"><label class="form-label">Type</label><select id="pe-type" class="form-select"><option value="Material">Material</option><option value="Cartridge">Cartridge</option><option value="Packaging">Packaging</option><option value="Reagent">Reagent</option><option value="Buffer">Buffer</option><option value="Consumable">Consumable</option><option value="In-House">In-House</option><option value="Finished Product">Finished Product</option></select></div>
-      <div class="form-group"><label class="form-label">Material Type</label><select id="pe-materialType" class="form-select"><option value="Raw Material">Raw Material</option><option value="In-House Material">In-House Material</option><option value="Finished Product">Finished Product</option><option value="Buffer">Buffer</option></select></div>
+      <div class="form-group"><label class="form-label">Type</label><select id="pe-type" class="form-select"><option value="Material">Material</option><option value="Cartridge">Cartridge</option><option value="Packaging">Packaging</option><option value="Reagent">Reagent</option><option value="Consumable">Consumable</option><option value="In-House">In-House</option><option value="Finished Product">Finished Product</option></select></div>
+      <div class="form-group"><label class="form-label">Material Type</label><select id="pe-materialType" class="form-select"><option value="Raw Material">Raw Material</option><option value="In-House Material">In-House Material</option><option value="Finished Product">Finished Product</option></select></div>
       <div class="form-group"><label class="form-label">Unit</label><select id="pe-unit" class="form-select"><option value="each">each</option><option value="strips">strips</option><option value="bags">bags</option><option value="parts">parts</option><option value="rolls">rolls</option><option value="boxes">boxes</option><option value="pads">pads</option><option value="sheets">sheets</option><option value="bottles">bottles</option><option value="vials">vials</option><option value="tubes">tubes</option><option value="kits">kits</option><option value="packs">packs</option><option value="filters">filters</option><option value="swabs">swabs</option><option value="cartons">cartons</option><option value="L">L</option><option value="mL">mL</option><option value="uL">µL</option><option value="g">g</option><option value="mg">mg</option><option value="ug">µg</option></select></div>
       <div class="form-group"><label class="form-label">Min Stock Qty</label><input type="number" id="pe-minQty" class="form-input" min="0" /></div>
       <div class="form-group"><label class="form-label">Lead Time (days)</label><input type="number" id="pe-leadTime" class="form-input" min="0" /></div>
@@ -2061,22 +2065,24 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:20px 0;}
     <div style="margin-top:16px;padding:12px;background:var(--neutral);border-radius:8px;">
       <div style="display:flex;justify-content:space-between;align-items:center;">
         <span style="font-size:12px;font-weight:600;">Current Version: <span id="pe-version-display">v1</span></span>
-        <button class="cat-action-btn version" onclick="openVersionModal(currentPartForEdit)">+ New Version</button>
+        <div id="pe-edit-history-link" style="font-size:11px;color:var(--soft-hash);cursor:pointer;" onclick="openEditHistoryModal(currentPartForEdit)">View edit history →</div>
       </div>
-      <div id="pe-edit-history-link" style="font-size:11px;color:var(--soft-hash);margin-top:4px;cursor:pointer;" onclick="openEditHistoryModal(currentPartForEdit)">View edit history →</div>
     </div>
 
     <div id="pe-error" style="color:#c0392b;font-size:13px;margin-top:10px;display:none;"></div>
 
-    <!-- Action buttons -->
-    <div style="display:flex;gap:8px;margin-top:18px;justify-content:space-between;">
-      <div>
-        <button class="cat-action-btn archive" id="pe-archive-btn" onclick="openArchiveModal(currentPartForEdit)">Archive Part</button>
-      </div>
-      <div style="display:flex;gap:8px;">
-        <button class="btn btn-secondary btn-sm" onclick="closeModal('partEditModal')">Cancel</button>
-        <button class="btn btn-primary btn-sm" onclick="savePartCard()">💾 Save Changes</button>
-      </div>
+    <!-- Action buttons — three distinct rows -->
+    <!-- Row 1: Save (edits info without changing version) -->
+    <div style="margin-top:18px;display:flex;gap:8px;justify-content:flex-end;">
+      <button class="btn btn-secondary btn-sm" onclick="closeModal('partEditModal')">Cancel</button>
+      <button class="btn btn-primary btn-sm" onclick="savePartCard()">💾 Save Changes</button>
+    </div>
+    <p style="font-size:10px;color:var(--soft-hash);text-align:right;margin:4px 0 0;">Saves edits without changing the version</p>
+
+    <!-- Row 2: Version & Archive -->
+    <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+      <button class="cat-action-btn archive" id="pe-archive-btn" onclick="openArchiveModal(currentPartForEdit)" style="font-size:12px;">🗃️ Archive Part</button>
+      <button class="cat-action-btn version" onclick="openVersionModal(currentPartForEdit)" style="font-size:12px;">+ New Version</button>
     </div>
   </div>
 </div>
@@ -2093,21 +2099,25 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:20px 0;}
     <button class="btn btn-primary" onclick="openNcScrapForm()">＋ Log NC / Scrap</button>
   </div>
 
-  <!-- NC vs Scrap explanation (per SOP-10) -->
-  <div id="ncExplainBox" style="border:1px solid var(--border);border-radius:10px;background:var(--white);padding:16px 20px;margin-bottom:16px;position:relative;">
-    <button onclick="this.parentElement.style.display='none'" style="position:absolute;top:10px;right:14px;background:none;border:none;color:var(--soft-hash);font-size:16px;cursor:pointer;">✕</button>
-    <div style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--soft-hash);margin-bottom:10px;">What's the difference? · Per SOP-10</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
-      <div style="border:1px solid #fcd34d;border-radius:8px;padding:12px 14px;background:#fffbeb;">
-        <div style="font-size:13px;font-weight:700;color:#92400e;margin-bottom:6px;">⚠️ Non-Conformance (NC)</div>
-        <p style="font-size:12px;color:#713f12;line-height:1.5;margin:0;">Material or product that is <strong>defective, damaged, non-functional, or doesn't meet specification</strong> (per 21 CFR 820). NC items are <strong>segregated and investigated</strong> — they may be reworked, returned to vendor, accepted as-is (with QA approval), or scrapped. The QA Manager is notified and a disposition is assigned. NC items stay in the system for traceability.</p>
+  <!-- NC vs Scrap explanation (per SOP-10) — collapsible -->
+  <div id="ncExplainBox" style="border:1px solid var(--border);border-radius:10px;background:var(--white);margin-bottom:16px;overflow:hidden;">
+    <button id="ncExplainToggle" onclick="toggleNcExplain()" style="width:100%;display:flex;justify-content:space-between;align-items:center;padding:12px 20px;background:none;border:none;cursor:pointer;">
+      <span style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--soft-hash);">What's the difference? · Per SOP-10</span>
+      <span id="ncExplainArrow" style="font-size:14px;color:var(--soft-hash);transition:transform .2s;">▼</span>
+    </button>
+    <div id="ncExplainContent" style="padding:0 20px 16px;display:none;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+        <div style="border:1px solid #fcd34d;border-radius:8px;padding:12px 14px;background:#fffbeb;">
+          <div style="font-size:13px;font-weight:700;color:#92400e;margin-bottom:6px;">⚠️ Non-Conformance (NC)</div>
+          <p style="font-size:12px;color:#713f12;line-height:1.5;margin:0;">Material or product that is <strong>defective, damaged, non-functional, or doesn't meet specification</strong> (per 21 CFR 820). NC items are <strong>segregated and investigated</strong> — they may be reworked, returned to vendor, accepted as-is (with QA approval), or scrapped. The QA Manager is notified and a disposition is assigned. NC items stay in the system for traceability.</p>
+        </div>
+        <div style="border:1px solid #fca5a5;border-radius:8px;padding:12px 14px;background:#fef2f2;">
+          <div style="font-size:13px;font-weight:700;color:#991b1b;margin-bottom:6px;">🗑️ Scrap</div>
+          <p style="font-size:12px;color:#7f1d1d;line-height:1.5;margin:0;">Material that has been <strong>permanently removed from inventory and safely disposed of</strong>. Scrapped items cannot re-enter the production system or be confused with conforming product. Scrap is a <strong>final disposition</strong> — the material is gone. Quantity is deducted from on-hand inventory immediately. Scrap typically results from an NC investigation, but can also occur during normal production (e.g. trim waste, damaged during assembly).</p>
+        </div>
       </div>
-      <div style="border:1px solid #fca5a5;border-radius:8px;padding:12px 14px;background:#fef2f2;">
-        <div style="font-size:13px;font-weight:700;color:#991b1b;margin-bottom:6px;">🗑️ Scrap</div>
-        <p style="font-size:12px;color:#7f1d1d;line-height:1.5;margin:0;">Material that has been <strong>permanently removed from inventory and safely disposed of</strong>. Scrapped items cannot re-enter the production system or be confused with conforming product. Scrap is a <strong>final disposition</strong> — the material is gone. Quantity is deducted from on-hand inventory immediately. Scrap typically results from an NC investigation, but can also occur during normal production (e.g. trim waste, damaged during assembly).</p>
-      </div>
+      <p style="font-size:11px;color:var(--soft-hash);margin:10px 0 0;line-height:1.5;"><strong>In short:</strong> NC = "something's wrong, let's investigate and decide what to do" → Scrap = "it's been decided — this material is permanently removed." Not all NCs become scrap (some get reworked or returned), but all scrap should be documented. Reference: SOP-10 §7.2.9</p>
     </div>
-    <p style="font-size:11px;color:var(--soft-hash);margin:10px 0 0;line-height:1.5;"><strong>In short:</strong> NC = "something's wrong, let's investigate and decide what to do" → Scrap = "it's been decided — this material is permanently removed." Not all NCs become scrap (some get reworked or returned), but all scrap should be documented. Reference: SOP-10 §7.2.9</p>
   </div>
 
   <!-- Log form (hidden by default) -->
@@ -2175,6 +2185,123 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:20px 0;}
           <tr><td colspan="8"><div class="table-placeholder"><div class="spinner"></div><p>Loading…</p></div></td></tr>
         </tbody>
       </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     PAGE — QUARANTINE HOLD
+══════════════════════════════════════════════════════ -->
+<div class="page" id="page-quarantine">
+  <div class="page-header">
+    <div>
+      <h1>🔒 Quarantine Hold</h1>
+      <p class="subtitle">Items on hold pending testing, investigation, or return to supplier</p>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-secondary btn-sm" onclick="showPage('inventory')">← Back to Inventory</button>
+    </div>
+  </div>
+
+  <!-- Stats strip -->
+  <div id="quarantineStats" style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px;"></div>
+
+  <!-- Filter tabs -->
+  <div style="display:flex;gap:4px;margin-bottom:16px;flex-wrap:wrap;">
+    <button class="dept-tab active" id="qt-tab-all" onclick="switchQuarantineTab('all')">All</button>
+    <button class="dept-tab" id="qt-tab-testing" onclick="switchQuarantineTab('Needs Testing')">🧪 Needs Testing</button>
+    <button class="dept-tab" id="qt-tab-returning" onclick="switchQuarantineTab('Returning to Supplier')">📦 Returning to Supplier</button>
+    <button class="dept-tab" id="qt-tab-resolved" onclick="switchQuarantineTab('Resolved')">✓ Resolved</button>
+  </div>
+
+  <!-- Quarantine table -->
+  <div class="table-card">
+    <div style="padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+      <span style="font-size:12px;font-weight:600;color:var(--soft-hash);letter-spacing:.05em;text-transform:uppercase;">Quarantined Items</span>
+      <input type="text" id="qtSearchInput" class="form-input" style="width:220px;padding:6px 10px;font-size:12px;" placeholder="Filter by part, lot, supplier…" oninput="renderQuarantineTable()" />
+    </div>
+    <div class="table-wrap">
+      <table class="catalog-table">
+        <thead>
+          <tr>
+            <th>Date Received</th>
+            <th>Part Name</th>
+            <th>Lot Number</th>
+            <th>Dept</th>
+            <th>Supplier</th>
+            <th>Qty</th>
+            <th>Hold Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="quarantineBody">
+          <tr><td colspan="8"><div class="table-placeholder"><p>No quarantined items</p></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══ QUARANTINE ACTION MODAL ═══════════════════════════ -->
+<div class="modal-overlay" id="quarantineActionModal">
+  <div class="modal-box" style="max-width:520px;">
+    <button class="modal-close" onclick="closeModal('quarantineActionModal')">✕</button>
+    <div class="modal-title" id="qa-title">Quarantine Action</div>
+    <div id="qa-itemInfo" style="background:var(--neutral);padding:10px 14px;border-radius:8px;font-size:12px;margin-bottom:16px;"></div>
+
+    <div class="form-grid" style="grid-template-columns:1fr;">
+      <!-- Action selector -->
+      <div class="form-group">
+        <label class="form-label">Action <span class="req">*</span></label>
+        <select id="qa-action" class="form-select" onchange="toggleQuarantineFields()">
+          <option value="">— Select action —</option>
+          <option value="pass">✓ Test Passed — Release to Inventory</option>
+          <option value="fail">✕ Test Failed — Do Not Use</option>
+          <option value="return">📦 Return to Supplier</option>
+        </select>
+      </div>
+
+      <!-- Test doc link (shown for pass/fail) -->
+      <div class="form-group" id="qa-testDocWrap" style="display:none;">
+        <label class="form-label">Test Document / Reference</label>
+        <input type="text" class="form-input" id="qa-testDoc" placeholder="e.g. COA #, test report link, file name…" />
+        <div class="form-hint">Link or reference to the testing documentation</div>
+      </div>
+
+      <!-- Return fields (shown for return) -->
+      <div id="qa-returnFields" style="display:none;">
+        <div class="form-group">
+          <label class="form-label">Supplier</label>
+          <input type="text" class="form-input" id="qa-supplier" readonly style="background:var(--neutral);" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Date Sent Back <span class="req">*</span></label>
+          <input type="date" class="form-input" id="qa-returnDate" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">RMA / Return Ref #</label>
+          <input type="text" class="form-input" id="qa-rmaNumber" placeholder="e.g. RMA-2026-001" />
+        </div>
+      </div>
+
+      <!-- Notes -->
+      <div class="form-group">
+        <label class="form-label">Notes</label>
+        <textarea class="form-input" id="qa-notes" rows="2" style="resize:vertical;" placeholder="Additional details…"></textarea>
+      </div>
+
+      <!-- Resolved by -->
+      <div class="form-group">
+        <label class="form-label">Resolved By</label>
+        <input type="text" class="form-input" id="qa-resolvedBy" placeholder="e.g. Jocelyn Meyer" />
+      </div>
+    </div>
+
+    <div id="qa-error" style="color:#c0392b;font-size:13px;margin-top:8px;display:none;"></div>
+
+    <div style="display:flex;gap:8px;margin-top:18px;justify-content:flex-end;">
+      <button class="btn btn-secondary btn-sm" onclick="closeModal('quarantineActionModal')">Cancel</button>
+      <button class="btn btn-primary btn-sm" id="qa-submit-btn" onclick="submitQuarantineAction()">Submit</button>
     </div>
   </div>
 </div>
@@ -2565,15 +2692,15 @@ const PARTS = {
   'Testosterone Mastercard': { itemNumber:'MCT', partNumber:'MCTS-001',                  supplier:'Eli Health',              category:'A', abbrev:'MCTS', type:'In-House',     materialType:'In-House Material', chemistry:'Testosterone', retainTarget:10 },
 
   // ══ BUFFERS ════════════════════════════════════
-  'Cortisol Running Buffer': { itemNumber:'BUF-RUN-COR', partNumber:'BFCR-001',          supplier:'Eli Health',              category:'A', abbrev:'BFCR', type:'Buffer',       materialType:'Buffer', chemistry:'Cortisol' },
-  'Progesterone Running Buffer': { itemNumber:'BUF-RUN-PRG', partNumber:'BFPR-001',          supplier:'Eli Health',              category:'A', abbrev:'BFPR', type:'Buffer',       materialType:'Buffer', chemistry:'Progesterone' },
-  'Testosterone Running Buffer': { itemNumber:'BUF-RUN-TST', partNumber:'BFTS-001',          supplier:'Eli Health',              category:'A', abbrev:'BFTS', type:'Buffer',       materialType:'Buffer', chemistry:'Testosterone' },
-  'Blocking Buffer': { itemNumber:'BUF-BLK', partNumber:'BFBL-001',              supplier:'Eli Health',              category:'A', abbrev:'BFBL', type:'Buffer',       materialType:'Buffer', chemistry:'N/A' },
-  'Conjugate Diluent Buffer': { itemNumber:'BUF-CD', partNumber:'BFCD-001',               supplier:'Eli Health',              category:'A', abbrev:'BFCD', type:'Buffer',       materialType:'Buffer', chemistry:'N/A' },
-  'Sample Buffer': { itemNumber:'BUF-SAMP', partNumber:'BFSM-001',             supplier:'Eli Health',              category:'A', abbrev:'BFSM', type:'Buffer',       materialType:'Buffer', chemistry:'N/A' },
-  'Cortisol Conjugate Buffer': { itemNumber:'BUF-CON-COR', partNumber:'BFCC-001',          supplier:'Eli Health',              category:'A', abbrev:'BFCC', type:'Buffer',       materialType:'Buffer', chemistry:'Cortisol' },
-  'Progesterone Conjugate Buffer': { itemNumber:'BUF-CON-PRG', partNumber:'BFCP-001',          supplier:'Eli Health',              category:'A', abbrev:'BFCP', type:'Buffer',       materialType:'Buffer', chemistry:'Progesterone' },
-  'Testosterone Conjugate Buffer': { itemNumber:'BUF-CON-TST', partNumber:'BFCT-001',          supplier:'Eli Health',              category:'A', abbrev:'BFCT', type:'Buffer',       materialType:'Buffer', chemistry:'Testosterone' },
+  'Cortisol Running Buffer': { itemNumber:'BUF-RUN-COR', partNumber:'BFCR-001',          supplier:'Eli Health',              category:'A', abbrev:'BFCR', type:'In-House',     materialType:'In-House Material', chemistry:'Cortisol' },
+  'Progesterone Running Buffer': { itemNumber:'BUF-RUN-PRG', partNumber:'BFPR-001',          supplier:'Eli Health',              category:'A', abbrev:'BFPR', type:'In-House',     materialType:'In-House Material', chemistry:'Progesterone' },
+  'Testosterone Running Buffer': { itemNumber:'BUF-RUN-TST', partNumber:'BFTS-001',          supplier:'Eli Health',              category:'A', abbrev:'BFTS', type:'In-House',     materialType:'In-House Material', chemistry:'Testosterone' },
+  'Blocking Buffer': { itemNumber:'BUF-BLK', partNumber:'BFBL-001',              supplier:'Eli Health',              category:'A', abbrev:'BFBL', type:'In-House',     materialType:'In-House Material', chemistry:'N/A' },
+  'Conjugate Diluent Buffer': { itemNumber:'BUF-CD', partNumber:'BFCD-001',               supplier:'Eli Health',              category:'A', abbrev:'BFCD', type:'In-House',     materialType:'In-House Material', chemistry:'N/A' },
+  'Sample Buffer': { itemNumber:'BUF-SAMP', partNumber:'BFSM-001',             supplier:'Eli Health',              category:'A', abbrev:'BFSM', type:'In-House',     materialType:'In-House Material', chemistry:'N/A' },
+  'Cortisol Conjugate Buffer': { itemNumber:'BUF-CON-COR', partNumber:'BFCC-001',          supplier:'Eli Health',              category:'A', abbrev:'BFCC', type:'In-House',     materialType:'In-House Material', chemistry:'Cortisol' },
+  'Progesterone Conjugate Buffer': { itemNumber:'BUF-CON-PRG', partNumber:'BFCP-001',          supplier:'Eli Health',              category:'A', abbrev:'BFCP', type:'In-House',     materialType:'In-House Material', chemistry:'Progesterone' },
+  'Testosterone Conjugate Buffer': { itemNumber:'BUF-CON-TST', partNumber:'BFCT-001',          supplier:'Eli Health',              category:'A', abbrev:'BFCT', type:'In-House',     materialType:'In-House Material', chemistry:'Testosterone' },
 
   // ══ FINISHED PRODUCTS ══════════════════════════
   // ── Cortisol Finished ───────────────────────────
@@ -2697,18 +2824,6 @@ function buildPartsDropdown(selectId, deptOverride) {
     }
 
     // ── BUFFER groups ─────────────────────────────────
-    const bufItems = Object.entries(PARTS).filter(([,d]) => d.materialType === 'Buffer');
-    if (bufItems.length) {
-      const grp = document.createElement('optgroup');
-      grp.label = '🧪 Buffers';
-      bufItems.forEach(([name]) => {
-        const opt = document.createElement('option');
-        opt.value = name; opt.textContent = name;
-        grp.appendChild(opt);
-      });
-      sel.appendChild(grp);
-    }
-
     // ── FINISHED PRODUCT groups ───────────────────────
     const fpItems = Object.entries(PARTS).filter(([,d]) => d.materialType === 'Finished Product');
     if (fpItems.length) {
@@ -2886,10 +3001,16 @@ function onDeptChange() {
     mtSel.innerHTML = `<option value="Raw Material">🌿 Raw Material</option>` +
       (isInhouse ? `
         <option value="In-House Material">🔬 In-House Material</option>
-        <option value="Finished Product">📦 Finished Product</option>
-        <option value="Buffer">🧪 Buffer</option>` : '');
+        <option value="Finished Product">📦 Finished Product</option>` : '');
     mtSel.value = 'Raw Material';
     onMaterialTypeChange();
+  }
+
+  // Show/hide SDS/COA/COO section — only for Mfg, Assay R&D, Hardware R&D
+  const docSection = document.getElementById('in-docSection');
+  if (docSection) {
+    const docDepts = ['Manufacturing','Assay R&D','Hardware R&D'];
+    docSection.style.display = docDepts.includes(dept) ? '' : 'none';
   }
 
   // Rebuild parts dropdown filtered for this department
@@ -2976,6 +3097,9 @@ function showPage(name) {
   }
   if (name === 'suppliers') {
     initSupplierDirectory();
+  }
+  if (name === 'quarantine') {
+    renderQuarantineTable();
   }
   if (name === 'catalog') {
     loadCatalogPage();
@@ -3101,7 +3225,7 @@ function switchDept(dept) {
 
   // Show in-house/finished/buffer tabs only when viewing Mfg, Assay R&D, or All
   const showAdvanced = dept === 'All' || INHOUSE_DEPTS.includes(dept);
-  ['mtab-InHouse','mtab-Finished','mtab-Buffer'].forEach(id => {
+  ['mtab-InHouse','mtab-Finished'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.style.display = showAdvanced ? '' : 'none';
   });
@@ -3189,8 +3313,8 @@ function renderTable(rows) {
     // Material type + chemistry
     const mtype      = row['Material Type'] || 'Raw Material';
     const chem       = row['Chemistry'] || 'N/A';
-    const mtypeClass = mtype==='In-House Material'?'inhouse':mtype==='Finished Product'?'finished':mtype==='Buffer'?'buffer':'raw';
-    const mtypeShort = mtype==='In-House Material'?'In-House':mtype==='Finished Product'?'Finished':mtype==='Buffer'?'Buffer':'Raw';
+    const mtypeClass = mtype==='In-House Material'?'inhouse':mtype==='Finished Product'?'finished':'raw';
+    const mtypeShort = mtype==='In-House Material'?'In-House':mtype==='Finished Product'?'Finished':'Raw';
     const chemClass  = chem==='Cortisol'?'cortisol':chem==='Progesterone'?'progesterone':chem==='Testosterone'?'testosterone':'na';
     const chemPill   = chem && chem!=='N/A' ? `<span class="chem-pill ${chemClass}">${chem}</span>` : '';
     // Permission check for this row's department
@@ -3641,7 +3765,7 @@ let activeMtype = 'All';
 function switchMtype(type) {
   activeMtype = type;
   document.querySelectorAll('.mtype-tab').forEach(b => b.classList.remove('active'));
-  const idMap = {'All':'mtab-All','Raw Material':'mtab-Raw','In-House Material':'mtab-InHouse','Finished Product':'mtab-Finished','Buffer':'mtab-Buffer'};
+  const idMap = {'All':'mtab-All','Raw Material':'mtab-Raw','In-House Material':'mtab-InHouse','Finished Product':'mtab-Finished'};
   const btn = document.getElementById(idMap[type]);
   if (btn) btn.classList.add('active');
   filterTable();
@@ -3754,6 +3878,15 @@ function onMaterialTypeChange() {
     supplierInput.placeholder = isInHouseOrFinished ? 'Eli Health (auto)' : 'e.g. Porex, Sigma Aldrich…';
     if (isInHouseOrFinished && !supplierInput.value) supplierInput.value = 'Eli Health';
   }
+
+  // Expiration date: required for Raw Material, In-House Material, Finished Product; optional for Cartridge-type parts
+  const expReq = document.getElementById('in-expirationReq');
+  const expHint = document.getElementById('in-expirationHint');
+  const expInput = document.getElementById('in-expirationDate');
+  const needsExp = ['Raw Material','In-House Material','Finished Product'].includes(mtype);
+  if (expReq) expReq.style.display = needsExp ? '' : 'none';
+  if (expHint) expHint.textContent = needsExp ? 'Required for raw materials, in-house, and finished products (yyyy-mm-dd)' : 'Optional — leave blank if no expiration';
+  if (expInput) expInput.required = needsExp;
 }
 
 function setInspCat(cat) {
@@ -3860,6 +3993,11 @@ async function submitIncoming(e) {
   }
 
   if (!currentInspCat) { showToast('Please select an inspection category','error'); btn.disabled=false; btn.textContent='✓ Complete Inspection & Add to Inventory'; return; }
+
+  // Validate expiration date for required material types
+  const mtype = document.getElementById('in-materialType') ? document.getElementById('in-materialType').value : 'Raw Material';
+  const needsExpiration = ['Raw Material','In-House Material','Finished Product'].includes(mtype);
+  if (needsExpiration && !expirationDate) { showToast('Expiration date is required for ' + mtype + ' items (yyyy-mm-dd)','error'); btn.disabled=false; btn.textContent='✓ Complete Inspection & Add to Inventory'; return; }
 
   // Collect inspection-specific fields
   let inspData = {};
@@ -4830,6 +4968,14 @@ function filterActivity() {
 let allNcData    = [];
 let currentNcRow = null;
 
+function toggleNcExplain() {
+  const content = document.getElementById('ncExplainContent');
+  const arrow = document.getElementById('ncExplainArrow');
+  const isOpen = content.style.display !== 'none';
+  content.style.display = isOpen ? 'none' : 'block';
+  arrow.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
+}
+
 function openNcScrapForm(prefilledRow) {
   // If called from scan result, navigate to the NC & Scrap page first
   if (prefilledRow) {
@@ -5114,20 +5260,202 @@ function savePartCard() {
 // ══════════════════════════════════════════════════════
 // SDS & COA REGISTER
 // ══════════════════════════════════════════════════════
+//  QUARANTINE HOLD
+// ══════════════════════════════════════════════════════
+let quarantineCurrentTab = 'all';
+let quarantineEditIdx = -1;
+
+function switchQuarantineTab(tab) {
+  quarantineCurrentTab = tab;
+  document.querySelectorAll('[id^="qt-tab-"]').forEach(b => b.classList.remove('active'));
+  const idMap = {'all':'all','Needs Testing':'testing','Returning to Supplier':'returning','Resolved':'resolved'};
+  const btn = document.getElementById('qt-tab-' + (idMap[tab] || tab));
+  if (btn) btn.classList.add('active');
+  renderQuarantineTable();
+}
+
+function getQuarantineItems() {
+  // Pull all inventory rows where Status === 'Quarantine'
+  const items = [];
+  inventoryData.forEach((row, idx) => {
+    if (row.Status === 'Quarantine' || row._quarantineHold) {
+      items.push({...row, _invIdx: idx});
+    }
+  });
+  return items;
+}
+
+function renderQuarantineTable() {
+  const items = getQuarantineItems();
+  const search = (document.getElementById('qtSearchInput')?.value || '').toLowerCase();
+  const tbody = document.getElementById('quarantineBody');
+  if (!tbody) return;
+
+  // Stats
+  const statsEl = document.getElementById('quarantineStats');
+  const needsTesting = items.filter(i => !i._quarantineResolved).length;
+  const returning = items.filter(i => i._quarantineAction === 'return' && !i._quarantineResolved).length;
+  const resolved = items.filter(i => i._quarantineResolved).length;
+  if (statsEl) {
+    statsEl.innerHTML = `
+      <div style="padding:10px 16px;border-radius:8px;background:#fffbeb;border:1px solid #fcd34d;font-size:13px;font-weight:600;color:#92400e;">🔒 On Hold: ${needsTesting}</div>
+      <div style="padding:10px 16px;border-radius:8px;background:#eff6ff;border:1px solid #93c5fd;font-size:13px;font-weight:600;color:#1d4ed8;">📦 Returning: ${returning}</div>
+      <div style="padding:10px 16px;border-radius:8px;background:#f0fdf4;border:1px solid #86efac;font-size:13px;font-weight:600;color:#166534;">✓ Resolved: ${resolved}</div>
+    `;
+  }
+
+  // Filter
+  let filtered = items;
+  if (quarantineCurrentTab === 'Needs Testing') {
+    filtered = items.filter(i => !i._quarantineResolved && i._quarantineAction !== 'return');
+  } else if (quarantineCurrentTab === 'Returning to Supplier') {
+    filtered = items.filter(i => i._quarantineAction === 'return' && !i._quarantineResolved);
+  } else if (quarantineCurrentTab === 'Resolved') {
+    filtered = items.filter(i => i._quarantineResolved);
+  }
+
+  if (search) {
+    filtered = filtered.filter(i =>
+      (i['Part Name']||'').toLowerCase().includes(search) ||
+      (i['Lot Number']||'').toLowerCase().includes(search) ||
+      (i.Supplier||i._supplier||'').toLowerCase().includes(search)
+    );
+  }
+
+  if (!filtered.length) {
+    tbody.innerHTML = '<tr><td colspan="8"><div class="table-placeholder"><p>No quarantined items' + (quarantineCurrentTab !== 'all' ? ' in this category' : '') + '</p></div></td></tr>';
+    return;
+  }
+
+  let rows = '';
+  filtered.forEach(item => {
+    const holdStatus = item._quarantineResolved
+      ? (item._quarantineAction === 'pass' ? '<span class="status-badge in-stock">Released</span>'
+        : item._quarantineAction === 'fail' ? '<span class="status-badge terminated">Do Not Use</span>'
+        : item._quarantineAction === 'return' ? '<span class="status-badge" style="background:#dbeafe;color:#1d4ed8;">Returned ' + (item._quarantineReturnDate || '') + '</span>'
+        : '<span class="status-badge">Resolved</span>')
+      : item._quarantineAction === 'return'
+        ? '<span class="status-badge" style="background:#dbeafe;color:#1d4ed8;">Returning to Supplier</span>'
+        : '<span class="status-badge quarantine">Needs Testing</span>';
+
+    const actions = item._quarantineResolved
+      ? '<span style="font-size:11px;color:var(--soft-hash);">' + (item._quarantineNotes || 'Resolved') + '</span>'
+      : '<button class="btn btn-sm btn-primary" style="padding:3px 10px;font-size:11px;" onclick="openQuarantineAction(' + item._invIdx + ')">Take Action</button>';
+
+    rows += '<tr' + (item._quarantineResolved ? ' style="opacity:.6;"' : '') + '>' +
+      '<td>' + (item['Date Received'] || '—') + '</td>' +
+      '<td style="font-weight:600;">' + (item['Part Name'] || '—') + '</td>' +
+      '<td class="mono" style="font-size:11px;">' + (item['Lot Number'] || '—') + '</td>' +
+      '<td>' + (item.Department || item._dept || '—') + '</td>' +
+      '<td>' + (item.Supplier || item._supplier || '—') + '</td>' +
+      '<td>' + (item.Quantity ?? '—') + '</td>' +
+      '<td>' + holdStatus + '</td>' +
+      '<td>' + actions + '</td>' +
+      '</tr>';
+  });
+  tbody.innerHTML = rows;
+}
+
+function openQuarantineAction(invIdx) {
+  quarantineEditIdx = invIdx;
+  const item = inventoryData[invIdx];
+  if (!item) return;
+
+  document.getElementById('qa-title').textContent = 'Quarantine Action — ' + (item['Part Name'] || 'Item');
+  document.getElementById('qa-itemInfo').innerHTML =
+    '<strong>' + (item['Part Name']||'') + '</strong> · Lot: <span class="mono">' + (item['Lot Number']||'') + '</span> · Qty: ' + (item.Quantity??'') + ' · Dept: ' + (item.Department||item._dept||'');
+  document.getElementById('qa-action').value = '';
+  document.getElementById('qa-testDoc').value = '';
+  document.getElementById('qa-supplier').value = item.Supplier || item._supplier || '';
+  document.getElementById('qa-returnDate').value = todayISO();
+  document.getElementById('qa-rmaNumber').value = '';
+  document.getElementById('qa-notes').value = '';
+  document.getElementById('qa-resolvedBy').value = currentUser?.name || currentUser?.email || '';
+  document.getElementById('qa-error').style.display = 'none';
+  toggleQuarantineFields();
+  openModal('quarantineActionModal');
+}
+
+function toggleQuarantineFields() {
+  const action = document.getElementById('qa-action').value;
+  document.getElementById('qa-testDocWrap').style.display = (action === 'pass' || action === 'fail') ? '' : 'none';
+  document.getElementById('qa-returnFields').style.display = action === 'return' ? '' : 'none';
+}
+
+function submitQuarantineAction() {
+  const action = document.getElementById('qa-action').value;
+  const errEl = document.getElementById('qa-error');
+  if (!action) { errEl.textContent = 'Please select an action'; errEl.style.display = ''; return; }
+
+  const item = inventoryData[quarantineEditIdx];
+  if (!item) return;
+
+  const testDoc = document.getElementById('qa-testDoc').value.trim();
+  const notes = document.getElementById('qa-notes').value.trim();
+  const resolvedBy = document.getElementById('qa-resolvedBy').value.trim();
+
+  if (action === 'pass') {
+    // Release to inventory — change status to Approved for Production Use
+    item.Status = 'Approved for Production Use';
+    item.Disposition = 'Approved for Production Use';
+    item._quarantineResolved = true;
+    item._quarantineAction = 'pass';
+    item._quarantineTestDoc = testDoc;
+    item._quarantineNotes = notes;
+    item._quarantineResolvedBy = resolvedBy;
+    item._quarantineResolvedDate = todayISO();
+    showToast('✓ Released to inventory — status changed to Approved');
+  } else if (action === 'fail') {
+    // Mark as Do Not Use
+    item.Status = 'Do Not Use';
+    item.Disposition = 'Do Not Use';
+    item._quarantineResolved = true;
+    item._quarantineAction = 'fail';
+    item._quarantineTestDoc = testDoc;
+    item._quarantineNotes = notes;
+    item._quarantineResolvedBy = resolvedBy;
+    item._quarantineResolvedDate = todayISO();
+    showToast('Item marked as Do Not Use');
+  } else if (action === 'return') {
+    const returnDate = document.getElementById('qa-returnDate').value;
+    const rmaNumber = document.getElementById('qa-rmaNumber').value.trim();
+    if (!returnDate) { errEl.textContent = 'Please enter the date sent back'; errEl.style.display = ''; return; }
+    item._quarantineAction = 'return';
+    item._quarantineReturnDate = returnDate;
+    item._quarantineRmaNumber = rmaNumber;
+    item._quarantineNotes = notes;
+    item._quarantineResolvedBy = resolvedBy;
+    item._quarantineResolved = true;
+    item._quarantineResolvedDate = todayISO();
+    item.Status = 'Returned to Supplier';
+    item.Disposition = 'Returned to Supplier';
+    showToast('📦 Marked as returned to supplier on ' + returnDate);
+  }
+
+  // Save to backend
+  saveRow(quarantineEditIdx);
+
+  closeModal('quarantineActionModal');
+  renderQuarantineTable();
+  renderTable(); // refresh main inventory table too
+}
+
+// ══════════════════════════════════════════════════════
 let sdsRecords = [];
-let sdsCurrentTab = 'mfg';
+let sdsCurrentTab = 'Manufacturing';
 
 function switchSdsTab(tab) {
   sdsCurrentTab = tab;
-  document.getElementById('sds-tab-mfg').classList.toggle('active', tab === 'mfg');
-  document.getElementById('sds-tab-rd').classList.toggle('active', tab === 'rd');
+  document.getElementById('sds-tab-mfg').classList.toggle('active', tab === 'Manufacturing');
+  document.getElementById('sds-tab-assayrd').classList.toggle('active', tab === 'Assay R&D');
+  document.getElementById('sds-tab-hwrd').classList.toggle('active', tab === 'Hardware R&D');
   renderSdsTable();
 }
 
 function renderSdsTable() {
   const searchVal = (document.getElementById('sdsSearch')?.value || '').toLowerCase();
   const statusFil = document.getElementById('sdsStatusFilter')?.value || '';
-  const deptFilter = sdsCurrentTab === 'mfg' ? 'Manufacturing' : 'R&D';
+  const deptFilter = sdsCurrentTab;
 
   let rows = '';
   let count = 0;
@@ -5170,7 +5498,7 @@ function openAddSdsModal() {
     const el = document.getElementById(id);
     if (el) el.value = '';
   });
-  document.getElementById('sds-dept').value = sdsCurrentTab === 'mfg' ? 'Manufacturing' : 'R&D';
+  document.getElementById('sds-dept').value = sdsCurrentTab;
   document.getElementById('sds-status').value = 'current';
   document.getElementById('sds-coaStatus').value = 'received';
   document.getElementById('sds-hazard').value = '—';
@@ -5209,8 +5537,8 @@ function submitSdsRecord() {
 
 function addSdsFromIncoming(partName, supplier, dept, sdsDate, coaLotRef) {
   // Auto-add SDS record from incoming inspection
-  const deptMap = { 'Manufacturing': 'Manufacturing', 'Assay R&D': 'R&D', 'Hardware R&D': 'R&D' };
-  const mappedDept = deptMap[dept] || 'R&D';
+  const deptMap = { 'Manufacturing': 'Manufacturing', 'Assay R&D': 'Assay R&D', 'Hardware R&D': 'Hardware R&D' };
+  const mappedDept = deptMap[dept] || 'Assay R&D';
   const sdsStatus = sdsDate ? 'current' : 'missing';
   const coaStatus = coaLotRef ? 'received' : 'missing';
 
@@ -5315,8 +5643,11 @@ function initSupplierDirectory() {
 function switchSupplierTab(dept) {
   supplierCurrentTab = dept;
   document.querySelectorAll('[id^="sup-tab-"]').forEach(btn => btn.classList.remove('active'));
-  const tabBtn = document.getElementById('sup-tab-' + dept);
+  const tabIdMap = {'Manufacturing':'Manufacturing','Assay R&D':'AssayRD','Hardware R&D':'HardwareRD','Marketing':'Marketing','Office':'Office'};
+  const tabBtn = document.getElementById('sup-tab-' + (tabIdMap[dept] || dept));
   if (tabBtn) tabBtn.classList.add('active');
+  const sub = document.getElementById('sup-subtitle');
+  if (sub) sub.style.display = (dept === 'Manufacturing') ? '' : 'none';
   renderSupplierTable();
 }
 
@@ -5726,7 +6057,6 @@ function buildTraceData() {
   const raw      = [];
   const inhouse  = [];
   const finished = [];
-  const buffers  = [];
 
   inventoryData.forEach(row => {
     const mtype = row['Material Type'] || 'Raw Material';
@@ -5745,7 +6075,6 @@ function buildTraceData() {
     if (mtype === 'Raw Material')       raw.push(row);
     else if (mtype === 'In-House Material') inhouse.push(row);
     else if (mtype === 'Finished Product')  finished.push(row);
-    else if (mtype === 'Buffer')            buffers.push(row);
   });
 
   // Build batch groups: key = batchNumber (or lot number for raw/ungrouped)
@@ -5757,7 +6086,7 @@ function buildTraceData() {
     const chem  = row['Chemistry']    || 'N/A';
     const key   = bnum || ('raw::' + row['Lot Number']);
     if (!batchMap[key]) {
-      batchMap[key] = { batchNumber: bnum || row['Lot Number'], chemistry: chem, tiers: { raw:[], inhouse:[], finished:[], buffer:[] }, hasFinished: false };
+      batchMap[key] = { batchNumber: bnum || row['Lot Number'], chemistry: chem, tiers: { raw:[], inhouse:[], finished:[] }, hasFinished: false };
     }
     batchMap[key].tiers[tier].push(row);
     if (tier === 'finished') batchMap[key].hasFinished = true;
@@ -5767,7 +6096,6 @@ function buildTraceData() {
 
   finished.forEach(r => addToBatch(r, 'finished'));
   inhouse.forEach(r  => addToBatch(r, 'inhouse'));
-  buffers.forEach(r  => addToBatch(r, 'buffer'));
 
   // For raw materials: link them to batches via Source Lots of in-house items
   const allSourceLots = new Set();
@@ -5864,7 +6192,6 @@ function renderTraceGroups() {
       <div class="trace-batch-body">
         ${tierHtml('Finished Product', g.tiers.finished, 'finished')}
         ${tierHtml('In-House Material', g.tiers.inhouse, 'inhouse')}
-        ${tierHtml('Buffer', g.tiers.buffer, 'buffer')}
         ${tierHtml('Raw Material', g.tiers.raw, 'raw')}
       </div>
     </div>`;
@@ -5923,7 +6250,6 @@ function buildBatchTraceData() {
         finishedItems: [],
         rawMaterials: [],
         inHouseItems: [],
-        bufferItems: [],
         dailyLogs: [],
         shipments: [],
         scrapEntries: [],
@@ -5953,8 +6279,6 @@ function buildBatchTraceData() {
       batch.rawMaterials.push(row);
     } else if (mtype === 'In-House Material') {
       batch.inHouseItems.push(row);
-    } else if (mtype === 'Buffer') {
-      batch.bufferItems.push(row);
     }
   });
 
@@ -6458,8 +6782,8 @@ function findAndShowLot(lot) {
   const slClass    = sl==='In Stock'?'sl-in':sl==='Low Stock'?'sl-low':'sl-out';
   const mtype      = row['Material Type'] || 'Raw Material';
   const chem       = row['Chemistry']     || 'N/A';
-  const mtypeShort = mtype==='In-House Material'?'In-House':mtype==='Finished Product'?'Finished':mtype==='Buffer'?'Buffer':'Raw';
-  const mtypeClass = mtype==='In-House Material'?'inhouse':mtype==='Finished Product'?'finished':mtype==='Buffer'?'buffer':'raw';
+  const mtypeShort = mtype==='In-House Material'?'In-House':mtype==='Finished Product'?'Finished':'Raw';
+  const mtypeClass = mtype==='In-House Material'?'inhouse':mtype==='Finished Product'?'finished':'raw';
   const chemClass  = chem==='Cortisol'?'cortisol':chem==='Progesterone'?'progesterone':chem==='Testosterone'?'testosterone':'na';
 
   document.getElementById('scanResultInfo').innerHTML = `
