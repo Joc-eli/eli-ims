@@ -343,6 +343,10 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:20px 0;}
 /* Archive badge */
 .archive-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;background:#fee2e2;color:#991b1b;}
 .active-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;background:#d1fae5;color:#065f46;}
+.asl-badge{display:inline-block;padding:2px 6px;border-radius:6px;font-size:9px;font-weight:700;letter-spacing:.03em;}
+.asl-badge.critical{background:#dbeafe;color:#1e40af;}
+.asl-badge.not-critical{background:#f3e8ff;color:#6b21a8;}
+.asl-badge.not-on-asl{background:#fef3c7;color:#92400e;}
 
 
 /* Catalog row hover */
@@ -721,6 +725,7 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:20px 0;}
   <button class="nav-link" onclick="showPage('production')" id="nav-production"><span class="nav-icon">🧪</span> Production Lots</button>
   <button class="nav-link" onclick="showPage('ncscrap')" id="nav-ncscrap"><span class="nav-icon">⚠️</span> NC &amp; Scrap Log</button>
   <button class="nav-link" onclick="showPage('batchtrace')" id="nav-batchtrace"><span class="nav-icon">📊</span> Batch Traceability</button>
+  <button class="nav-link" onclick="showPage('sds')" id="nav-sds"><span class="nav-icon">📄</span> SDS &amp; COA Register</button>
   <div class="sidebar-section-label" id="sidebar-admin-label" style="margin-top:8px;display:none;">Admin</div>
   <button class="nav-link" onclick="showPage('catalog')" id="nav-catalog" style="display:none">
     <span class="nav-icon">📋</span> Parts Catalog
@@ -870,7 +875,8 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:20px 0;}
 
         <div class="form-group">
           <label class="form-label">Vendor / Supplier <span class="req">*</span></label>
-          <input type="text" class="form-input" id="in-supplier" placeholder="e.g. Porex, Sigma Aldrich…" required />
+          <input type="text" class="form-input" id="in-supplier" placeholder="e.g. Porex, Sigma Aldrich…" required oninput="checkAslStatus()" />
+          <div id="in-aslWarning" style="display:none;margin-top:6px;padding:6px 10px;border-radius:8px;font-size:11px;font-weight:600;"></div>
         </div>
 
         <div class="form-group">
@@ -1242,6 +1248,37 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:20px 0;}
         Select an inspection category above to load the checklist
       </div>
 
+      <!-- ── SECTION: Documentation (SDS & COA) ───── -->
+      <div class="disp-section" style="border:1px solid var(--border);border-radius:10px;padding:20px;margin-top:16px;background:#fefefe;">
+        <div style="font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--soft-hash);margin-bottom:14px;">Documentation — SDS &amp; COA</div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Safety Data Sheet (SDS) <span class="req">*</span></label>
+            <div class="radio-group" style="margin-bottom:8px;">
+              <div class="radio-opt"><input type="radio" name="sdsReceived" id="sdsYes" value="Yes" onchange="document.getElementById('in-sdsDateWrap').style.display=''" /><label for="sdsYes">Received</label></div>
+              <div class="radio-opt"><input type="radio" name="sdsReceived" id="sdsOnFile" value="On File" onchange="document.getElementById('in-sdsDateWrap').style.display='none'" /><label for="sdsOnFile">Already on file</label></div>
+              <div class="radio-opt"><input type="radio" name="sdsReceived" id="sdsNA" value="N/A" onchange="document.getElementById('in-sdsDateWrap').style.display='none'" /><label for="sdsNA">N/A</label></div>
+            </div>
+            <div id="in-sdsDateWrap" style="display:none;">
+              <input type="date" class="form-input" id="in-sdsDate" style="max-width:200px;" />
+              <div class="form-hint">Date on the SDS document</div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Certificate of Analysis (COA) <span class="req">*</span></label>
+            <div class="radio-group" style="margin-bottom:8px;">
+              <div class="radio-opt"><input type="radio" name="coaReceived" id="coaYes" value="Yes" onchange="document.getElementById('in-coaLotWrap').style.display=''" /><label for="coaYes">Received</label></div>
+              <div class="radio-opt"><input type="radio" name="coaReceived" id="coaNA" value="N/A" onchange="document.getElementById('in-coaLotWrap').style.display='none'" /><label for="coaNA">N/A</label></div>
+            </div>
+            <div id="in-coaLotWrap" style="display:none;">
+              <input type="text" class="form-input mono" id="in-coaLotRef" placeholder="COA lot/ref # (if different)" style="max-width:250px;" />
+              <div class="form-hint">Lot number printed on the COA, if different from the item lot</div>
+            </div>
+          </div>
+        </div>
+        <div class="form-hint" style="margin-top:8px;color:#92400e;">Ask the supplier for an SDS and COA with every shipment. SDS tracks are maintained in the SDS Register.</div>
+      </div>
+
       <!-- ── SECTION: Quality Status ───────────────── -->
       <div class="disp-section">
         <div class="section-mini-title">Quality Status <span class="req">*</span></div>
@@ -1486,6 +1523,163 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:20px 0;}
     <div class="table-placeholder"><div class="spinner"></div><p>Loading batch data…</p></div>
   </div>
 </div>
+
+<!-- ══════════════════════════════════════════════════════
+     SDS & COA REGISTER PAGE
+══════════════════════════════════════════════════════ -->
+<div class="page" id="page-sds">
+  <div class="page-header">
+    <div>
+      <h1>📄 SDS &amp; COA Register</h1>
+      <p class="subtitle">Safety Data Sheets &amp; Certificates of Analysis · Per SOP-05 &amp; SOP-07</p>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-secondary btn-sm" onclick="showPage('inventory')">← Back to Inventory</button>
+      <button class="btn btn-primary btn-sm" onclick="openAddSdsModal()">＋ Add SDS/COA Record</button>
+    </div>
+  </div>
+
+  <!-- Tab toggle: Manufacturing vs R&D -->
+  <div style="display:flex;gap:4px;margin-bottom:16px;">
+    <button class="mtype-tab active" id="sds-tab-mfg" onclick="switchSdsTab('mfg')" style="padding:8px 20px;border:1px solid var(--border);border-radius:8px;background:#fff;cursor:pointer;font-size:13px;font-weight:600;">🏭 Manufacturing</button>
+    <button class="mtype-tab" id="sds-tab-rd" onclick="switchSdsTab('rd')" style="padding:8px 20px;border:1px solid var(--border);border-radius:8px;background:#fff;cursor:pointer;font-size:13px;font-weight:600;">🔬 R&amp;D</button>
+  </div>
+
+  <!-- Search & filters -->
+  <div class="toolbar" style="margin-bottom:16px;">
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="sdsSearch" class="search-input" placeholder="Search material, supplier, or SDS number…" oninput="renderSdsTable()" />
+    </div>
+    <select class="filter-select" id="sdsStatusFilter" onchange="renderSdsTable()">
+      <option value="">All Statuses</option>
+      <option value="current">Current</option>
+      <option value="expired">Expired / Needs Update</option>
+      <option value="missing">Missing</option>
+    </select>
+  </div>
+
+  <!-- SDS Table -->
+  <div class="table-wrap">
+    <table class="catalog-table">
+      <thead>
+        <tr>
+          <th>Material / Chemical</th>
+          <th>Supplier</th>
+          <th>SDS #</th>
+          <th>SDS Date</th>
+          <th style="text-align:center;">SDS Status</th>
+          <th>COA Lot Ref</th>
+          <th style="text-align:center;">COA Status</th>
+          <th>Hazards</th>
+          <th>Storage</th>
+          <th>Notes</th>
+        </tr>
+      </thead>
+      <tbody id="sdsTbody">
+        <tr><td colspan="10" style="text-align:center;padding:30px;color:var(--soft-hash);">Loading SDS records…</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="form-hint" style="margin-top:12px;">
+    SDS records are populated automatically from Incoming Inspection. You can also add records manually for items already in stock.
+    Manufacturing items must come from ASL vendors per SOP-05.
+  </div>
+</div>
+
+<!-- Add SDS/COA Modal -->
+<div class="modal-overlay" id="addSdsModal">
+  <div class="modal" style="max-width:600px;">
+    <div class="modal-header">
+      <h3 id="sds-modal-title">Add SDS / COA Record</h3>
+      <button class="modal-close" onclick="closeModal('addSdsModal')">✕</button>
+    </div>
+    <div style="padding:20px;">
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Material / Chemical Name <span class="req">*</span></label>
+          <input type="text" class="form-input" id="sds-material" placeholder="e.g. HEPES, Triton X-100" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Supplier</label>
+          <input type="text" class="form-input" id="sds-supplier" placeholder="e.g. Sigma Aldrich" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Department <span class="req">*</span></label>
+          <select class="form-select" id="sds-dept">
+            <option value="Manufacturing">🏭 Manufacturing</option>
+            <option value="R&D">🔬 R&amp;D</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">SDS Number</label>
+          <input type="text" class="form-input mono" id="sds-number" placeholder="e.g. SDS-001" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">SDS Date</label>
+          <input type="date" class="form-input" id="sds-date" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">SDS Status</label>
+          <select class="form-select" id="sds-status">
+            <option value="current">Current</option>
+            <option value="expired">Expired / Needs Update</option>
+            <option value="missing">Missing</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">COA Lot Reference</label>
+          <input type="text" class="form-input mono" id="sds-coaRef" placeholder="Lot # from COA" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">COA Status</label>
+          <select class="form-select" id="sds-coaStatus">
+            <option value="received">Received</option>
+            <option value="missing">Missing</option>
+            <option value="na">N/A</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Hazard Classification</label>
+          <select class="form-select" id="sds-hazard">
+            <option value="—">— None —</option>
+            <option value="Flammable">Flammable</option>
+            <option value="Corrosive">Corrosive</option>
+            <option value="Toxic">Toxic</option>
+            <option value="Health Hazard">Health Hazard</option>
+            <option value="Oxidizer">Oxidizer</option>
+            <option value="Biohazard">Biohazard</option>
+            <option value="Compressed Gas">Compressed Gas</option>
+            <option value="Environment">Environment</option>
+            <option value="Irritant">Irritant</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Storage Requirements</label>
+          <select class="form-select" id="sds-storage">
+            <option value="Room Temp">Room Temp</option>
+            <option value="4°C">4°C (Refrigerated)</option>
+            <option value="-20°C">-20°C (Freezer)</option>
+            <option value="Flammables Cabinet">Flammables Cabinet</option>
+            <option value="Acids Cabinet">Acids Cabinet</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="form-group full">
+          <label class="form-label">Notes</label>
+          <textarea class="form-input" id="sds-notes" rows="2" placeholder="PPE requirements, special handling, etc."></textarea>
+        </div>
+      </div>
+      <div id="sds-error" class="form-error" style="display:none;"></div>
+      <div style="display:flex;gap:10px;margin-top:16px;">
+        <button class="btn btn-primary" onclick="submitSdsRecord()">Save Record</button>
+        <button class="btn btn-secondary" onclick="closeModal('addSdsModal')">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="page" id="page-forecast"><div class="page-header"><div><h1>Inventory Forecast</h1></div></div><div class="coming-soon"><div class="cs-icon">📈</div><h3>Coming Soon</h3></div></div>
 
 <!-- ══ ADMIN PANEL PAGE ══════════════════════════════════ -->
@@ -1629,15 +1823,17 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:20px 0;}
           <th>Item # (Supplier)</th>
           <th>Version</th>
           <th>Supplier</th>
+          <th>ASL</th>
           <th>Chemistry</th>
           <th>Type</th>
+          <th>Unit</th>
           <th style="text-align:center;">Min Qty</th>
           <th style="text-align:center;">Lead Time</th>
           <th>Status</th>
         </tr>
       </thead>
       <tbody id="catalogTbody">
-        <tr><td colspan="10" style="text-align:center;padding:30px;color:var(--soft-hash);">Loading catalog…</td></tr>
+        <tr><td colspan="12" style="text-align:center;padding:30px;color:var(--soft-hash);">Loading catalog…</td></tr>
       </tbody>
     </table>
   </div>
@@ -1656,9 +1852,9 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:20px 0;}
       <div class="form-group"><label class="form-label">Supplier</label><input type="text" id="np-supplier" class="form-input" placeholder="e.g. Sigma Aldrich"/></div>
       <div class="form-group"><label class="form-label">Chemistry</label><select id="np-chemistry" class="form-select"><option value="N/A">N/A</option><option value="Cortisol">Cortisol</option><option value="Progesterone">Progesterone</option><option value="Testosterone">Testosterone</option></select></div>
       <div class="form-group"><label class="form-label">Category</label><select id="np-category" class="form-select"><option value="A">A — Verify Only</option><option value="B">B — Sampling Plan</option><option value="C">C — 100% Inspection</option></select></div>
-      <div class="form-group"><label class="form-label">Type</label><select id="np-type" class="form-select"><option value="Material">Material</option><option value="Cartridge">Cartridge</option><option value="Packaging">Packaging</option><option value="Reagent">Reagent</option><option value="Label/IFU">Label/IFU</option><option value="Equipment">Equipment</option><option value="Buffer">Buffer</option></select></div>
+      <div class="form-group"><label class="form-label">Type</label><select id="np-type" class="form-select"><option value="Material">Material</option><option value="Cartridge">Cartridge</option><option value="Packaging">Packaging</option><option value="Reagent">Reagent</option><option value="Buffer">Buffer</option><option value="Consumable">Consumable</option><option value="In-House">In-House</option><option value="Finished Product">Finished Product</option></select></div>
       <div class="form-group"><label class="form-label">Material Type</label><select id="np-materialType" class="form-select"><option value="Raw Material">Raw Material</option><option value="In-House Material">In-House Material</option><option value="Finished Product">Finished Product</option><option value="Buffer">Buffer</option></select></div>
-      <div class="form-group"><label class="form-label">Unit</label><select id="np-unit" class="form-select"><option value="each">each</option><option value="strips">strips</option><option value="bags">bags</option><option value="parts">parts</option><option value="rolls">rolls</option><option value="boxes">boxes</option><option value="pads">pads</option><option value="sheets">sheets</option><option value="bottles">bottles</option><option value="vials">vials</option><option value="tubes">tubes</option><option value="kits">kits</option><option value="mL">mL</option><option value="g">g</option><option value="mg">mg</option></select></div>
+      <div class="form-group"><label class="form-label">Unit</label><select id="np-unit" class="form-select"><option value="each">each</option><option value="strips">strips</option><option value="bags">bags</option><option value="parts">parts</option><option value="rolls">rolls</option><option value="boxes">boxes</option><option value="pads">pads</option><option value="sheets">sheets</option><option value="bottles">bottles</option><option value="vials">vials</option><option value="tubes">tubes</option><option value="kits">kits</option><option value="packs">packs</option><option value="filters">filters</option><option value="swabs">swabs</option><option value="cartons">cartons</option><option value="L">L</option><option value="mL">mL</option><option value="uL">µL</option><option value="g">g</option><option value="mg">mg</option><option value="ug">µg</option></select></div>
       <div class="form-group"><label class="form-label">Min Stock Qty</label><input type="number" id="np-minQty" class="form-input" min="0" placeholder="0"/></div>
       <div class="form-group"><label class="form-label">Lead Time (days)</label><input type="number" id="np-leadTime" class="form-input" min="0" placeholder="0"/></div>
     </div>
@@ -1728,9 +1924,9 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:20px 0;}
       <div class="form-group"><label class="form-label">Supplier</label><input type="text" id="pe-supplier" class="form-input" /></div>
       <div class="form-group"><label class="form-label">Chemistry</label><select id="pe-chemistry" class="form-select"><option value="N/A">N/A</option><option value="Cortisol">Cortisol</option><option value="Progesterone">Progesterone</option><option value="Testosterone">Testosterone</option></select></div>
       <div class="form-group"><label class="form-label">Category</label><select id="pe-category" class="form-select"><option value="A">A — Verify Only</option><option value="B">B — Sampling Plan</option><option value="C">C — 100% Inspection</option></select></div>
-      <div class="form-group"><label class="form-label">Type</label><select id="pe-type" class="form-select"><option value="Material">Material</option><option value="Cartridge">Cartridge</option><option value="Packaging">Packaging</option><option value="Reagent">Reagent</option><option value="Label/IFU">Label/IFU</option><option value="Equipment">Equipment</option><option value="Buffer">Buffer</option><option value="Consumable">Consumable</option><option value="In-House">In-House</option><option value="Finished">Finished</option></select></div>
+      <div class="form-group"><label class="form-label">Type</label><select id="pe-type" class="form-select"><option value="Material">Material</option><option value="Cartridge">Cartridge</option><option value="Packaging">Packaging</option><option value="Reagent">Reagent</option><option value="Buffer">Buffer</option><option value="Consumable">Consumable</option><option value="In-House">In-House</option><option value="Finished Product">Finished Product</option></select></div>
       <div class="form-group"><label class="form-label">Material Type</label><select id="pe-materialType" class="form-select"><option value="Raw Material">Raw Material</option><option value="In-House Material">In-House Material</option><option value="Finished Product">Finished Product</option><option value="Buffer">Buffer</option></select></div>
-      <div class="form-group"><label class="form-label">Unit</label><select id="pe-unit" class="form-select"><option value="each">each</option><option value="strips">strips</option><option value="bags">bags</option><option value="parts">parts</option><option value="rolls">rolls</option><option value="boxes">boxes</option><option value="pads">pads</option><option value="sheets">sheets</option><option value="bottles">bottles</option><option value="vials">vials</option><option value="tubes">tubes</option><option value="kits">kits</option><option value="mL">mL</option><option value="g">g</option><option value="mg">mg</option></select></div>
+      <div class="form-group"><label class="form-label">Unit</label><select id="pe-unit" class="form-select"><option value="each">each</option><option value="strips">strips</option><option value="bags">bags</option><option value="parts">parts</option><option value="rolls">rolls</option><option value="boxes">boxes</option><option value="pads">pads</option><option value="sheets">sheets</option><option value="bottles">bottles</option><option value="vials">vials</option><option value="tubes">tubes</option><option value="kits">kits</option><option value="packs">packs</option><option value="filters">filters</option><option value="swabs">swabs</option><option value="cartons">cartons</option><option value="L">L</option><option value="mL">mL</option><option value="uL">µL</option><option value="g">g</option><option value="mg">mg</option><option value="ug">µg</option></select></div>
       <div class="form-group"><label class="form-label">Min Stock Qty</label><input type="number" id="pe-minQty" class="form-input" min="0" /></div>
       <div class="form-group"><label class="form-label">Lead Time (days)</label><input type="number" id="pe-leadTime" class="form-input" min="0" /></div>
     </div>
@@ -2255,26 +2451,26 @@ const PARTS = {
 
   // ══ FINISHED PRODUCTS ══════════════════════════
   // ── Cortisol Finished ───────────────────────────
-  'Cortisol Cartridge Assembled': { itemNumber:'CLC', partNumber:'CCAS-001',                  supplier:'Eli Health',              category:'A', abbrev:'CCAS', type:'Finished',     materialType:'Finished Product', chemistry:'Cortisol',     retainTarget:2 },
-  'Cortisol Kit': { itemNumber:'CLK', partNumber:'CLKT-001',                  supplier:'Eli Health',              category:'A', abbrev:'CLKT', type:'Finished',     materialType:'Finished Product', chemistry:'Cortisol',     retainTarget:0 },
-  'Cortisol Transfer Strip': { itemNumber:'CLC-S1-C1', partNumber:'CTSC-001',            supplier:'Eli Health',              category:'A', abbrev:'CTSC', type:'Finished',     materialType:'Finished Product', chemistry:'Cortisol',     retainTarget:0 },
-  'Cortisol Upper Handle': { itemNumber:'CLC-S1-C2', partNumber:'CUHC-001',            supplier:'Eli Health',              category:'A', abbrev:'CUHC', type:'Finished',     materialType:'Finished Product', chemistry:'Cortisol',     retainTarget:0 },
-  'Cortisol Lower Handle': { itemNumber:'CLC-S1-C3', partNumber:'CLHC-001',            supplier:'Eli Health',              category:'A', abbrev:'CLHC', type:'Finished',     materialType:'Finished Product', chemistry:'Cortisol',     retainTarget:0 },
-  'Cortisol Test': { itemNumber:'CT', partNumber:'CTST-001',                   supplier:'Eli Health',              category:'A', abbrev:'CTST', type:'Finished',     materialType:'Finished Product', chemistry:'Cortisol',     retainTarget:2 },
+  'Cortisol Cartridge Assembled': { itemNumber:'CLC', partNumber:'CCAS-001',                  supplier:'Eli Health',              category:'A', abbrev:'CCAS', type:'Finished Product',     materialType:'Finished Product', chemistry:'Cortisol',     retainTarget:2 },
+  'Cortisol Kit': { itemNumber:'CLK', partNumber:'CLKT-001',                  supplier:'Eli Health',              category:'A', abbrev:'CLKT', type:'Finished Product',     materialType:'Finished Product', chemistry:'Cortisol',     retainTarget:0 },
+  'Cortisol Transfer Strip': { itemNumber:'CLC-S1-C1', partNumber:'CTSC-001',            supplier:'Eli Health',              category:'A', abbrev:'CTSC', type:'Finished Product',     materialType:'Finished Product', chemistry:'Cortisol',     retainTarget:0 },
+  'Cortisol Upper Handle': { itemNumber:'CLC-S1-C2', partNumber:'CUHC-001',            supplier:'Eli Health',              category:'A', abbrev:'CUHC', type:'Finished Product',     materialType:'Finished Product', chemistry:'Cortisol',     retainTarget:0 },
+  'Cortisol Lower Handle': { itemNumber:'CLC-S1-C3', partNumber:'CLHC-001',            supplier:'Eli Health',              category:'A', abbrev:'CLHC', type:'Finished Product',     materialType:'Finished Product', chemistry:'Cortisol',     retainTarget:0 },
+  'Cortisol Test': { itemNumber:'CT', partNumber:'CTST-001',                   supplier:'Eli Health',              category:'A', abbrev:'CTST', type:'Finished Product',     materialType:'Finished Product', chemistry:'Cortisol',     retainTarget:2 },
   // ── Progesterone Finished ───────────────────────
-  'Progesterone Cartridge Assembled': { itemNumber:'PEC', partNumber:'PCAS-001',                  supplier:'Eli Health',              category:'A', abbrev:'PCAS', type:'Finished',     materialType:'Finished Product', chemistry:'Progesterone', retainTarget:2 },
-  'Progesterone Kit': { itemNumber:'PEK', partNumber:'PEKT-001',                  supplier:'Eli Health',              category:'A', abbrev:'PEKT', type:'Finished',     materialType:'Finished Product', chemistry:'Progesterone', retainTarget:0 },
-  'Progesterone Transfer Strip': { itemNumber:'PEC-S1-C1', partNumber:'PTSC-001',            supplier:'Eli Health',              category:'A', abbrev:'PTSC', type:'Finished',     materialType:'Finished Product', chemistry:'Progesterone', retainTarget:0 },
-  'Progesterone Upper Handle': { itemNumber:'PEC-S1-C2', partNumber:'PUHC-001',            supplier:'Eli Health',              category:'A', abbrev:'PUHC', type:'Finished',     materialType:'Finished Product', chemistry:'Progesterone', retainTarget:0 },
-  'Progesterone Lower Handle': { itemNumber:'PEC-S1-C3', partNumber:'PLHC-001',            supplier:'Eli Health',              category:'A', abbrev:'PLHC', type:'Finished',     materialType:'Finished Product', chemistry:'Progesterone', retainTarget:0 },
-  'Progesterone Test': { itemNumber:'PT', partNumber:'PTST-001',                   supplier:'Eli Health',              category:'A', abbrev:'PTST', type:'Finished',     materialType:'Finished Product', chemistry:'Progesterone', retainTarget:2 },
+  'Progesterone Cartridge Assembled': { itemNumber:'PEC', partNumber:'PCAS-001',                  supplier:'Eli Health',              category:'A', abbrev:'PCAS', type:'Finished Product',     materialType:'Finished Product', chemistry:'Progesterone', retainTarget:2 },
+  'Progesterone Kit': { itemNumber:'PEK', partNumber:'PEKT-001',                  supplier:'Eli Health',              category:'A', abbrev:'PEKT', type:'Finished Product',     materialType:'Finished Product', chemistry:'Progesterone', retainTarget:0 },
+  'Progesterone Transfer Strip': { itemNumber:'PEC-S1-C1', partNumber:'PTSC-001',            supplier:'Eli Health',              category:'A', abbrev:'PTSC', type:'Finished Product',     materialType:'Finished Product', chemistry:'Progesterone', retainTarget:0 },
+  'Progesterone Upper Handle': { itemNumber:'PEC-S1-C2', partNumber:'PUHC-001',            supplier:'Eli Health',              category:'A', abbrev:'PUHC', type:'Finished Product',     materialType:'Finished Product', chemistry:'Progesterone', retainTarget:0 },
+  'Progesterone Lower Handle': { itemNumber:'PEC-S1-C3', partNumber:'PLHC-001',            supplier:'Eli Health',              category:'A', abbrev:'PLHC', type:'Finished Product',     materialType:'Finished Product', chemistry:'Progesterone', retainTarget:0 },
+  'Progesterone Test': { itemNumber:'PT', partNumber:'PTST-001',                   supplier:'Eli Health',              category:'A', abbrev:'PTST', type:'Finished Product',     materialType:'Finished Product', chemistry:'Progesterone', retainTarget:2 },
   // ── Testosterone Finished ───────────────────────
-  'Testosterone Cartridge Assembled': { itemNumber:'TEC', partNumber:'TCAS-001',                  supplier:'Eli Health',              category:'A', abbrev:'TCAS', type:'Finished',     materialType:'Finished Product', chemistry:'Testosterone', retainTarget:2 },
-  'Testosterone Kit': { itemNumber:'TEK', partNumber:'TEKT-001',                  supplier:'Eli Health',              category:'A', abbrev:'TEKT', type:'Finished',     materialType:'Finished Product', chemistry:'Testosterone', retainTarget:0 },
-  'Testosterone Transfer Strip': { itemNumber:'TEC-S1-C1', partNumber:'TTSC-001',            supplier:'Eli Health',              category:'A', abbrev:'TTSC', type:'Finished',     materialType:'Finished Product', chemistry:'Testosterone', retainTarget:0 },
-  'Testosterone Upper Handle': { itemNumber:'TEC-S1-C2', partNumber:'TUHC-001',            supplier:'Eli Health',              category:'A', abbrev:'TUHC', type:'Finished',     materialType:'Finished Product', chemistry:'Testosterone', retainTarget:0 },
-  'Testosterone Lower Handle': { itemNumber:'TEC-S1-C3', partNumber:'TLHC-001',            supplier:'Eli Health',              category:'A', abbrev:'TLHC', type:'Finished',     materialType:'Finished Product', chemistry:'Testosterone', retainTarget:0 },
-  'Testosterone Test': { itemNumber:'TT', partNumber:'TTST-001',                   supplier:'Eli Health',              category:'A', abbrev:'TTST', type:'Finished',     materialType:'Finished Product', chemistry:'Testosterone', retainTarget:2 },
+  'Testosterone Cartridge Assembled': { itemNumber:'TEC', partNumber:'TCAS-001',                  supplier:'Eli Health',              category:'A', abbrev:'TCAS', type:'Finished Product',     materialType:'Finished Product', chemistry:'Testosterone', retainTarget:2 },
+  'Testosterone Kit': { itemNumber:'TEK', partNumber:'TEKT-001',                  supplier:'Eli Health',              category:'A', abbrev:'TEKT', type:'Finished Product',     materialType:'Finished Product', chemistry:'Testosterone', retainTarget:0 },
+  'Testosterone Transfer Strip': { itemNumber:'TEC-S1-C1', partNumber:'TTSC-001',            supplier:'Eli Health',              category:'A', abbrev:'TTSC', type:'Finished Product',     materialType:'Finished Product', chemistry:'Testosterone', retainTarget:0 },
+  'Testosterone Upper Handle': { itemNumber:'TEC-S1-C2', partNumber:'TUHC-001',            supplier:'Eli Health',              category:'A', abbrev:'TUHC', type:'Finished Product',     materialType:'Finished Product', chemistry:'Testosterone', retainTarget:0 },
+  'Testosterone Lower Handle': { itemNumber:'TEC-S1-C3', partNumber:'TLHC-001',            supplier:'Eli Health',              category:'A', abbrev:'TLHC', type:'Finished Product',     materialType:'Finished Product', chemistry:'Testosterone', retainTarget:0 },
+  'Testosterone Test': { itemNumber:'TT', partNumber:'TTST-001',                   supplier:'Eli Health',              category:'A', abbrev:'TTST', type:'Finished Product',     materialType:'Finished Product', chemistry:'Testosterone', retainTarget:2 },
   // ── Nitrocellulose (Raw from Sartorius — per chemistry) ─
   'Cortisol Nitrocellulose (Raw)': { itemNumber:'LFC-S1', partNumber:'CNCS-001',               supplier:'Sartorius',               category:'A', abbrev:'CNCS', type:'Material',     materialType:'Raw Material', chemistry:'Cortisol' },
   'Progesterone Nitrocellulose (Raw)': { itemNumber:'LFP-S1', partNumber:'PNCS-001',              supplier:'Sartorius',               category:'A', abbrev:'PNCS', type:'Material',     materialType:'Raw Material', chemistry:'Progesterone' },
@@ -2296,6 +2492,23 @@ let currentDept     = 'All'; // active department tab
 let currentXferRow  = null;  // row being transferred
 let catalogDirtyParts = new Set(); // tracks which parts have been edited
 let currentPartForEdit = null; // part being edited in the edit card
+
+// Approved Supplier List (ASL) per FRM-05-01 / SOP-05
+const ASL_SUPPLIERS = {
+  'Ahlstrom':'Critical','Sartorius':'Critical','Porex':'Critical','Kenosha':'Critical',
+  'Seehope':'Critical','Seehope Silicone':'Critical','Stephen Gould':'Critical',
+  'Food Pak':'Critical','Foodpak':'Critical','Nanocomposix':'Critical','Attogene':'Critical',
+  'CalBioReagents':'Critical','BBI Solutions':'Critical','BBI Solutions (Diarect)':'Critical',
+  'Bioventix':'Critical','bioventix':'Critical','Conju-Probe':'Critical','conju-probe':'Critical',
+  'Transcat':'Critical','transcat':'Critical','ABS':'Critical','HEPA':'Critical','AirCare':'Critical',
+  'WFP':'Critical',
+  'Sigma Aldrich':'Not Critical','sigma Aldrich':'Not Critical','Millipore Sigma':'Not Critical',
+  'MilliporeSigma':'Not Critical','Thermo Fisher':'Not Critical','ThermoFisher':'Not Critical',
+  'Thermo Fisher Scientific':'Not Critical','Bio Shop':'Not Critical','BioShop':'Not Critical',
+  'Research Products':'Not Critical','TRC':'Not Critical',
+  'TRC (Toronto Research Chemicals)':'Not Critical','Uline':'Not Critical',
+  'Eli Health':'N/A'
+};
 
 const DEPT_CLASS = {
   'Assay R&D':    'dept-rd',
@@ -2501,6 +2714,32 @@ function buildLocationCode() {
 const INHOUSE_DEPTS = ['Manufacturing', 'Assay R&D'];
 
 // Called when department changes — rebuilds location dropdown + material type options
+function checkAslStatus() {
+  const supplier = (document.getElementById('in-supplier')?.value || '').trim();
+  const dept = document.getElementById('in-department')?.value || '';
+  const warn = document.getElementById('in-aslWarning');
+  if (!warn || !supplier) { if (warn) warn.style.display = 'none'; return; }
+
+  const aslMatch = Object.keys(ASL_SUPPLIERS).find(k => k.toLowerCase() === supplier.toLowerCase());
+  if (aslMatch) {
+    const crit = ASL_SUPPLIERS[aslMatch];
+    warn.style.display = '';
+    warn.style.background = crit === 'Critical' ? '#dbeafe' : '#f3e8ff';
+    warn.style.color = crit === 'Critical' ? '#1e40af' : '#6b21a8';
+    warn.textContent = `✓ On ASL — ${crit} supplier (SOP-05)`;
+  } else if (dept === 'Manufacturing') {
+    warn.style.display = '';
+    warn.style.background = '#fef3c7';
+    warn.style.color = '#92400e';
+    warn.textContent = '⚠ Not on ASL — Manufacturing must use ASL vendors per SOP-05';
+  } else {
+    warn.style.display = '';
+    warn.style.background = '#f0fdf4';
+    warn.style.color = '#166534';
+    warn.textContent = 'ℹ Not on ASL — OK for non-manufacturing departments';
+  }
+}
+
 function onDeptChange() {
   const dept = document.getElementById('in-department').value;
   const locs = DEPT_LOCATIONS[dept] || [];
@@ -2531,6 +2770,7 @@ function onDeptChange() {
   buildPartsDropdown('in-partName', dept);
 
   onItemChange();
+  checkAslStatus();
 }
 
 // Called when location type changes — shows/hides storage sub-fields
@@ -2596,6 +2836,9 @@ function showPage(name) {
   }
   if (name === 'batchtrace') {
     loadBatchTrace();
+  }
+  if (name === 'sds') {
+    loadSdsRecords();
   }
   if (name === 'catalog') {
     loadCatalogPage();
@@ -3526,12 +3769,24 @@ async function submitIncoming(e) {
   const retainQty     = document.getElementById('in-retainQty')     ? document.getElementById('in-retainQty').value     : '0';
   const retainTarget  = document.getElementById('in-retainTarget')  ? document.getElementById('in-retainTarget').value  : '0';
 
+  // SDS & COA documentation
+  const sdsReceived = getRadioValue('sdsReceived') || 'N/A';
+  const sdsDate     = document.getElementById('in-sdsDate')?.value || '';
+  const coaReceived = getRadioValue('coaReceived') || 'N/A';
+  const coaLotRef   = document.getElementById('in-coaLotRef')?.value?.trim() || '';
+
+  // Auto-add SDS record from incoming inspection
+  if (sdsReceived === 'Yes' || coaReceived === 'Yes') {
+    addSdsFromIncoming(partName, supplier, department, sdsDate, coaLotRef);
+  }
+
   const payload = {
     action:'addItem', partName, partNumber, quantity, supplierName:supplier,
     dateReceived:date, expirationDate, lotNumber, lotType, inspectionCategory:currentInspCat,
     qualityStatus, disposition, inspectedBy:inspBy, signDate, department, location,
     minQty, leadTime,
     materialType, chemistry, batchNumber, sourceLots, retainQty, retainTarget,
+    sdsReceived, sdsDate, coaReceived, coaLotRef,
     userEmail: currentUser?.email || '',
     inspectionData: JSON.stringify(inspData),
   };
@@ -4626,7 +4881,7 @@ function openPartCard(partName) {
   const p = catalogParts[partName] || {};
 
   // Load all fields into the form
-  document.getElementById('pe-name').value = p.name || '';
+  document.getElementById('pe-name').value = p.name || partName;
   document.getElementById('pe-partNumber').value = p.partNumber || '';
   document.getElementById('pe-itemNumber').value = p.itemNumber || '';
   document.getElementById('pe-abbrev').value = p.abbrev || '';
@@ -4718,6 +4973,155 @@ function savePartCard() {
   renderCatalogTable();
 }
 
+// ══════════════════════════════════════════════════════
+// SDS & COA REGISTER
+// ══════════════════════════════════════════════════════
+let sdsRecords = [];
+let sdsCurrentTab = 'mfg';
+
+function switchSdsTab(tab) {
+  sdsCurrentTab = tab;
+  document.getElementById('sds-tab-mfg').classList.toggle('active', tab === 'mfg');
+  document.getElementById('sds-tab-rd').classList.toggle('active', tab === 'rd');
+  renderSdsTable();
+}
+
+function renderSdsTable() {
+  const searchVal = (document.getElementById('sdsSearch')?.value || '').toLowerCase();
+  const statusFil = document.getElementById('sdsStatusFilter')?.value || '';
+  const deptFilter = sdsCurrentTab === 'mfg' ? 'Manufacturing' : 'R&D';
+
+  let rows = '';
+  let count = 0;
+
+  sdsRecords.forEach((r, idx) => {
+    if (r.dept !== deptFilter) return;
+    if (statusFil && r.sdsStatus !== statusFil) return;
+    if (searchVal && !r.material.toLowerCase().includes(searchVal) &&
+        !(r.supplier || '').toLowerCase().includes(searchVal) &&
+        !(r.sdsNumber || '').toLowerCase().includes(searchVal)) return;
+
+    count++;
+    const sdsBadge = r.sdsStatus === 'current' ? '<span class="active-badge">Current</span>' :
+                     r.sdsStatus === 'expired' ? '<span class="archive-badge">Needs Update</span>' :
+                     '<span style="background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600;">Missing</span>';
+    const coaBadge = r.coaStatus === 'received' ? '<span class="active-badge">Received</span>' :
+                     r.coaStatus === 'missing' ? '<span class="archive-badge">Missing</span>' :
+                     '<span style="color:var(--soft-hash);font-size:12px;">N/A</span>';
+
+    rows += `<tr>
+      <td><strong>${r.material}</strong></td>
+      <td>${r.supplier || ''}</td>
+      <td class="mono">${r.sdsNumber || '—'}</td>
+      <td>${r.sdsDate || '—'}</td>
+      <td style="text-align:center;">${sdsBadge}</td>
+      <td class="mono">${r.coaRef || '—'}</td>
+      <td style="text-align:center;">${coaBadge}</td>
+      <td>${r.hazard && r.hazard !== '—' ? r.hazard : '—'}</td>
+      <td>${r.storage || '—'}</td>
+      <td style="font-size:12px;color:var(--soft-hash);max-width:180px;overflow:hidden;text-overflow:ellipsis;">${r.notes || ''}</td>
+    </tr>`;
+  });
+
+  if (!count) rows = `<tr><td colspan="10" style="text-align:center;padding:30px;color:var(--soft-hash);">No ${deptFilter} SDS records found</td></tr>`;
+  document.getElementById('sdsTbody').innerHTML = rows;
+}
+
+function openAddSdsModal() {
+  ['sds-material','sds-supplier','sds-number','sds-date','sds-coaRef','sds-notes'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  document.getElementById('sds-dept').value = sdsCurrentTab === 'mfg' ? 'Manufacturing' : 'R&D';
+  document.getElementById('sds-status').value = 'current';
+  document.getElementById('sds-coaStatus').value = 'received';
+  document.getElementById('sds-hazard').value = '—';
+  document.getElementById('sds-storage').value = 'Room Temp';
+  document.getElementById('sds-error').style.display = 'none';
+  document.getElementById('addSdsModal').classList.add('open');
+}
+
+function submitSdsRecord() {
+  const errEl = document.getElementById('sds-error');
+  const material = document.getElementById('sds-material').value.trim();
+  if (!material) { errEl.textContent = 'Material name is required'; errEl.style.display = ''; return; }
+
+  const record = {
+    material,
+    supplier: document.getElementById('sds-supplier').value.trim(),
+    dept: document.getElementById('sds-dept').value,
+    sdsNumber: document.getElementById('sds-number').value.trim(),
+    sdsDate: document.getElementById('sds-date').value,
+    sdsStatus: document.getElementById('sds-status').value,
+    coaRef: document.getElementById('sds-coaRef').value.trim(),
+    coaStatus: document.getElementById('sds-coaStatus').value,
+    hazard: document.getElementById('sds-hazard').value,
+    storage: document.getElementById('sds-storage').value,
+    notes: document.getElementById('sds-notes').value.trim(),
+    addedBy: currentUser?.email || 'Unknown',
+    addedAt: new Date().toISOString()
+  };
+
+  sdsRecords.push(record);
+  saveSdsToBackend(record);
+  closeModal('addSdsModal');
+  showToast('✓ SDS record added');
+  renderSdsTable();
+}
+
+function addSdsFromIncoming(partName, supplier, dept, sdsDate, coaLotRef) {
+  // Auto-add SDS record from incoming inspection
+  const deptMap = { 'Manufacturing': 'Manufacturing', 'Assay R&D': 'R&D', 'Hardware R&D': 'R&D' };
+  const mappedDept = deptMap[dept] || 'R&D';
+  const sdsStatus = sdsDate ? 'current' : 'missing';
+  const coaStatus = coaLotRef ? 'received' : 'missing';
+
+  const record = {
+    material: partName,
+    supplier: supplier || '',
+    dept: mappedDept,
+    sdsNumber: '',
+    sdsDate: sdsDate || '',
+    sdsStatus,
+    coaRef: coaLotRef || '',
+    coaStatus,
+    hazard: '—',
+    storage: 'Room Temp',
+    notes: 'Auto-added from Incoming Inspection',
+    addedBy: currentUser?.email || 'Unknown',
+    addedAt: new Date().toISOString()
+  };
+
+  sdsRecords.push(record);
+  saveSdsToBackend(record);
+}
+
+function saveSdsToBackend(record) {
+  // Persist to Google Sheets backend
+  if (typeof APPS_SCRIPT_URL !== 'undefined' && APPS_SCRIPT_URL) {
+    fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'saveSds', ...record })
+    }).catch(e => console.warn('SDS save error:', e));
+  }
+}
+
+function loadSdsRecords() {
+  // Load from backend; for now populate from inventory data
+  if (typeof APPS_SCRIPT_URL !== 'undefined' && APPS_SCRIPT_URL) {
+    fetch(APPS_SCRIPT_URL + '?action=getSds')
+      .then(r => r.json())
+      .then(data => {
+        if (data.sdsRecords) sdsRecords = data.sdsRecords;
+        renderSdsTable();
+      })
+      .catch(() => renderSdsTable());
+  } else {
+    renderSdsTable();
+  }
+}
+
 function downloadPartMapping() {
   let csv = 'Part Name,Part Number (Eli),Item Number (Supplier),Supplier,Chemistry,Status\n';
   Object.entries(catalogParts).forEach(([name, p]) => {
@@ -4769,21 +5173,36 @@ function renderCatalogTable() {
     const minQtyDisplay = p.minQty ? p.minQty : '—';
     const leadTimeDisplay = p.leadTime ? p.leadTime : '—';
 
+    // ASL status lookup (normalize supplier name for matching)
+    const supplierName = p.supplier || '';
+    const aslLookup = Object.keys(ASL_SUPPLIERS).find(k => k.toLowerCase() === supplierName.toLowerCase());
+    let aslBadge;
+    if (supplierName === 'Eli Health') {
+      aslBadge = '<span style="color:var(--soft-hash);font-size:11px;">—</span>';
+    } else if (aslLookup) {
+      const crit = ASL_SUPPLIERS[aslLookup];
+      aslBadge = crit === 'Critical' ? '<span class="asl-badge critical">Critical</span>' : '<span class="asl-badge not-critical">Non-Critical</span>';
+    } else {
+      aslBadge = '<span class="asl-badge not-on-asl">Not on ASL</span>';
+    }
+
     rows += `<tr data-partname="${name}" data-archived="${p.archived || false}" class="catalog-row" style="cursor:pointer;">
       <td>${name}</td>
       <td class="mono">${p.partNumber || ''}</td>
       <td class="mono">${p.itemNumber || ''}</td>
       <td>${versionBadge}</td>
       <td>${p.supplier || ''}</td>
+      <td>${aslBadge}</td>
       <td>${chemPill}</td>
       <td>${p.type || ''}</td>
+      <td>${p.unit || 'each'}</td>
       <td style="text-align:center;">${minQtyDisplay}</td>
       <td style="text-align:center;">${leadTimeDisplay}</td>
       <td>${statusBadge}</td>
     </tr>`;
   });
 
-  if (!visibleCount) rows = `<tr><td colspan="10" style="text-align:center;padding:30px;color:var(--soft-hash);">No parts match the current filters</td></tr>`;
+  if (!visibleCount) rows = `<tr><td colspan="12" style="text-align:center;padding:30px;color:var(--soft-hash);">No parts match the current filters</td></tr>`;
   document.getElementById('catalogTbody').innerHTML = rows;
 
   // Add event listeners to catalog rows
