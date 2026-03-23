@@ -337,6 +337,51 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:20px 0;}
 .catalog-section-row td{background:#f1f5f9;font-size:11px;font-weight:700;color:var(--soft-hash);text-transform:uppercase;letter-spacing:.06em;padding:6px 14px;}
 .catalog-unsaved-dot{display:inline-block;width:6px;height:6px;background:#f59e0b;border-radius:50%;margin-right:4px;vertical-align:middle;}
 
+/* Version badge */
+.version-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;letter-spacing:.03em;background:#ede9fe;color:#6d28d9;}
+
+/* Archive badge */
+.archive-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;background:#fee2e2;color:#991b1b;}
+.active-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;background:#d1fae5;color:#065f46;}
+
+
+/* Catalog row hover */
+.catalog-table tbody tr{transition:background .1s;}
+.catalog-table tbody tr:hover{background:#f3f0ff;cursor:pointer;}
+
+/* Monospace text */
+.mono{font-family:monospace;font-size:11px;}
+
+/* Version history modal */
+.version-timeline{margin:16px 0;}
+.version-entry{border-left:2px solid var(--border);padding:8px 0 16px 16px;position:relative;font-size:13px;}
+.version-entry::before{content:'';position:absolute;left:-5px;top:10px;width:8px;height:8px;border-radius:50%;background:#7c3aed;border:2px solid var(--white);}
+.version-entry.current::before{background:#10b981;}
+.version-entry-header{font-weight:600;color:var(--black);margin-bottom:4px;}
+.version-entry-meta{font-size:11px;color:var(--soft-hash);}
+.version-entry-changes{font-size:12px;color:var(--graphite);margin-top:4px;background:var(--neutral);border-radius:6px;padding:8px 10px;}
+
+/* Archive note */
+.archive-note{background:#fef3c7;border:1px solid #fde047;border-radius:8px;padding:10px 14px;font-size:12px;color:#713f12;margin-top:8px;}
+
+/* Edit history log */
+.edit-log-entry{font-size:11px;color:var(--soft-hash);padding:4px 0;border-bottom:1px solid var(--border);}
+.edit-log-entry:last-child{border-bottom:none;}
+
+/* Catalog action buttons */
+.cat-action-btn{padding:3px 8px;font-size:10px;font-weight:600;border-radius:5px;border:1px solid var(--border);background:var(--white);cursor:pointer;transition:all .12s;white-space:nowrap;}
+.cat-action-btn:hover{border-color:var(--graphite);}
+.cat-action-btn.version{border-color:#7c3aed;color:#7c3aed;}
+.cat-action-btn.version:hover{background:#ede9fe;}
+.cat-action-btn.archive{border-color:#dc2626;color:#dc2626;}
+.cat-action-btn.archive:hover{background:#fee2e2;}
+.cat-action-btn.restore{border-color:#059669;color:#059669;}
+.cat-action-btn.restore:hover{background:#d1fae5;}
+
+/* Show archived toggle */
+.show-archived-toggle{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--soft-hash);cursor:pointer;}
+.show-archived-toggle input{cursor:pointer;}
+
 /* ── Low Stock Alert Strip ────────────────────────── */
 .alert-strip{margin-bottom:18px;}
 .alert-strip-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
@@ -482,6 +527,92 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:20px 0;}
 .comment-text{font-size:13px;color:var(--graphite);}
 .comment-empty{text-align:center;color:var(--soft-hash);font-size:13px;padding:16px 0;}
 
+/* ── Batch Traceability ──────────────────────────────── */
+.bt-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;}
+.bt-stat{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;text-align:center;}
+.bt-stat-val{font-size:26px;font-weight:700;color:var(--black);line-height:1;}
+.bt-stat-lbl{font-size:10px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--soft-hash);margin-top:4px;}
+
+.bt-batch-card{background:var(--white);border:1px solid var(--border);border-radius:12px;margin-bottom:14px;overflow:hidden;transition:box-shadow .15s;}
+.bt-batch-card:hover{box-shadow:0 2px 12px rgba(0,0,0,.06);}
+.bt-batch-header{display:flex;align-items:center;gap:12px;padding:16px 20px;cursor:pointer;user-select:none;border-bottom:1px solid transparent;transition:background .1s;}
+.bt-batch-header:hover{background:#f8fafc;}
+.bt-batch-card.expanded .bt-batch-header{border-bottom-color:var(--border);background:#f8fafc;}
+.bt-chevron{font-size:12px;color:var(--soft-hash);transition:transform .2s;flex-shrink:0;}
+.bt-batch-card.expanded .bt-chevron{transform:rotate(90deg);}
+.bt-batch-id{font-size:16px;font-weight:700;color:var(--black);font-family:'Chivo Mono',monospace;}
+.bt-batch-pills{display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
+.bt-status-pill{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;}
+.bt-status-pill.in-progress{background:#dbeafe;color:#1d4ed8;border:1px solid #93c5fd;}
+.bt-status-pill.complete{background:#d1fae5;color:#065f46;border:1px solid #6ee7b7;}
+.bt-status-pill.shipped{background:#ede9fe;color:#6d28d9;border:1px solid #c4b5fd;}
+.bt-status-pill.partial{background:#fef3c7;color:#92400e;border:1px solid #fcd34d;}
+.bt-batch-meta{margin-left:auto;display:flex;gap:16px;align-items:center;font-size:12px;color:var(--soft-hash);}
+.bt-batch-meta strong{color:var(--graphite);}
+
+.bt-batch-body{display:none;padding:0;}
+.bt-batch-card.expanded .bt-batch-body{display:block;}
+.bt-body-tabs{display:flex;border-bottom:1px solid var(--border);background:#fafbfc;padding:0 20px;}
+.bt-body-tab{padding:10px 16px;font-size:12px;font-weight:600;color:var(--soft-hash);cursor:pointer;border-bottom:2px solid transparent;transition:color .1s;}
+.bt-body-tab.active{color:#7c3aed;border-bottom-color:#7c3aed;}
+.bt-body-tab:hover:not(.active){color:var(--graphite);}
+.bt-tab-panel{display:none;padding:20px;}
+.bt-tab-panel.active{display:block;}
+
+/* Overview sub-section */
+.bt-overview-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.bt-overview-card{border:1px solid var(--border);border-radius:10px;padding:16px;}
+.bt-overview-card h4{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--soft-hash);margin-bottom:10px;}
+.bt-kv-row{display:flex;justify-content:space-between;padding:5px 0;font-size:13px;border-bottom:1px solid #f5f5f5;}
+.bt-kv-row:last-child{border-bottom:none;}
+.bt-kv-key{color:var(--warm-fog);}
+.bt-kv-val{font-weight:600;color:var(--black);}
+
+/* Raw materials sub-table */
+.bt-raw-table{width:100%;border-collapse:collapse;font-size:12px;}
+.bt-raw-table th{background:var(--neutral);padding:8px 12px;text-align:left;font-size:10px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--soft-hash);border-bottom:1px solid var(--border);}
+.bt-raw-table td{padding:8px 12px;border-bottom:1px solid #f5f5f5;vertical-align:middle;}
+.bt-raw-table tr:last-child td{border-bottom:none;}
+.bt-raw-table tr:hover td{background:#fafafa;}
+.bt-qr-mini{width:32px;height:32px;border:1px solid var(--border);border-radius:4px;background:var(--white);display:flex;align-items:center;justify-content:center;overflow:hidden;}
+
+/* Daily log */
+.bt-day-card{border:1px solid var(--border);border-radius:10px;margin-bottom:12px;overflow:hidden;}
+.bt-day-header{display:flex;align-items:center;gap:10px;padding:12px 16px;background:#fafbfc;font-size:13px;font-weight:600;color:var(--graphite);border-bottom:1px solid var(--border);}
+.bt-day-badge{background:var(--black);color:var(--white);padding:2px 10px;border-radius:12px;font-size:11px;font-weight:700;}
+.bt-day-body{padding:12px 16px;}
+.bt-day-row{display:flex;align-items:center;gap:12px;padding:6px 0;font-size:12px;border-bottom:1px solid #f8f8f8;}
+.bt-day-row:last-child{border-bottom:none;}
+.bt-day-action{font-size:10px;font-weight:600;padding:2px 8px;border-radius:8px;}
+.bt-day-action.built{background:#d1fae5;color:#065f46;}
+.bt-day-action.consumed{background:#dbeafe;color:#1d4ed8;}
+.bt-day-action.scrap{background:#fee2e2;color:#991b1b;}
+.bt-day-action.added{background:#fef3c7;color:#92400e;}
+.bt-day-action.updated{background:#f3f4f6;color:#374151;}
+
+/* Shipment cards */
+.bt-shipment-card{border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;gap:16px;}
+.bt-ship-icon{font-size:24px;}
+.bt-ship-info{flex:1;}
+.bt-ship-dest{font-size:14px;font-weight:600;color:var(--black);}
+.bt-ship-meta{font-size:12px;color:var(--soft-hash);margin-top:2px;}
+.bt-ship-qty{font-size:20px;font-weight:700;color:var(--graphite);text-align:right;}
+.bt-ship-qty-lbl{font-size:10px;color:var(--soft-hash);text-transform:uppercase;letter-spacing:.05em;}
+
+/* Location status */
+.bt-loc-card{display:flex;align-items:center;gap:12px;padding:10px 14px;border:1px solid var(--border);border-radius:8px;margin-bottom:8px;}
+.bt-loc-icon{font-size:18px;}
+.bt-loc-info{flex:1;font-size:13px;}
+.bt-loc-info strong{color:var(--black);}
+.bt-loc-qty{font-size:18px;font-weight:700;text-align:right;}
+
+/* Log daily build form */
+.bt-log-form{background:var(--neutral);border:1.5px dashed var(--border);border-radius:10px;padding:18px 20px;margin-bottom:16px;}
+.bt-log-form-title{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--graphite);margin-bottom:12px;}
+
+/* Shipment form */
+.bt-ship-form{background:var(--neutral);border:1.5px dashed var(--border);border-radius:10px;padding:18px 20px;margin-bottom:16px;}
+
 /* ── Print ────────────────────────────────────────── */
 @media print{
   #topbar,#sidebar,.modal-close,.modal-actions,#toast{display:none!important;}
@@ -589,15 +720,17 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:20px 0;}
   <div class="sidebar-section-label" style="margin-top:8px;">Traceability</div>
   <button class="nav-link" onclick="showPage('production')" id="nav-production"><span class="nav-icon">🧪</span> Production Lots</button>
   <button class="nav-link" onclick="showPage('ncscrap')" id="nav-ncscrap"><span class="nav-icon">⚠️</span> NC &amp; Scrap Log</button>
-  <button class="nav-link nav-disabled"><span class="nav-icon">🔍</span> Lot Traceability</button>
-  <div class="sidebar-section-label" style="margin-top:8px;">Admin</div>
+  <button class="nav-link" onclick="showPage('batchtrace')" id="nav-batchtrace"><span class="nav-icon">📊</span> Batch Traceability</button>
+  <div class="sidebar-section-label" id="sidebar-admin-label" style="margin-top:8px;display:none;">Admin</div>
   <button class="nav-link" onclick="showPage('catalog')" id="nav-catalog" style="display:none">
     <span class="nav-icon">📋</span> Parts Catalog
   </button>
   <button class="nav-link" onclick="showPage('admin')" id="nav-admin" style="display:none">
     <span class="nav-icon">🛡️</span> Users &amp; Access Log
   </button>
-  <button class="nav-link nav-disabled"><span class="nav-icon">📈</span> Inventory Forecast</button>
+  <button class="nav-link" onclick="showPage('forecast')" id="nav-forecast" style="display:none">
+    <span class="nav-icon">📈</span> Inventory Forecast
+  </button>
   <div class="sidebar-status-key">
     <div class="key-title">Status Key</div>
     <div class="key-item"><div class="key-dot blue"></div><span>In Stock</span><span class="key-hormone">Cortisol</span></div>
@@ -681,9 +814,9 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:20px 0;}
     </select>
     <select class="filter-select" id="chemistryFilter" onchange="filterTable()">
       <option value="">All Chemistry</option>
-      <option value="Cortisol">🟡 Cortisol</option>
-      <option value="Progesterone">🟣 Progesterone</option>
-      <option value="Testosterone">🔵 Testosterone</option>
+      <option value="Cortisol">🔵 Cortisol</option>
+      <option value="Progesterone">🟢 Progesterone</option>
+      <option value="Testosterone">🔴 Testosterone</option>
       <option value="N/A">— Shared / N/A</option>
     </select>
   </div>
@@ -883,9 +1016,9 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:20px 0;}
               <label class="form-label">Chemistry</label>
               <select class="form-select" id="in-chemistry">
                 <option value="N/A">— Shared / N/A</option>
-                <option value="Cortisol">🟡 Cortisol</option>
-                <option value="Progesterone">🟣 Progesterone</option>
-                <option value="Testosterone">🔵 Testosterone</option>
+                <option value="Cortisol">🔵 Cortisol</option>
+                <option value="Progesterone">🟢 Progesterone</option>
+                <option value="Testosterone">🔴 Testosterone</option>
               </select>
             </div>
 
@@ -1223,6 +1356,50 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:20px 0;}
   </div>
 </div>
 
+<!-- Log Daily Build Modal -->
+<div class="modal-overlay" id="logBuildModal">
+  <div class="modal-box" style="max-width:540px;">
+    <button class="modal-close" onclick="closeModal('logBuildModal')">✕</button>
+    <div class="modal-title">📝 Log Daily Build</div>
+    <p style="font-size:12px;color:var(--soft-hash);margin-bottom:16px;" id="lb-batch-label">Batch: —</p>
+    <div class="form-grid">
+      <div class="form-group"><label class="form-label">Date *</label><input type="date" id="lb-date" class="form-input"/></div>
+      <div class="form-group"><label class="form-label">Operator *</label><input type="text" id="lb-operator" class="form-input" placeholder="Who built today?"/></div>
+      <div class="form-group"><label class="form-label">Qty Built Today *</label><input type="number" id="lb-qty" class="form-input" min="0" placeholder="e.g. 2600"/></div>
+      <div class="form-group"><label class="form-label">Scrap Qty</label><input type="number" id="lb-scrap" class="form-input" min="0" placeholder="0"/></div>
+      <div class="form-group full"><label class="form-label">Parts Consumed (raw materials used)</label><textarea id="lb-parts" class="form-input" rows="2" placeholder="e.g. 2600 × Transfer Strip Main Body, 2600 × Cartridge Lower Housing…" style="resize:vertical;"></textarea></div>
+      <div class="form-group full"><label class="form-label">Notes</label><input type="text" id="lb-notes" class="form-input" placeholder="Any issues, observations…"/></div>
+    </div>
+    <div id="lb-error" style="color:#c0392b;font-size:13px;margin-top:8px;display:none;"></div>
+    <div style="display:flex;gap:8px;margin-top:14px;justify-content:flex-end;">
+      <button class="btn btn-secondary btn-sm" onclick="closeModal('logBuildModal')">Cancel</button>
+      <button class="btn btn-primary btn-sm" onclick="submitDailyBuild()">Log Build</button>
+    </div>
+  </div>
+</div>
+
+<!-- Log Shipment Modal -->
+<div class="modal-overlay" id="logShipModal">
+  <div class="modal-box" style="max-width:480px;">
+    <button class="modal-close" onclick="closeModal('logShipModal')">✕</button>
+    <div class="modal-title">🚚 Log Shipment</div>
+    <p style="font-size:12px;color:var(--soft-hash);margin-bottom:16px;" id="ls-batch-label">Batch: —</p>
+    <div class="form-grid">
+      <div class="form-group"><label class="form-label">Qty Shipped *</label><input type="number" id="ls-qty" class="form-input" min="1" placeholder="e.g. 5000"/></div>
+      <div class="form-group"><label class="form-label">Ship Date *</label><input type="date" id="ls-date" class="form-input"/></div>
+      <div class="form-group"><label class="form-label">Destination *</label><input type="text" id="ls-dest" class="form-input" placeholder="e.g. Amazon FBA, Direct, Internal Use"/></div>
+      <div class="form-group"><label class="form-label">Shipped By *</label><input type="text" id="ls-by" class="form-input" placeholder="Who shipped?"/></div>
+      <div class="form-group full"><label class="form-label">Tracking # / Reference</label><input type="text" id="ls-tracking" class="form-input" placeholder="Optional tracking number"/></div>
+      <div class="form-group full"><label class="form-label">Notes</label><input type="text" id="ls-notes" class="form-input" placeholder="Any additional notes"/></div>
+    </div>
+    <div id="ls-error" style="color:#c0392b;font-size:13px;margin-top:8px;display:none;"></div>
+    <div style="display:flex;gap:8px;margin-top:14px;justify-content:flex-end;">
+      <button class="btn btn-secondary btn-sm" onclick="closeModal('logShipModal')">Cancel</button>
+      <button class="btn btn-primary btn-sm" onclick="submitShipment()">Log Shipment</button>
+    </div>
+  </div>
+</div>
+
 <!-- Coming Soon pages -->
 <!-- ══════════════════════════════════════════════════════
      PAGE — PRODUCTION LOTS TRACEABILITY
@@ -1243,9 +1420,9 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:20px 0;}
     </div>
     <select class="filter-select" id="traceChemFilter" onchange="renderTraceGroups()">
       <option value="">All Chemistry</option>
-      <option value="Cortisol">🟡 Cortisol</option>
-      <option value="Progesterone">🟣 Progesterone</option>
-      <option value="Testosterone">🔵 Testosterone</option>
+      <option value="Cortisol">🔵 Cortisol</option>
+      <option value="Progesterone">🟢 Progesterone</option>
+      <option value="Testosterone">🔴 Testosterone</option>
     </select>
     <select class="filter-select" id="traceMtypeFilter" onchange="renderTraceGroups()">
       <option value="">All Material Types</option>
@@ -1261,7 +1438,54 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:20px 0;}
   </div>
 </div>
 <div class="page" id="page-nonconformance"><div class="page-header"><div><h1>Non-Conformance</h1></div></div><div class="coming-soon"><div class="cs-icon">⚠️</div><h3>Coming Soon</h3></div></div>
-<div class="page" id="page-traceability"><div class="page-header"><div><h1>Lot Traceability</h1></div></div><div class="coming-soon"><div class="cs-icon">🔍</div><h3>Coming Soon</h3></div></div>
+<!-- ══════════════════════════════════════════════════════
+     PAGE — BATCH TRACEABILITY (Manufacturing)
+══════════════════════════════════════════════════════ -->
+<div class="page" id="page-batchtrace">
+  <div class="page-header">
+    <div>
+      <h1>📊 Batch Traceability</h1>
+      <p class="subtitle">Manufacturing finished batches · Full lifecycle: raw materials → assembly → shipment</p>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-secondary btn-sm" onclick="loadBatchTrace()">↻ Refresh</button>
+    </div>
+  </div>
+
+  <!-- Stats strip -->
+  <div class="bt-stats">
+    <div class="bt-stat"><div class="bt-stat-val" id="bt-stat-total">—</div><div class="bt-stat-lbl">Total Batches</div></div>
+    <div class="bt-stat"><div class="bt-stat-val" id="bt-stat-active">—</div><div class="bt-stat-lbl">In Progress</div></div>
+    <div class="bt-stat"><div class="bt-stat-val" id="bt-stat-complete">—</div><div class="bt-stat-lbl">Complete</div></div>
+    <div class="bt-stat"><div class="bt-stat-val" id="bt-stat-shipped">—</div><div class="bt-stat-lbl">Shipped</div></div>
+  </div>
+
+  <!-- Filters -->
+  <div class="toolbar" style="margin-bottom:16px;">
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="btSearch" class="search-input" placeholder="Search batch number, lot, or part…" oninput="renderBatchTrace()" />
+    </div>
+    <select class="filter-select" id="btChemFilter" onchange="renderBatchTrace()">
+      <option value="">All Chemistry</option>
+      <option value="Cortisol">🔵 Cortisol</option>
+      <option value="Progesterone">🟢 Progesterone</option>
+      <option value="Testosterone">🔴 Testosterone</option>
+    </select>
+    <select class="filter-select" id="btStatusFilter" onchange="renderBatchTrace()">
+      <option value="">All Statuses</option>
+      <option value="in-progress">🔵 In Progress</option>
+      <option value="complete">🟢 Complete</option>
+      <option value="shipped">🟣 Shipped</option>
+      <option value="partial">🟡 Partial Ship</option>
+    </select>
+  </div>
+
+  <!-- Batch cards container -->
+  <div id="btContainer">
+    <div class="table-placeholder"><div class="spinner"></div><p>Loading batch data…</p></div>
+  </div>
+</div>
 <div class="page" id="page-forecast"><div class="page-header"><div><h1>Inventory Forecast</h1></div></div><div class="coming-soon"><div class="cs-icon">📈</div><h3>Coming Soon</h3></div></div>
 
 <!-- ══ ADMIN PANEL PAGE ══════════════════════════════════ -->
@@ -1299,6 +1523,7 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:20px 0;}
             <option value="user">User</option>
             <option value="admin">Admin</option>
             <option value="catalog">Catalog</option>
+            <option value="catalog_admin">Catalog Admin (Granular)</option>
           </select>
         </div>
       </div>
@@ -1306,7 +1531,22 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:20px 0;}
       <div class="add-user-depts" id="newUserDepts">
         <!-- Populated by JS -->
       </div>
-      <div style="display:flex;gap:8px;">
+      <div class="form-label" style="margin-bottom:8px;margin-top:14px;">Admin Section Access</div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px;">
+          <input type="checkbox" id="newUserCatalogAccess" />
+          <span>Parts Catalog</span>
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px;">
+          <input type="checkbox" id="newUserUsersAccess" />
+          <span>Users &amp; Access</span>
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px;">
+          <input type="checkbox" id="newUserForecastAccess" />
+          <span>Inventory Forecast</span>
+        </label>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:16px;">
         <button class="btn btn-primary btn-sm" onclick="submitAddUser()">Add to Team</button>
         <button class="btn btn-ghost btn-sm" onclick="toggleAddUserForm()">Cancel</button>
       </div>
@@ -1349,10 +1589,12 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:20px 0;}
   <div class="page-header">
     <div>
       <h1>📋 Parts Catalog</h1>
-      <p class="page-subtitle">Manage minimum stock levels and supplier lead times per part</p>
+      <p class="subtitle">Manage parts, versions, and inventory parameters</p>
     </div>
-    <div style="display:flex;gap:10px;align-items:center;">
+    <div style="display:flex;gap:8px;align-items:center;">
       <button class="btn btn-secondary btn-sm" onclick="showPage('inventory')">← Back to Inventory</button>
+      <button class="btn btn-secondary btn-sm" onclick="downloadPartMapping()">⬇ Download Part # Mapping</button>
+      <button class="btn btn-primary btn-sm" onclick="openAddPartModal()">＋ Add New Part</button>
     </div>
   </div>
 
@@ -1372,8 +1614,10 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:20px 0;}
       <option value="Finished Product">Finished Product</option>
       <option value="Buffer">Buffer</option>
     </select>
-    <span id="catalogUnsavedBadge" style="display:none;background:#fef3c7;color:#92400e;border-radius:6px;padding:4px 10px;font-size:12px;font-weight:600;">⚠️ Unsaved changes</span>
-    <button class="btn btn-primary btn-sm" onclick="saveAllCatalogChanges()" id="catalogSaveAllBtn" style="display:none;">💾 Save All Changes</button>
+    <label class="show-archived-toggle">
+      <input type="checkbox" id="showArchivedToggle" onchange="toggleShowArchived()" />
+      <span>Show Archived</span>
+    </label>
   </div>
 
   <div class="catalog-table-wrap">
@@ -1381,20 +1625,137 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:20px 0;}
       <thead>
         <tr>
           <th>Part Name</th>
-          <th>Part Number</th>
+          <th>Part # (Eli)</th>
+          <th>Item # (Supplier)</th>
+          <th>Version</th>
           <th>Supplier</th>
           <th>Chemistry</th>
           <th>Type</th>
-          <th style="text-align:center;">Min Stock Qty</th>
-          <th style="text-align:center;">Lead Time (days)</th>
-          <th style="text-align:center;">Save</th>
-          <th>Last Updated</th>
+          <th style="text-align:center;">Min Qty</th>
+          <th style="text-align:center;">Lead Time</th>
+          <th>Status</th>
         </tr>
       </thead>
       <tbody id="catalogTbody">
-        <tr><td colspan="9" style="text-align:center;padding:30px;color:var(--soft-hash);">Loading catalog…</td></tr>
+        <tr><td colspan="10" style="text-align:center;padding:30px;color:var(--soft-hash);">Loading catalog…</td></tr>
       </tbody>
     </table>
+  </div>
+</div>
+
+<!-- Add Part Modal -->
+<div class="modal-overlay" id="addPartModal">
+  <div class="modal-box" style="max-width:520px;">
+    <button class="modal-close" onclick="closeModal('addPartModal')">✕</button>
+    <div class="modal-title">Add New Part</div>
+    <div class="form-grid">
+      <div class="form-group"><label class="form-label">Part Name *</label><input type="text" id="np-name" class="form-input" placeholder="e.g. New Reagent X"/></div>
+      <div class="form-group"><label class="form-label">Item Number (Supplier) *</label><input type="text" id="np-itemNumber" class="form-input mono" placeholder="e.g. S018308"/></div>
+      <div class="form-group"><label class="form-label">Part Number (Eli) *</label><input type="text" id="np-partNumber" class="form-input mono" placeholder="e.g. NRX-001"/></div>
+      <div class="form-group"><label class="form-label">Abbreviation *</label><input type="text" id="np-abbrev" class="form-input mono" placeholder="e.g. NRGX" maxlength="4" style="text-transform:uppercase;"/></div>
+      <div class="form-group"><label class="form-label">Supplier</label><input type="text" id="np-supplier" class="form-input" placeholder="e.g. Sigma Aldrich"/></div>
+      <div class="form-group"><label class="form-label">Chemistry</label><select id="np-chemistry" class="form-select"><option value="N/A">N/A</option><option value="Cortisol">Cortisol</option><option value="Progesterone">Progesterone</option><option value="Testosterone">Testosterone</option></select></div>
+      <div class="form-group"><label class="form-label">Category</label><select id="np-category" class="form-select"><option value="A">A — Verify Only</option><option value="B">B — Sampling Plan</option><option value="C">C — 100% Inspection</option></select></div>
+      <div class="form-group"><label class="form-label">Type</label><select id="np-type" class="form-select"><option value="Material">Material</option><option value="Cartridge">Cartridge</option><option value="Packaging">Packaging</option><option value="Reagent">Reagent</option><option value="Label/IFU">Label/IFU</option><option value="Equipment">Equipment</option><option value="Buffer">Buffer</option></select></div>
+      <div class="form-group"><label class="form-label">Material Type</label><select id="np-materialType" class="form-select"><option value="Raw Material">Raw Material</option><option value="In-House Material">In-House Material</option><option value="Finished Product">Finished Product</option><option value="Buffer">Buffer</option></select></div>
+      <div class="form-group"><label class="form-label">Unit</label><select id="np-unit" class="form-select"><option value="each">each</option><option value="strips">strips</option><option value="bags">bags</option><option value="parts">parts</option><option value="rolls">rolls</option><option value="boxes">boxes</option><option value="pads">pads</option><option value="sheets">sheets</option><option value="bottles">bottles</option><option value="vials">vials</option><option value="tubes">tubes</option><option value="kits">kits</option><option value="mL">mL</option><option value="g">g</option><option value="mg">mg</option></select></div>
+      <div class="form-group"><label class="form-label">Min Stock Qty</label><input type="number" id="np-minQty" class="form-input" min="0" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Lead Time (days)</label><input type="number" id="np-leadTime" class="form-input" min="0" placeholder="0"/></div>
+    </div>
+    <div id="np-error" style="color:#c0392b;font-size:13px;margin-top:10px;display:none;"></div>
+    <div style="display:flex;gap:8px;margin-top:18px;justify-content:flex-end;">
+      <button class="btn btn-secondary btn-sm" onclick="closeModal('addPartModal')">Cancel</button>
+      <button class="btn btn-primary btn-sm" onclick="submitNewPart()">Add Part</button>
+    </div>
+  </div>
+</div>
+
+<!-- Version History Modal -->
+<div class="modal-overlay" id="versionModal">
+  <div class="modal-box" style="max-width:520px;">
+    <button class="modal-close" onclick="closeModal('versionModal')">✕</button>
+    <div class="modal-title" id="vm-title">Version History</div>
+    <div id="vm-timeline" class="version-timeline"></div>
+    <hr class="divider"/>
+    <div style="font-size:12px;font-weight:600;color:var(--graphite);margin-bottom:10px;">Create New Version</div>
+    <div class="form-group"><label class="form-label">New Part Number (optional)</label><input type="text" id="vm-newNumber" class="form-input mono" placeholder="Leave blank to keep current"/></div>
+    <div class="form-group"><label class="form-label">What changed? *</label><textarea id="vm-changes" class="form-input" rows="2" placeholder="Describe what changed in this version..." style="resize:vertical;"></textarea></div>
+    <div id="vm-error" style="color:#c0392b;font-size:13px;margin-top:8px;display:none;"></div>
+    <div style="display:flex;gap:8px;margin-top:14px;justify-content:flex-end;">
+      <button class="btn btn-secondary btn-sm" onclick="closeModal('versionModal')">Cancel</button>
+      <button class="btn btn-primary btn-sm" style="background:#7c3aed;" onclick="submitNewVersion()">Create Version</button>
+    </div>
+  </div>
+</div>
+
+<!-- Archive Modal -->
+<div class="modal-overlay" id="archiveModal">
+  <div class="modal-box" style="max-width:420px;">
+    <button class="modal-close" onclick="closeModal('archiveModal')">✕</button>
+    <div class="modal-title" id="am-title">Archive Part</div>
+    <p style="font-size:13px;color:var(--warm-fog);margin-bottom:14px;" id="am-subtitle">This will hide the part from active catalog views.</p>
+    <div class="form-group"><label class="form-label">Reason for archiving *</label><textarea id="am-reason" class="form-input" rows="3" placeholder="Why is this part being archived?" style="resize:vertical;"></textarea></div>
+    <div id="am-error" style="color:#c0392b;font-size:13px;margin-top:8px;display:none;"></div>
+    <div style="display:flex;gap:8px;margin-top:14px;justify-content:flex-end;">
+      <button class="btn btn-secondary btn-sm" onclick="closeModal('archiveModal')">Cancel</button>
+      <button class="btn btn-primary btn-sm" style="background:#dc2626;" onclick="submitArchive()">Archive Part</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit History Modal -->
+<div class="modal-overlay" id="editHistoryModal">
+  <div class="modal-box" style="max-width:520px;">
+    <button class="modal-close" onclick="closeModal('editHistoryModal')">✕</button>
+    <div class="modal-title" id="eh-title">Edit History</div>
+    <div id="eh-body" style="max-height:400px;overflow-y:auto;"></div>
+  </div>
+</div>
+
+<!-- Part Edit Card Modal -->
+<div class="modal-overlay" id="partEditModal">
+  <div class="modal-box" style="max-width:640px;">
+    <button class="modal-close" onclick="closeModal('partEditModal')">✕</button>
+    <div class="modal-title" id="pe-title">Edit Part</div>
+    <div id="pe-status-bar" style="margin-bottom:14px;"></div>
+
+    <!-- Edit form in a grid -->
+    <div class="form-grid" style="grid-template-columns:1fr 1fr;">
+      <div class="form-group full"><label class="form-label">Part Name</label><input type="text" id="pe-name" class="form-input" /></div>
+      <div class="form-group"><label class="form-label">Part # (Eli)</label><input type="text" id="pe-partNumber" class="form-input mono" /></div>
+      <div class="form-group"><label class="form-label">Item # (Supplier)</label><input type="text" id="pe-itemNumber" class="form-input mono" /></div>
+      <div class="form-group"><label class="form-label">Abbreviation</label><input type="text" id="pe-abbrev" class="form-input mono" maxlength="4" style="text-transform:uppercase;" /></div>
+      <div class="form-group"><label class="form-label">Supplier</label><input type="text" id="pe-supplier" class="form-input" /></div>
+      <div class="form-group"><label class="form-label">Chemistry</label><select id="pe-chemistry" class="form-select"><option value="N/A">N/A</option><option value="Cortisol">Cortisol</option><option value="Progesterone">Progesterone</option><option value="Testosterone">Testosterone</option></select></div>
+      <div class="form-group"><label class="form-label">Category</label><select id="pe-category" class="form-select"><option value="A">A — Verify Only</option><option value="B">B — Sampling Plan</option><option value="C">C — 100% Inspection</option></select></div>
+      <div class="form-group"><label class="form-label">Type</label><select id="pe-type" class="form-select"><option value="Material">Material</option><option value="Cartridge">Cartridge</option><option value="Packaging">Packaging</option><option value="Reagent">Reagent</option><option value="Label/IFU">Label/IFU</option><option value="Equipment">Equipment</option><option value="Buffer">Buffer</option><option value="Consumable">Consumable</option><option value="In-House">In-House</option><option value="Finished">Finished</option></select></div>
+      <div class="form-group"><label class="form-label">Material Type</label><select id="pe-materialType" class="form-select"><option value="Raw Material">Raw Material</option><option value="In-House Material">In-House Material</option><option value="Finished Product">Finished Product</option><option value="Buffer">Buffer</option></select></div>
+      <div class="form-group"><label class="form-label">Unit</label><select id="pe-unit" class="form-select"><option value="each">each</option><option value="strips">strips</option><option value="bags">bags</option><option value="parts">parts</option><option value="rolls">rolls</option><option value="boxes">boxes</option><option value="pads">pads</option><option value="sheets">sheets</option><option value="bottles">bottles</option><option value="vials">vials</option><option value="tubes">tubes</option><option value="kits">kits</option><option value="mL">mL</option><option value="g">g</option><option value="mg">mg</option></select></div>
+      <div class="form-group"><label class="form-label">Min Stock Qty</label><input type="number" id="pe-minQty" class="form-input" min="0" /></div>
+      <div class="form-group"><label class="form-label">Lead Time (days)</label><input type="number" id="pe-leadTime" class="form-input" min="0" /></div>
+    </div>
+
+    <!-- Version info -->
+    <div style="margin-top:16px;padding:12px;background:var(--neutral);border-radius:8px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-size:12px;font-weight:600;">Current Version: <span id="pe-version-display">v1</span></span>
+        <button class="cat-action-btn version" onclick="openVersionModal(currentPartForEdit)">+ New Version</button>
+      </div>
+      <div id="pe-edit-history-link" style="font-size:11px;color:var(--soft-hash);margin-top:4px;cursor:pointer;" onclick="openEditHistoryModal(currentPartForEdit)">View edit history →</div>
+    </div>
+
+    <div id="pe-error" style="color:#c0392b;font-size:13px;margin-top:10px;display:none;"></div>
+
+    <!-- Action buttons -->
+    <div style="display:flex;gap:8px;margin-top:18px;justify-content:space-between;">
+      <div>
+        <button class="cat-action-btn archive" id="pe-archive-btn" onclick="openArchiveModal(currentPartForEdit)">Archive Part</button>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-secondary btn-sm" onclick="closeModal('partEditModal')">Cancel</button>
+        <button class="btn btn-primary btn-sm" onclick="savePartCard()">💾 Save Changes</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -1408,6 +1769,23 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:20px 0;}
       <p class="subtitle">Log non-conforming material and scrapped items · Automatically deducts from on-hand quantity</p>
     </div>
     <button class="btn btn-primary" onclick="openNcScrapForm()">＋ Log NC / Scrap</button>
+  </div>
+
+  <!-- NC vs Scrap explanation (per SOP-10) -->
+  <div id="ncExplainBox" style="border:1px solid var(--border);border-radius:10px;background:var(--white);padding:16px 20px;margin-bottom:16px;position:relative;">
+    <button onclick="this.parentElement.style.display='none'" style="position:absolute;top:10px;right:14px;background:none;border:none;color:var(--soft-hash);font-size:16px;cursor:pointer;">✕</button>
+    <div style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--soft-hash);margin-bottom:10px;">What's the difference? · Per SOP-10</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <div style="border:1px solid #fcd34d;border-radius:8px;padding:12px 14px;background:#fffbeb;">
+        <div style="font-size:13px;font-weight:700;color:#92400e;margin-bottom:6px;">⚠️ Non-Conformance (NC)</div>
+        <p style="font-size:12px;color:#713f12;line-height:1.5;margin:0;">Material or product that is <strong>defective, damaged, non-functional, or doesn't meet specification</strong> (per 21 CFR 820). NC items are <strong>segregated and investigated</strong> — they may be reworked, returned to vendor, accepted as-is (with QA approval), or scrapped. The QA Manager is notified and a disposition is assigned. NC items stay in the system for traceability.</p>
+      </div>
+      <div style="border:1px solid #fca5a5;border-radius:8px;padding:12px 14px;background:#fef2f2;">
+        <div style="font-size:13px;font-weight:700;color:#991b1b;margin-bottom:6px;">🗑️ Scrap</div>
+        <p style="font-size:12px;color:#7f1d1d;line-height:1.5;margin:0;">Material that has been <strong>permanently removed from inventory and safely disposed of</strong>. Scrapped items cannot re-enter the production system or be confused with conforming product. Scrap is a <strong>final disposition</strong> — the material is gone. Quantity is deducted from on-hand inventory immediately. Scrap typically results from an NC investigation, but can also occur during normal production (e.g. trim waste, damaged during assembly).</p>
+      </div>
+    </div>
+    <p style="font-size:11px;color:var(--soft-hash);margin:10px 0 0;line-height:1.5;"><strong>In short:</strong> NC = "something's wrong, let's investigate and decide what to do" → Scrap = "it's been decided — this material is permanently removed." Not all NCs become scrap (some get reworked or returned), but all scrap should be documented. Reference: SOP-10 §7.2.9</p>
   </div>
 
   <!-- Log form (hidden by default) -->
@@ -1763,145 +2141,148 @@ const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxlfGjOZv1CmSpD
 // ─────────────────────────────────────────────────────────
 const PARTS = {
   // ── RAW MATERIALS ──────────────────────────────
-  'A205 Pad':                        { number:'S018308',              supplier:'Porex',                   category:'A', abbrev:'A205', type:'Material',     materialType:'Raw Material', chemistry:'N/A' },
-  'A205 Sample Pad':                 { number:'S020680',              supplier:'Porex',                   category:'A', abbrev:'ASPD', type:'Material',     materialType:'Raw Material', chemistry:'N/A' },
-  'Backing Cards':                   { number:'KN-PS1060.283',        supplier:'Kenosha',                 category:'A', abbrev:'BKC',  type:'Material',     materialType:'Raw Material', chemistry:'N/A' },
-  'CN95 Nitrocellulose':             { number:'1UN95ER100025NT',      supplier:'Sartorius',               category:'A', abbrev:'CN95', type:'Material',     materialType:'Raw Material', chemistry:'N/A' },
-  'Collection Pad':                  { number:'S020226',              supplier:'Porex',                   category:'A', abbrev:'CLPD', type:'Material',     materialType:'Raw Material', chemistry:'N/A' },
-  'Cover Tape (Raw)':                { number:'',                     supplier:'Kenosha',                 category:'A', abbrev:'CVTP', type:'Material',     materialType:'Raw Material', chemistry:'N/A' },
-  'Formlabs Clear Resin':            { number:'FLB-RSN-STD-CLR-100', supplier:'Voxel',                   category:'A', abbrev:'FCRS', type:'Material',     materialType:'Raw Material', chemistry:'N/A' },
-  'Formlabs White Resin':            { number:'FLB-RSN-STD-WHI-100', supplier:'Voxel',                   category:'A', abbrev:'FWRS', type:'Material',     materialType:'Raw Material', chemistry:'N/A' },
-  'Grade 222 Pad (Absorbent Pad)':   { number:'112994',               supplier:'Ahlstrom',                category:'A', abbrev:'G222', type:'Material',     materialType:'Raw Material', chemistry:'N/A' },
-  'Grade 6614 Pad':                  { number:'920520',               supplier:'Ahlstrom',                category:'A', abbrev:'G661', type:'Material',     materialType:'Raw Material', chemistry:'N/A' },
+  'A205 Pad': { itemNumber:'S018308', partNumber:'A205-001',              supplier:'Porex',                   category:'A', abbrev:'A205', type:'Material',     materialType:'Raw Material', chemistry:'N/A' },
+  'A205 Sample Pad': { itemNumber:'S020680', partNumber:'ASPD-001',              supplier:'Porex',                   category:'A', abbrev:'ASPD', type:'Material',     materialType:'Raw Material', chemistry:'N/A' },
+  'Backing Cards': { itemNumber:'KN-PS1060.283', partNumber:'BKC-001',        supplier:'Kenosha',                 category:'A', abbrev:'BKC',  type:'Material',     materialType:'Raw Material', chemistry:'N/A' },
+  'CN95 Nitrocellulose': { itemNumber:'1UN95ER100025NT', partNumber:'CN95-001',      supplier:'Sartorius',               category:'A', abbrev:'CN95', type:'Material',     materialType:'Raw Material', chemistry:'N/A' },
+  'Collection Pad': { itemNumber:'S020226', partNumber:'CLPD-001',              supplier:'Porex',                   category:'A', abbrev:'CLPD', type:'Material',     materialType:'Raw Material', chemistry:'N/A' },
+  'Cover Tape (Raw)': { itemNumber:'', partNumber:'CVTP-001',                     supplier:'Kenosha',                 category:'A', abbrev:'CVTP', type:'Material',     materialType:'Raw Material', chemistry:'N/A' },
+  'Formlabs Clear Resin': { itemNumber:'FLB-RSN-STD-CLR-100', partNumber:'FCRS-001', supplier:'Voxel',                   category:'A', abbrev:'FCRS', type:'Material',     materialType:'Raw Material', chemistry:'N/A' },
+  'Formlabs White Resin': { itemNumber:'FLB-RSN-STD-WHI-100', partNumber:'FWRS-001', supplier:'Voxel',                   category:'A', abbrev:'FWRS', type:'Material',     materialType:'Raw Material', chemistry:'N/A' },
+  'Grade 222 Pad (Absorbent Pad)': { itemNumber:'112994', partNumber:'G222-001',               supplier:'Ahlstrom',                category:'A', abbrev:'G222', type:'Material',     materialType:'Raw Material', chemistry:'N/A' },
+  'Grade 6614 Pad': { itemNumber:'920520', partNumber:'G661-001',               supplier:'Ahlstrom',                category:'A', abbrev:'G661', type:'Material',     materialType:'Raw Material', chemistry:'N/A' },
   // ── CARTRIDGE PARTS (RAW) ──────────────────────
-  'Cartridge Parts':                 { number:'',                     supplier:'Seehope',                 category:'B', abbrev:'CAR',  type:'Cartridge',    materialType:'Raw Material', chemistry:'N/A' },
-  'Transfer Strip Main Body':        { number:'CAR-S1-C1',            supplier:'Seehope',                 category:'B', abbrev:'TSMB', type:'Cartridge',    materialType:'Raw Material', chemistry:'N/A' },
-  'Cartridge Lower Housing':         { number:'CAR-C2',               supplier:'Seehope',                 category:'B', abbrev:'CLHS', type:'Cartridge',    materialType:'Raw Material', chemistry:'N/A' },
-  'Cartridge Upper Housing (Cortisol)':    { number:'CAR-C1-C',       supplier:'Seehope',                 category:'B', abbrev:'CAHC', type:'Cartridge',    materialType:'Raw Material', chemistry:'Cortisol' },
-  'Cartridge Upper Housing (Progesterone)':{ number:'CAR-C1-P',       supplier:'Seehope',                 category:'B', abbrev:'CAHP', type:'Cartridge',    materialType:'Raw Material', chemistry:'Progesterone' },
-  'Cartridge Upper Housing (Testosterone)':{ number:'CAR-C1-T',       supplier:'Seehope',                 category:'B', abbrev:'CAHT', type:'Cartridge',    materialType:'Raw Material', chemistry:'Testosterone' },
+  'Cartridge Parts': { itemNumber:'', partNumber:'CAR-001',                     supplier:'Seehope',                 category:'B', abbrev:'CAR',  type:'Cartridge',    materialType:'Raw Material', chemistry:'N/A' },
+  'Transfer Strip Main Body': { itemNumber:'CAR-S1-C1', partNumber:'TSMB-001',            supplier:'Seehope',                 category:'B', abbrev:'TSMB', type:'Cartridge',    materialType:'Raw Material', chemistry:'N/A' },
+  'Cartridge Lower Housing': { itemNumber:'CAR-C2', partNumber:'CLHS-001',               supplier:'Seehope',                 category:'B', abbrev:'CLHS', type:'Cartridge',    materialType:'Raw Material', chemistry:'N/A' },
+  'Cartridge Upper Housing (Cortisol)': { itemNumber:'CAR-C1-C', partNumber:'CAHC-001',       supplier:'Seehope',                 category:'B', abbrev:'CAHC', type:'Cartridge',    materialType:'Raw Material', chemistry:'Cortisol' },
+  'Cartridge Upper Housing (Progesterone)': { itemNumber:'CAR-C1-P', partNumber:'CAHP-001',       supplier:'Seehope',                 category:'B', abbrev:'CAHP', type:'Cartridge',    materialType:'Raw Material', chemistry:'Progesterone' },
+  'Cartridge Upper Housing (Testosterone)': { itemNumber:'CAR-C1-T', partNumber:'CAHT-001',       supplier:'Seehope',                 category:'B', abbrev:'CAHT', type:'Cartridge',    materialType:'Raw Material', chemistry:'Testosterone' },
   // ── PACKAGING (RAW) ────────────────────────────
-  '4-Pack Box':                      { number:'',                     supplier:'Stephen Gould',           category:'A', abbrev:'4PKB', type:'Packaging',    materialType:'Raw Material', chemistry:'N/A' },
-  'Eli Test Pouches':                { number:'',                     supplier:'Food Pak',                category:'A', abbrev:'EPCH', type:'Packaging',    materialType:'Raw Material', chemistry:'N/A' },
-  'Mailer Box':                      { number:'',                     supplier:'Stephen Gould',           category:'A', abbrev:'MLBX', type:'Packaging',    materialType:'Raw Material', chemistry:'N/A' },
-  'Cortisol Pouch':                  { number:'CLT-C1',               supplier:'Food Pak',                category:'A', abbrev:'CTPC', type:'Packaging',    materialType:'Raw Material', chemistry:'Cortisol' },
-  'Progesterone Pouch':              { number:'PET-C1',               supplier:'Food Pak',                category:'A', abbrev:'PTPP', type:'Packaging',    materialType:'Raw Material', chemistry:'Progesterone' },
-  'Testosterone Pouch':              { number:'TET-C1',               supplier:'Food Pak',                category:'A', abbrev:'TTPT', type:'Packaging',    materialType:'Raw Material', chemistry:'Testosterone' },
-  'Cortisol Kit Box':                { number:'CLK-C1',               supplier:'Stephen Gould',           category:'A', abbrev:'CLKB', type:'Packaging',    materialType:'Raw Material', chemistry:'Cortisol' },
-  'Progesterone Kit Box':            { number:'PEK-C1',               supplier:'Stephen Gould',           category:'A', abbrev:'PEKB', type:'Packaging',    materialType:'Raw Material', chemistry:'Progesterone' },
-  'Testosterone Kit Box':            { number:'TEK-C1',               supplier:'Stephen Gould',           category:'A', abbrev:'TEKB', type:'Packaging',    materialType:'Raw Material', chemistry:'Testosterone' },
+  '4-Pack Box': { itemNumber:'', partNumber:'4PKB-001',                     supplier:'Stephen Gould',           category:'A', abbrev:'4PKB', type:'Packaging',    materialType:'Raw Material', chemistry:'N/A' },
+  'Eli Test Pouches': { itemNumber:'', partNumber:'EPCH-001',                     supplier:'Food Pak',                category:'A', abbrev:'EPCH', type:'Packaging',    materialType:'Raw Material', chemistry:'N/A' },
+  'Mailer Box': { itemNumber:'', partNumber:'MLBX-001',                     supplier:'Stephen Gould',           category:'A', abbrev:'MLBX', type:'Packaging',    materialType:'Raw Material', chemistry:'N/A' },
+  'Cortisol Pouch': { itemNumber:'CLT-C1', partNumber:'CTPC-001',               supplier:'Food Pak',                category:'A', abbrev:'CTPC', type:'Packaging',    materialType:'Raw Material', chemistry:'Cortisol' },
+  'Progesterone Pouch': { itemNumber:'PET-C1', partNumber:'PTPP-001',               supplier:'Food Pak',                category:'A', abbrev:'PTPP', type:'Packaging',    materialType:'Raw Material', chemistry:'Progesterone' },
+  'Testosterone Pouch': { itemNumber:'TET-C1', partNumber:'TTPT-001',               supplier:'Food Pak',                category:'A', abbrev:'TTPT', type:'Packaging',    materialType:'Raw Material', chemistry:'Testosterone' },
+  'Cortisol Kit Box': { itemNumber:'CLK-C1', partNumber:'CLKB-001',               supplier:'Stephen Gould',           category:'A', abbrev:'CLKB', type:'Packaging',    materialType:'Raw Material', chemistry:'Cortisol' },
+  'Progesterone Kit Box': { itemNumber:'PEK-C1', partNumber:'PEKB-001',               supplier:'Stephen Gould',           category:'A', abbrev:'PEKB', type:'Packaging',    materialType:'Raw Material', chemistry:'Progesterone' },
+  'Testosterone Kit Box': { itemNumber:'TEK-C1', partNumber:'TEKB-001',               supplier:'Stephen Gould',           category:'A', abbrev:'TEKB', type:'Packaging',    materialType:'Raw Material', chemistry:'Testosterone' },
   // ── REAGENTS (RAW) ─────────────────────────────
-  '40nm Unconjugated Gold':          { number:'',                     supplier:'Attogene',                category:'C', abbrev:'AUGN', type:'Reagent',      materialType:'Raw Material', chemistry:'N/A' },
-  'Acetonitrile':                    { number:'34851',                supplier:'Sigma Aldrich',           category:'A', abbrev:'ACTN', type:'Reagent',      materialType:'Raw Material', chemistry:'N/A' },
-  'Anti-Cortisol MAB':               { number:'M344',                 supplier:'CalBioReagents',          category:'A', abbrev:'ACMB', type:'Reagent',      materialType:'Raw Material', chemistry:'Cortisol' },
-  'B7-PEG12-NHS':                    { number:'21312',                supplier:'Thermo Fisher Scientific',category:'A', abbrev:'B7PN', type:'Reagent',      materialType:'Raw Material', chemistry:'N/A' },
-  'Bovine Serum Albumin (BSA)':      { number:'ALB001.250',           supplier:'BioShop',                 category:'A', abbrev:'BSA',  type:'Reagent',      materialType:'Raw Material', chemistry:'N/A' },
-  'Cortisol-3-BSA':                  { number:'C037',                 supplier:'CalBioReagents',          category:'A', abbrev:'C3BS', type:'Reagent',      materialType:'Raw Material', chemistry:'Cortisol' },
-  'Cortisol-3-CMO':                  { number:'H6635',                supplier:'Sigma Aldrich',           category:'A', abbrev:'C3CM', type:'Reagent',      materialType:'Raw Material', chemistry:'Cortisol' },
-  'Desiccants - 1g Silica Gel':      { number:'S-3903',               supplier:'Uline',                   category:'A', abbrev:'DSCC', type:'Reagent',      materialType:'Raw Material', chemistry:'N/A' },
-  'Dextran':                         { number:'31392-50G',            supplier:'Sigma Aldrich',           category:'A', abbrev:'DXTR', type:'Reagent',      materialType:'Raw Material', chemistry:'N/A' },
-  'DI Water':                        { number:'660641',               supplier:'Thermo Fisher Scientific',category:'A', abbrev:'DIWT', type:'Reagent',      materialType:'Raw Material', chemistry:'N/A' },
-  'DMSO':                            { number:'DMS555.1',             supplier:'BioShop',                 category:'A', abbrev:'DMSO', type:'Reagent',      materialType:'Raw Material', chemistry:'N/A' },
-  'EDC':                             { number:'341006-5MG',           supplier:'MilliporeSigma',          category:'A', abbrev:'EDCC', type:'Reagent',      materialType:'Raw Material', chemistry:'N/A' },
-  'Goat Anti-Mouse IgG':             { number:'7455507',              supplier:'Lampire',                 category:'A', abbrev:'GAMI', type:'Reagent',      materialType:'Raw Material', chemistry:'N/A' },
-  'HEPES':                           { number:'H3375-100G',           supplier:'Sigma Aldrich',           category:'A', abbrev:'HPES', type:'Reagent',      materialType:'Raw Material', chemistry:'N/A' },
-  'Hydrochloric Acid':               { number:'HCL444.1',             supplier:'BioShop',                 category:'A', abbrev:'HCLA', type:'Reagent',      materialType:'Raw Material', chemistry:'N/A' },
-  'Mouse Anti-Progesterone':         { number:'7720-1420',            supplier:'Cedarlane',               category:'A', abbrev:'MAPB', type:'Reagent',      materialType:'Raw Material', chemistry:'Progesterone' },
-  'NCX Conjugate Diluent':           { number:'CDPR-1L',              supplier:'Nanocomposix',            category:'A', abbrev:'NCDL', type:'Reagent',      materialType:'Raw Material', chemistry:'N/A' },
-  'NHS':                             { number:'TRC-H954000',          supplier:'TRC',                     category:'A', abbrev:'NHSS', type:'Reagent',      materialType:'Raw Material', chemistry:'N/A' },
-  'NHS-PEG12-Biotin':                { number:'A35389',               supplier:'ThermoFisher',            category:'A', abbrev:'NHPB', type:'Reagent',      materialType:'Raw Material', chemistry:'N/A' },
-  'Poly Streptavidin':               { number:'N10 120 100',          supplier:'BBI Solutions',           category:'A', abbrev:'PSAV', type:'Reagent',      materialType:'Raw Material', chemistry:'N/A' },
-  'Potassium Chloride':              { number:'POC999.500',           supplier:'BioShop',                 category:'A', abbrev:'KCLX', type:'Reagent',      materialType:'Raw Material', chemistry:'N/A' },
-  'Potassium Phosphate Dibasic':     { number:'P3786-500G',           supplier:'Sigma Aldrich',           category:'A', abbrev:'KPDB', type:'Reagent',      materialType:'Raw Material', chemistry:'N/A' },
-  'Progesterone-11-Hemisuccinate':   { number:'CP-5012',              supplier:'Conju-probe',             category:'A', abbrev:'P11H', type:'Reagent',      materialType:'Raw Material', chemistry:'Progesterone' },
-  'Progesterone-3-CMO':              { number:'P3277-25MG',           supplier:'MilliporeSigma',          category:'A', abbrev:'P3CM', type:'Reagent',      materialType:'Raw Material', chemistry:'Progesterone' },
-  'Sheep Anti-Progesterone FAB SH':  { number:'',                     supplier:'Bioventix',               category:'A', abbrev:'SAPF', type:'Reagent',      materialType:'Raw Material', chemistry:'Progesterone' },
-  'Sodium Chloride':                 { number:'S3014-1KG',            supplier:'Sigma Aldrich',           category:'A', abbrev:'NACL', type:'Reagent',      materialType:'Raw Material', chemistry:'N/A' },
-  'Sodium Hydroxide':                { number:'SHY888.1',             supplier:'BioShop',                 category:'A', abbrev:'NAOH', type:'Reagent',      materialType:'Raw Material', chemistry:'N/A' },
-  'Sodium Phosphate Dibasic':        { number:'S0876-500G',           supplier:'Sigma Aldrich',           category:'A', abbrev:'SPDB', type:'Reagent',      materialType:'Raw Material', chemistry:'N/A' },
-  'Streptavidin':                    { number:'S000-01',              supplier:'Rockland',                category:'A', abbrev:'SAVX', type:'Reagent',      materialType:'Raw Material', chemistry:'N/A' },
-  'Sucrose':                         { number:'S0389-1kg',            supplier:'Sigma Aldrich',           category:'A', abbrev:'SUCR', type:'Reagent',      materialType:'Raw Material', chemistry:'N/A' },
-  'Tannic Acid':                     { number:'403040-50G',           supplier:'MilliporeSigma',          category:'A', abbrev:'TNAC', type:'Reagent',      materialType:'Raw Material', chemistry:'N/A' },
-  'Trehalose Dihydrate':             { number:'T0167-100G',           supplier:'Research Products',       category:'A', abbrev:'TRHD', type:'Reagent',      materialType:'Raw Material', chemistry:'N/A' },
-  'Triton X-100':                    { number:'X100-100ML',           supplier:'Millipore Sigma',         category:'A', abbrev:'TX10', type:'Reagent',      materialType:'Raw Material', chemistry:'N/A' },
-  'Trizma Base':                     { number:'93362-250G',           supplier:'Sigma Aldrich',           category:'A', abbrev:'TRZB', type:'Reagent',      materialType:'Raw Material', chemistry:'N/A' },
-  'Tween 20':                        { number:'P9416-100ML',          supplier:'Sigma Aldrich',           category:'A', abbrev:'TW20', type:'Reagent',      materialType:'Raw Material', chemistry:'N/A' },
+  '40nm Unconjugated Gold': { itemNumber:'', partNumber:'AUGN-001',                     supplier:'Attogene',                category:'C', abbrev:'AUGN', type:'Reagent',      materialType:'Raw Material', chemistry:'N/A' },
+  'Acetonitrile': { itemNumber:'34851', partNumber:'ACTN-001',                supplier:'Sigma Aldrich',           category:'A', abbrev:'ACTN', type:'Reagent',      materialType:'Raw Material', chemistry:'N/A' },
+  'Anti-Cortisol MAB': { itemNumber:'M344', partNumber:'ACMB-001',                 supplier:'CalBioReagents',          category:'A', abbrev:'ACMB', type:'Reagent',      materialType:'Raw Material', chemistry:'Cortisol' },
+  'B7-PEG12-NHS': { itemNumber:'21312', partNumber:'B7PN-001',                supplier:'Thermo Fisher Scientific',category:'A', abbrev:'B7PN', type:'Reagent',      materialType:'Raw Material', chemistry:'N/A' },
+  'Bovine Serum Albumin (BSA)': { itemNumber:'ALB001.250', partNumber:'BSA-001',           supplier:'BioShop',                 category:'A', abbrev:'BSA',  type:'Reagent',      materialType:'Raw Material', chemistry:'N/A' },
+  'Cortisol-3-BSA': { itemNumber:'C037', partNumber:'C3BS-001',                 supplier:'CalBioReagents',          category:'A', abbrev:'C3BS', type:'Reagent',      materialType:'Raw Material', chemistry:'Cortisol' },
+  'Cortisol-3-CMO': { itemNumber:'H6635', partNumber:'C3CM-001',                supplier:'Sigma Aldrich',           category:'A', abbrev:'C3CM', type:'Reagent',      materialType:'Raw Material', chemistry:'Cortisol' },
+  'Desiccants - 1g Silica Gel': { itemNumber:'S-3903', partNumber:'DSCC-001',               supplier:'Uline',                   category:'A', abbrev:'DSCC', type:'Reagent',      materialType:'Raw Material', chemistry:'N/A' },
+  'Dextran': { itemNumber:'31392-50G', partNumber:'DXTR-001',            supplier:'Sigma Aldrich',           category:'A', abbrev:'DXTR', type:'Reagent',      materialType:'Raw Material', chemistry:'N/A' },
+  'DI Water': { itemNumber:'660641', partNumber:'DIWT-001',               supplier:'Thermo Fisher Scientific',category:'A', abbrev:'DIWT', type:'Reagent',      materialType:'Raw Material', chemistry:'N/A' },
+  'DMSO': { itemNumber:'DMS555.1', partNumber:'DMSO-001',             supplier:'BioShop',                 category:'A', abbrev:'DMSO', type:'Reagent',      materialType:'Raw Material', chemistry:'N/A' },
+  'EDC': { itemNumber:'341006-5MG', partNumber:'EDCC-001',           supplier:'MilliporeSigma',          category:'A', abbrev:'EDCC', type:'Reagent',      materialType:'Raw Material', chemistry:'N/A' },
+  'Goat Anti-Mouse IgG': { itemNumber:'7455507', partNumber:'GAMI-001',              supplier:'Lampire',                 category:'A', abbrev:'GAMI', type:'Reagent',      materialType:'Raw Material', chemistry:'N/A' },
+  'HEPES': { itemNumber:'H3375-100G', partNumber:'HPES-001',           supplier:'Sigma Aldrich',           category:'A', abbrev:'HPES', type:'Reagent',      materialType:'Raw Material', chemistry:'N/A' },
+  'Hydrochloric Acid': { itemNumber:'HCL444.1', partNumber:'HCLA-001',             supplier:'BioShop',                 category:'A', abbrev:'HCLA', type:'Reagent',      materialType:'Raw Material', chemistry:'N/A' },
+  'Mouse Anti-Progesterone': { itemNumber:'7720-1420', partNumber:'MAPB-001',            supplier:'Cedarlane',               category:'A', abbrev:'MAPB', type:'Reagent',      materialType:'Raw Material', chemistry:'Progesterone' },
+  'NCX Conjugate Diluent': { itemNumber:'CDPR-1L', partNumber:'NCDL-001',              supplier:'Nanocomposix',            category:'A', abbrev:'NCDL', type:'Reagent',      materialType:'Raw Material', chemistry:'N/A' },
+  'NHS': { itemNumber:'TRC-H954000', partNumber:'NHSS-001',          supplier:'TRC',                     category:'A', abbrev:'NHSS', type:'Reagent',      materialType:'Raw Material', chemistry:'N/A' },
+  'NHS-PEG12-Biotin': { itemNumber:'A35389', partNumber:'NHPB-001',               supplier:'ThermoFisher',            category:'A', abbrev:'NHPB', type:'Reagent',      materialType:'Raw Material', chemistry:'N/A' },
+  'Poly Streptavidin': { itemNumber:'N10 120 100', partNumber:'PSAV-001',          supplier:'BBI Solutions',           category:'A', abbrev:'PSAV', type:'Reagent',      materialType:'Raw Material', chemistry:'N/A' },
+  'Potassium Chloride': { itemNumber:'POC999.500', partNumber:'KCLX-001',           supplier:'BioShop',                 category:'A', abbrev:'KCLX', type:'Reagent',      materialType:'Raw Material', chemistry:'N/A' },
+  'Potassium Phosphate Dibasic': { itemNumber:'P3786-500G', partNumber:'KPDB-001',           supplier:'Sigma Aldrich',           category:'A', abbrev:'KPDB', type:'Reagent',      materialType:'Raw Material', chemistry:'N/A' },
+  'Progesterone-11-Hemisuccinate': { itemNumber:'CP-5012', partNumber:'P11H-001',              supplier:'Conju-probe',             category:'A', abbrev:'P11H', type:'Reagent',      materialType:'Raw Material', chemistry:'Progesterone' },
+  'Progesterone-3-CMO': { itemNumber:'P3277-25MG', partNumber:'P3CM-001',           supplier:'MilliporeSigma',          category:'A', abbrev:'P3CM', type:'Reagent',      materialType:'Raw Material', chemistry:'Progesterone' },
+  'Sheep Anti-Progesterone FAB SH': { itemNumber:'', partNumber:'SAPF-001',                     supplier:'Bioventix',               category:'A', abbrev:'SAPF', type:'Reagent',      materialType:'Raw Material', chemistry:'Progesterone' },
+  'Sodium Chloride': { itemNumber:'S3014-1KG', partNumber:'NACL-001',            supplier:'Sigma Aldrich',           category:'A', abbrev:'NACL', type:'Reagent',      materialType:'Raw Material', chemistry:'N/A' },
+  'Sodium Hydroxide': { itemNumber:'SHY888.1', partNumber:'NAOH-001',             supplier:'BioShop',                 category:'A', abbrev:'NAOH', type:'Reagent',      materialType:'Raw Material', chemistry:'N/A' },
+  'Sodium Phosphate Dibasic': { itemNumber:'S0876-500G', partNumber:'SPDB-001',           supplier:'Sigma Aldrich',           category:'A', abbrev:'SPDB', type:'Reagent',      materialType:'Raw Material', chemistry:'N/A' },
+  'Streptavidin': { itemNumber:'S000-01', partNumber:'SAVX-001',              supplier:'Rockland',                category:'A', abbrev:'SAVX', type:'Reagent',      materialType:'Raw Material', chemistry:'N/A' },
+  'Sucrose': { itemNumber:'S0389-1kg', partNumber:'SUCR-001',            supplier:'Sigma Aldrich',           category:'A', abbrev:'SUCR', type:'Reagent',      materialType:'Raw Material', chemistry:'N/A' },
+  'Tannic Acid': { itemNumber:'403040-50G', partNumber:'TNAC-001',           supplier:'MilliporeSigma',          category:'A', abbrev:'TNAC', type:'Reagent',      materialType:'Raw Material', chemistry:'N/A' },
+  'Trehalose Dihydrate': { itemNumber:'T0167-100G', partNumber:'TRHD-001',           supplier:'Research Products',       category:'A', abbrev:'TRHD', type:'Reagent',      materialType:'Raw Material', chemistry:'N/A' },
+  'Triton X-100': { itemNumber:'X100-100ML', partNumber:'TX10-001',           supplier:'Millipore Sigma',         category:'A', abbrev:'TX10', type:'Reagent',      materialType:'Raw Material', chemistry:'N/A' },
+  'Trizma Base': { itemNumber:'93362-250G', partNumber:'TRZB-001',           supplier:'Sigma Aldrich',           category:'A', abbrev:'TRZB', type:'Reagent',      materialType:'Raw Material', chemistry:'N/A' },
+  'Tween 20': { itemNumber:'P9416-100ML', partNumber:'TW20-001',          supplier:'Sigma Aldrich',           category:'A', abbrev:'TW20', type:'Reagent',      materialType:'Raw Material', chemistry:'N/A' },
   // ── CONSUMABLES (RAW) ──────────────────────────
-  'Binders':                         { number:'B00FG2NAC2',           supplier:'Amazon',                  category:'A', abbrev:'BNDR', type:'Consumable',   materialType:'Raw Material', chemistry:'N/A' },
-  'Dymo Labels 2.125x4"':            { number:'S-24740',              supplier:'Uline',                   category:'A', abbrev:'DYML', type:'Consumable',   materialType:'Raw Material', chemistry:'N/A' },
-  'Large Latex Gloves':              { number:'FG100L-10',            supplier:'FroggaBio',               category:'A', abbrev:'GLLG', type:'Consumable',   materialType:'Raw Material', chemistry:'N/A' },
-  'Masking Tape':                    { number:'B0DHV15QPG',           supplier:'Amazon',                  category:'A', abbrev:'MSKP', type:'Consumable',   materialType:'Raw Material', chemistry:'N/A' },
-  'Medium Latex Gloves':             { number:'FG100M-10',            supplier:'FroggaBio',               category:'A', abbrev:'GLMG', type:'Consumable',   materialType:'Raw Material', chemistry:'N/A' },
-  'Nitrile Gloves — Large':          { number:'S-13046L',             supplier:'Uline',                   category:'A', abbrev:'NGLG', type:'Consumable',   materialType:'Raw Material', chemistry:'N/A' },
-  'Nitrile Gloves — Medium':         { number:'S-13046M',             supplier:'Uline',                   category:'A', abbrev:'NGMG', type:'Consumable',   materialType:'Raw Material', chemistry:'N/A' },
-  'Nitrile Gloves — Small':          { number:'S-13046S',             supplier:'Uline',                   category:'A', abbrev:'NGSG', type:'Consumable',   materialType:'Raw Material', chemistry:'N/A' },
-  'Nitrile Gloves — XL':             { number:'S-13046XL',            supplier:'Uline',                   category:'A', abbrev:'NGXL', type:'Consumable',   materialType:'Raw Material', chemistry:'N/A' },
-  'RNJet TIJ 2.5 BLACK 5 Cartridge': { number:'100-1562-801',        supplier:'RN Jet',                  category:'A', abbrev:'RNJT', type:'Consumable',   materialType:'Raw Material', chemistry:'N/A' },
-  'Small Latex Gloves':              { number:'FG100S-10',            supplier:'FroggaBio',               category:'A', abbrev:'GLSG', type:'Consumable',   materialType:'Raw Material', chemistry:'N/A' },
-  'Tube Rack':                       { number:'B082ZPRB8C',           supplier:'Amazon',                  category:'A', abbrev:'TBRK', type:'Consumable',   materialType:'Raw Material', chemistry:'N/A' },
-  'Tweezers':                        { number:'B07QNZFXFN',           supplier:'Amazon',                  category:'A', abbrev:'TWZR', type:'Consumable',   materialType:'Raw Material', chemistry:'N/A' },
+  'Binders': { itemNumber:'B00FG2NAC2', partNumber:'BNDR-001',           supplier:'Amazon',                  category:'A', abbrev:'BNDR', type:'Consumable',   materialType:'Raw Material', chemistry:'N/A' },
+  'Dymo Labels 2.125x4"': { itemNumber:'S-24740', partNumber:'DYML-001',              supplier:'Uline',                   category:'A', abbrev:'DYML', type:'Consumable',   materialType:'Raw Material', chemistry:'N/A' },
+  'Large Latex Gloves': { itemNumber:'FG100L-10', partNumber:'GLLG-001',            supplier:'FroggaBio',               category:'A', abbrev:'GLLG', type:'Consumable',   materialType:'Raw Material', chemistry:'N/A' },
+  'Masking Tape': { itemNumber:'B0DHV15QPG', partNumber:'MSKP-001',           supplier:'Amazon',                  category:'A', abbrev:'MSKP', type:'Consumable',   materialType:'Raw Material', chemistry:'N/A' },
+  'Medium Latex Gloves': { itemNumber:'FG100M-10', partNumber:'GLMG-001',            supplier:'FroggaBio',               category:'A', abbrev:'GLMG', type:'Consumable',   materialType:'Raw Material', chemistry:'N/A' },
+  'Nitrile Gloves — Large': { itemNumber:'S-13046L', partNumber:'NGLG-001',             supplier:'Uline',                   category:'A', abbrev:'NGLG', type:'Consumable',   materialType:'Raw Material', chemistry:'N/A' },
+  'Nitrile Gloves — Medium': { itemNumber:'S-13046M', partNumber:'NGMG-001',             supplier:'Uline',                   category:'A', abbrev:'NGMG', type:'Consumable',   materialType:'Raw Material', chemistry:'N/A' },
+  'Nitrile Gloves — Small': { itemNumber:'S-13046S', partNumber:'NGSG-001',             supplier:'Uline',                   category:'A', abbrev:'NGSG', type:'Consumable',   materialType:'Raw Material', chemistry:'N/A' },
+  'Nitrile Gloves — XL': { itemNumber:'S-13046XL', partNumber:'NGXL-001',            supplier:'Uline',                   category:'A', abbrev:'NGXL', type:'Consumable',   materialType:'Raw Material', chemistry:'N/A' },
+  'RNJet TIJ 2.5 BLACK 5 Cartridge': { itemNumber:'100-1562-801', partNumber:'RNJT-001',        supplier:'RN Jet',                  category:'A', abbrev:'RNJT', type:'Consumable',   materialType:'Raw Material', chemistry:'N/A' },
+  'Small Latex Gloves': { itemNumber:'FG100S-10', partNumber:'GLSG-001',            supplier:'FroggaBio',               category:'A', abbrev:'GLSG', type:'Consumable',   materialType:'Raw Material', chemistry:'N/A' },
+  'Tube Rack': { itemNumber:'B082ZPRB8C', partNumber:'TBRK-001',           supplier:'Amazon',                  category:'A', abbrev:'TBRK', type:'Consumable',   materialType:'Raw Material', chemistry:'N/A' },
+  'Tweezers': { itemNumber:'B07QNZFXFN', partNumber:'TWZR-001',           supplier:'Amazon',                  category:'A', abbrev:'TWZR', type:'Consumable',   materialType:'Raw Material', chemistry:'N/A' },
 
   // ══ IN-HOUSE MADE MATERIALS ════════════════════
   // ── Chemistry-Neutral Strips (cut/prepared in-house) ─
-  'Backing Strip (In-House)':        { number:'IH-BKG',               supplier:'Eli Health',              category:'A', abbrev:'IHBK', type:'In-House',     materialType:'In-House Material', chemistry:'N/A', retainTarget:0 },
-  'Sample Pad Strip (In-House)':     { number:'IH-SPD',               supplier:'Eli Health',              category:'A', abbrev:'IHSP', type:'In-House',     materialType:'In-House Material', chemistry:'N/A', retainTarget:0 },
-  'Cover Tape Strip (In-House)':     { number:'IH-CVT',               supplier:'Eli Health',              category:'A', abbrev:'IHCT', type:'In-House',     materialType:'In-House Material', chemistry:'N/A', retainTarget:0 },
-  'Absorbent Pad Strip (In-House)':  { number:'IH-APD',               supplier:'Eli Health',              category:'A', abbrev:'IHAP', type:'In-House',     materialType:'In-House Material', chemistry:'N/A', retainTarget:0 },
-  'Mixing Pad (In-House)':           { number:'IH-MXP',               supplier:'Eli Health',              category:'A', abbrev:'IHMP', type:'In-House',     materialType:'In-House Material', chemistry:'N/A', retainTarget:0 },
+  'Backing Strip (In-House)': { itemNumber:'IH-BKG', partNumber:'IHBK-001',               supplier:'Eli Health',              category:'A', abbrev:'IHBK', type:'In-House',     materialType:'In-House Material', chemistry:'N/A', retainTarget:0 },
+  'Sample Pad Strip (In-House)': { itemNumber:'IH-SPD', partNumber:'IHSP-001',               supplier:'Eli Health',              category:'A', abbrev:'IHSP', type:'In-House',     materialType:'In-House Material', chemistry:'N/A', retainTarget:0 },
+  'Cover Tape Strip (In-House)': { itemNumber:'IH-CVT', partNumber:'IHCT-001',               supplier:'Eli Health',              category:'A', abbrev:'IHCT', type:'In-House',     materialType:'In-House Material', chemistry:'N/A', retainTarget:0 },
+  'Absorbent Pad Strip (In-House)': { itemNumber:'IH-APD', partNumber:'IHAP-001',               supplier:'Eli Health',              category:'A', abbrev:'IHAP', type:'In-House',     materialType:'In-House Material', chemistry:'N/A', retainTarget:0 },
+  'Mixing Pad (In-House)': { itemNumber:'IH-MXP', partNumber:'IHMP-001',               supplier:'Eli Health',              category:'A', abbrev:'IHMP', type:'In-House',     materialType:'In-House Material', chemistry:'N/A', retainTarget:0 },
   // ── Cortisol In-House ───────────────────────────
-  'Cortisol Nitrocellulose Strip':   { number:'IH-NC-COR',            supplier:'Eli Health',              category:'A', abbrev:'NCCR', type:'In-House',     materialType:'In-House Material', chemistry:'Cortisol',     retainTarget:0 },
-  'Cortisol Gold Conjugate Pad':     { number:'LFC-S2',               supplier:'Eli Health',              category:'A', abbrev:'CGCP', type:'In-House',     materialType:'In-House Material', chemistry:'Cortisol',     retainTarget:0 },
-  'Cortisol LFA':                    { number:'LFC',                  supplier:'Eli Health',              category:'A', abbrev:'LFAC', type:'In-House',     materialType:'In-House Material', chemistry:'Cortisol',     retainTarget:40 },
-  'Cortisol Mastercard':             { number:'MC',                   supplier:'Eli Health',              category:'A', abbrev:'MCCT', type:'In-House',     materialType:'In-House Material', chemistry:'Cortisol',     retainTarget:10 },
+  'Cortisol Nitrocellulose Strip': { itemNumber:'IH-NC-COR', partNumber:'NCCR-001',            supplier:'Eli Health',              category:'A', abbrev:'NCCR', type:'In-House',     materialType:'In-House Material', chemistry:'Cortisol',     retainTarget:0 },
+  'Cortisol Gold Conjugate Pad': { itemNumber:'LFC-S2', partNumber:'CGCP-001',               supplier:'Eli Health',              category:'A', abbrev:'CGCP', type:'In-House',     materialType:'In-House Material', chemistry:'Cortisol',     retainTarget:0 },
+  'Cortisol LFA': { itemNumber:'LFC', partNumber:'LFAC-001',                  supplier:'Eli Health',              category:'A', abbrev:'LFAC', type:'In-House',     materialType:'In-House Material', chemistry:'Cortisol',     retainTarget:40 },
+  'Cortisol Mastercard': { itemNumber:'MC', partNumber:'MCCT-001',                   supplier:'Eli Health',              category:'A', abbrev:'MCCT', type:'In-House',     materialType:'In-House Material', chemistry:'Cortisol',     retainTarget:10 },
   // ── Progesterone In-House ───────────────────────
-  'Progesterone Nitrocellulose Strip':{ number:'IH-NC-PRG',           supplier:'Eli Health',              category:'A', abbrev:'NCPR', type:'In-House',     materialType:'In-House Material', chemistry:'Progesterone', retainTarget:0 },
-  'Progesterone Gold Conjugate Pad': { number:'LFP-S2',               supplier:'Eli Health',              category:'A', abbrev:'PGCP', type:'In-House',     materialType:'In-House Material', chemistry:'Progesterone', retainTarget:0 },
-  'Progesterone LFA':                { number:'LFP',                  supplier:'Eli Health',              category:'A', abbrev:'LFAP', type:'In-House',     materialType:'In-House Material', chemistry:'Progesterone', retainTarget:40 },
-  'Progesterone Mastercard':         { number:'MCP',                  supplier:'Eli Health',              category:'A', abbrev:'MCCP', type:'In-House',     materialType:'In-House Material', chemistry:'Progesterone', retainTarget:10 },
+  'Progesterone Nitrocellulose Strip': { itemNumber:'IH-NC-PRG', partNumber:'NCPR-001',           supplier:'Eli Health',              category:'A', abbrev:'NCPR', type:'In-House',     materialType:'In-House Material', chemistry:'Progesterone', retainTarget:0 },
+  'Progesterone Gold Conjugate Pad': { itemNumber:'LFP-S2', partNumber:'PGCP-001',               supplier:'Eli Health',              category:'A', abbrev:'PGCP', type:'In-House',     materialType:'In-House Material', chemistry:'Progesterone', retainTarget:0 },
+  'Progesterone LFA': { itemNumber:'LFP', partNumber:'LFAP-001',                  supplier:'Eli Health',              category:'A', abbrev:'LFAP', type:'In-House',     materialType:'In-House Material', chemistry:'Progesterone', retainTarget:40 },
+  'Progesterone Mastercard': { itemNumber:'MCP', partNumber:'MCCP-001',                  supplier:'Eli Health',              category:'A', abbrev:'MCCP', type:'In-House',     materialType:'In-House Material', chemistry:'Progesterone', retainTarget:10 },
   // ── Testosterone In-House ───────────────────────
-  'Testosterone Nitrocellulose Strip':{ number:'IH-NC-TST',           supplier:'Eli Health',              category:'A', abbrev:'NCTS', type:'In-House',     materialType:'In-House Material', chemistry:'Testosterone', retainTarget:0 },
-  'Testosterone Gold Conjugate Pad': { number:'LFT-S2',               supplier:'Eli Health',              category:'A', abbrev:'TGCP', type:'In-House',     materialType:'In-House Material', chemistry:'Testosterone', retainTarget:0 },
-  'Testosterone LFA':                { number:'LFT',                  supplier:'Eli Health',              category:'A', abbrev:'LFAT', type:'In-House',     materialType:'In-House Material', chemistry:'Testosterone', retainTarget:40 },
-  'Testosterone Mastercard':         { number:'MCT',                  supplier:'Eli Health',              category:'A', abbrev:'MCTS', type:'In-House',     materialType:'In-House Material', chemistry:'Testosterone', retainTarget:10 },
+  'Testosterone Nitrocellulose Strip': { itemNumber:'IH-NC-TST', partNumber:'NCTS-001',           supplier:'Eli Health',              category:'A', abbrev:'NCTS', type:'In-House',     materialType:'In-House Material', chemistry:'Testosterone', retainTarget:0 },
+  'Testosterone Gold Conjugate Pad': { itemNumber:'LFT-S2', partNumber:'TGCP-001',               supplier:'Eli Health',              category:'A', abbrev:'TGCP', type:'In-House',     materialType:'In-House Material', chemistry:'Testosterone', retainTarget:0 },
+  'Testosterone LFA': { itemNumber:'LFT', partNumber:'LFAT-001',                  supplier:'Eli Health',              category:'A', abbrev:'LFAT', type:'In-House',     materialType:'In-House Material', chemistry:'Testosterone', retainTarget:40 },
+  'Testosterone Mastercard': { itemNumber:'MCT', partNumber:'MCTS-001',                  supplier:'Eli Health',              category:'A', abbrev:'MCTS', type:'In-House',     materialType:'In-House Material', chemistry:'Testosterone', retainTarget:10 },
 
   // ══ BUFFERS ════════════════════════════════════
-  'Cortisol Running Buffer':         { number:'BUF-RUN-COR',          supplier:'Eli Health',              category:'A', abbrev:'BFCR', type:'Buffer',       materialType:'Buffer', chemistry:'Cortisol' },
-  'Progesterone Running Buffer':     { number:'BUF-RUN-PRG',          supplier:'Eli Health',              category:'A', abbrev:'BFPR', type:'Buffer',       materialType:'Buffer', chemistry:'Progesterone' },
-  'Testosterone Running Buffer':     { number:'BUF-RUN-TST',          supplier:'Eli Health',              category:'A', abbrev:'BFTS', type:'Buffer',       materialType:'Buffer', chemistry:'Testosterone' },
-  'Blocking Buffer':                 { number:'BUF-BLK',              supplier:'Eli Health',              category:'A', abbrev:'BFBL', type:'Buffer',       materialType:'Buffer', chemistry:'N/A' },
-  'Conjugate Diluent Buffer':        { number:'BUF-CD',               supplier:'Eli Health',              category:'A', abbrev:'BFCD', type:'Buffer',       materialType:'Buffer', chemistry:'N/A' },
-  'Sample Buffer':                   { number:'BUF-SAMP',             supplier:'Eli Health',              category:'A', abbrev:'BFSM', type:'Buffer',       materialType:'Buffer', chemistry:'N/A' },
-  'Cortisol Conjugate Buffer':       { number:'BUF-CON-COR',          supplier:'Eli Health',              category:'A', abbrev:'BFCC', type:'Buffer',       materialType:'Buffer', chemistry:'Cortisol' },
-  'Progesterone Conjugate Buffer':   { number:'BUF-CON-PRG',          supplier:'Eli Health',              category:'A', abbrev:'BFCP', type:'Buffer',       materialType:'Buffer', chemistry:'Progesterone' },
-  'Testosterone Conjugate Buffer':   { number:'BUF-CON-TST',          supplier:'Eli Health',              category:'A', abbrev:'BFCT', type:'Buffer',       materialType:'Buffer', chemistry:'Testosterone' },
+  'Cortisol Running Buffer': { itemNumber:'BUF-RUN-COR', partNumber:'BFCR-001',          supplier:'Eli Health',              category:'A', abbrev:'BFCR', type:'Buffer',       materialType:'Buffer', chemistry:'Cortisol' },
+  'Progesterone Running Buffer': { itemNumber:'BUF-RUN-PRG', partNumber:'BFPR-001',          supplier:'Eli Health',              category:'A', abbrev:'BFPR', type:'Buffer',       materialType:'Buffer', chemistry:'Progesterone' },
+  'Testosterone Running Buffer': { itemNumber:'BUF-RUN-TST', partNumber:'BFTS-001',          supplier:'Eli Health',              category:'A', abbrev:'BFTS', type:'Buffer',       materialType:'Buffer', chemistry:'Testosterone' },
+  'Blocking Buffer': { itemNumber:'BUF-BLK', partNumber:'BFBL-001',              supplier:'Eli Health',              category:'A', abbrev:'BFBL', type:'Buffer',       materialType:'Buffer', chemistry:'N/A' },
+  'Conjugate Diluent Buffer': { itemNumber:'BUF-CD', partNumber:'BFCD-001',               supplier:'Eli Health',              category:'A', abbrev:'BFCD', type:'Buffer',       materialType:'Buffer', chemistry:'N/A' },
+  'Sample Buffer': { itemNumber:'BUF-SAMP', partNumber:'BFSM-001',             supplier:'Eli Health',              category:'A', abbrev:'BFSM', type:'Buffer',       materialType:'Buffer', chemistry:'N/A' },
+  'Cortisol Conjugate Buffer': { itemNumber:'BUF-CON-COR', partNumber:'BFCC-001',          supplier:'Eli Health',              category:'A', abbrev:'BFCC', type:'Buffer',       materialType:'Buffer', chemistry:'Cortisol' },
+  'Progesterone Conjugate Buffer': { itemNumber:'BUF-CON-PRG', partNumber:'BFCP-001',          supplier:'Eli Health',              category:'A', abbrev:'BFCP', type:'Buffer',       materialType:'Buffer', chemistry:'Progesterone' },
+  'Testosterone Conjugate Buffer': { itemNumber:'BUF-CON-TST', partNumber:'BFCT-001',          supplier:'Eli Health',              category:'A', abbrev:'BFCT', type:'Buffer',       materialType:'Buffer', chemistry:'Testosterone' },
 
   // ══ FINISHED PRODUCTS ══════════════════════════
   // ── Cortisol Finished ───────────────────────────
-  'Cortisol Cartridge Assembled':    { number:'CLC',                  supplier:'Eli Health',              category:'A', abbrev:'CCAS', type:'Finished',     materialType:'Finished Product', chemistry:'Cortisol',     retainTarget:2 },
-  'Cortisol Kit':                    { number:'CLK',                  supplier:'Eli Health',              category:'A', abbrev:'CLKT', type:'Finished',     materialType:'Finished Product', chemistry:'Cortisol',     retainTarget:0 },
-  'Cortisol Transfer Strip':         { number:'CLC-S1-C1',            supplier:'Eli Health',              category:'A', abbrev:'CTSC', type:'Finished',     materialType:'Finished Product', chemistry:'Cortisol',     retainTarget:0 },
-  'Cortisol Upper Handle':           { number:'CLC-S1-C2',            supplier:'Eli Health',              category:'A', abbrev:'CUHC', type:'Finished',     materialType:'Finished Product', chemistry:'Cortisol',     retainTarget:0 },
-  'Cortisol Lower Handle':           { number:'CLC-S1-C3',            supplier:'Eli Health',              category:'A', abbrev:'CLHC', type:'Finished',     materialType:'Finished Product', chemistry:'Cortisol',     retainTarget:0 },
-  'Cortisol Test':                   { number:'CT',                   supplier:'Eli Health',              category:'A', abbrev:'CTST', type:'Finished',     materialType:'Finished Product', chemistry:'Cortisol',     retainTarget:2 },
+  'Cortisol Cartridge Assembled': { itemNumber:'CLC', partNumber:'CCAS-001',                  supplier:'Eli Health',              category:'A', abbrev:'CCAS', type:'Finished',     materialType:'Finished Product', chemistry:'Cortisol',     retainTarget:2 },
+  'Cortisol Kit': { itemNumber:'CLK', partNumber:'CLKT-001',                  supplier:'Eli Health',              category:'A', abbrev:'CLKT', type:'Finished',     materialType:'Finished Product', chemistry:'Cortisol',     retainTarget:0 },
+  'Cortisol Transfer Strip': { itemNumber:'CLC-S1-C1', partNumber:'CTSC-001',            supplier:'Eli Health',              category:'A', abbrev:'CTSC', type:'Finished',     materialType:'Finished Product', chemistry:'Cortisol',     retainTarget:0 },
+  'Cortisol Upper Handle': { itemNumber:'CLC-S1-C2', partNumber:'CUHC-001',            supplier:'Eli Health',              category:'A', abbrev:'CUHC', type:'Finished',     materialType:'Finished Product', chemistry:'Cortisol',     retainTarget:0 },
+  'Cortisol Lower Handle': { itemNumber:'CLC-S1-C3', partNumber:'CLHC-001',            supplier:'Eli Health',              category:'A', abbrev:'CLHC', type:'Finished',     materialType:'Finished Product', chemistry:'Cortisol',     retainTarget:0 },
+  'Cortisol Test': { itemNumber:'CT', partNumber:'CTST-001',                   supplier:'Eli Health',              category:'A', abbrev:'CTST', type:'Finished',     materialType:'Finished Product', chemistry:'Cortisol',     retainTarget:2 },
   // ── Progesterone Finished ───────────────────────
-  'Progesterone Cartridge Assembled':{ number:'PEC',                  supplier:'Eli Health',              category:'A', abbrev:'PCAS', type:'Finished',     materialType:'Finished Product', chemistry:'Progesterone', retainTarget:2 },
-  'Progesterone Kit':                { number:'PEK',                  supplier:'Eli Health',              category:'A', abbrev:'PEKT', type:'Finished',     materialType:'Finished Product', chemistry:'Progesterone', retainTarget:0 },
-  'Progesterone Transfer Strip':     { number:'PEC-S1-C1',            supplier:'Eli Health',              category:'A', abbrev:'PTSC', type:'Finished',     materialType:'Finished Product', chemistry:'Progesterone', retainTarget:0 },
-  'Progesterone Upper Handle':       { number:'PEC-S1-C2',            supplier:'Eli Health',              category:'A', abbrev:'PUHC', type:'Finished',     materialType:'Finished Product', chemistry:'Progesterone', retainTarget:0 },
-  'Progesterone Lower Handle':       { number:'PEC-S1-C3',            supplier:'Eli Health',              category:'A', abbrev:'PLHC', type:'Finished',     materialType:'Finished Product', chemistry:'Progesterone', retainTarget:0 },
-  'Progesterone Test':               { number:'PT',                   supplier:'Eli Health',              category:'A', abbrev:'PTST', type:'Finished',     materialType:'Finished Product', chemistry:'Progesterone', retainTarget:2 },
+  'Progesterone Cartridge Assembled': { itemNumber:'PEC', partNumber:'PCAS-001',                  supplier:'Eli Health',              category:'A', abbrev:'PCAS', type:'Finished',     materialType:'Finished Product', chemistry:'Progesterone', retainTarget:2 },
+  'Progesterone Kit': { itemNumber:'PEK', partNumber:'PEKT-001',                  supplier:'Eli Health',              category:'A', abbrev:'PEKT', type:'Finished',     materialType:'Finished Product', chemistry:'Progesterone', retainTarget:0 },
+  'Progesterone Transfer Strip': { itemNumber:'PEC-S1-C1', partNumber:'PTSC-001',            supplier:'Eli Health',              category:'A', abbrev:'PTSC', type:'Finished',     materialType:'Finished Product', chemistry:'Progesterone', retainTarget:0 },
+  'Progesterone Upper Handle': { itemNumber:'PEC-S1-C2', partNumber:'PUHC-001',            supplier:'Eli Health',              category:'A', abbrev:'PUHC', type:'Finished',     materialType:'Finished Product', chemistry:'Progesterone', retainTarget:0 },
+  'Progesterone Lower Handle': { itemNumber:'PEC-S1-C3', partNumber:'PLHC-001',            supplier:'Eli Health',              category:'A', abbrev:'PLHC', type:'Finished',     materialType:'Finished Product', chemistry:'Progesterone', retainTarget:0 },
+  'Progesterone Test': { itemNumber:'PT', partNumber:'PTST-001',                   supplier:'Eli Health',              category:'A', abbrev:'PTST', type:'Finished',     materialType:'Finished Product', chemistry:'Progesterone', retainTarget:2 },
   // ── Testosterone Finished ───────────────────────
-  'Testosterone Cartridge Assembled':{ number:'TEC',                  supplier:'Eli Health',              category:'A', abbrev:'TCAS', type:'Finished',     materialType:'Finished Product', chemistry:'Testosterone', retainTarget:2 },
-  'Testosterone Kit':                { number:'TEK',                  supplier:'Eli Health',              category:'A', abbrev:'TEKT', type:'Finished',     materialType:'Finished Product', chemistry:'Testosterone', retainTarget:0 },
-  'Testosterone Transfer Strip':     { number:'TEC-S1-C1',            supplier:'Eli Health',              category:'A', abbrev:'TTSC', type:'Finished',     materialType:'Finished Product', chemistry:'Testosterone', retainTarget:0 },
-  'Testosterone Upper Handle':       { number:'TEC-S1-C2',            supplier:'Eli Health',              category:'A', abbrev:'TUHC', type:'Finished',     materialType:'Finished Product', chemistry:'Testosterone', retainTarget:0 },
-  'Testosterone Lower Handle':       { number:'TEC-S1-C3',            supplier:'Eli Health',              category:'A', abbrev:'TLHC', type:'Finished',     materialType:'Finished Product', chemistry:'Testosterone', retainTarget:0 },
-  'Testosterone Test':               { number:'TT',                   supplier:'Eli Health',              category:'A', abbrev:'TTST', type:'Finished',     materialType:'Finished Product', chemistry:'Testosterone', retainTarget:2 },
+  'Testosterone Cartridge Assembled': { itemNumber:'TEC', partNumber:'TCAS-001',                  supplier:'Eli Health',              category:'A', abbrev:'TCAS', type:'Finished',     materialType:'Finished Product', chemistry:'Testosterone', retainTarget:2 },
+  'Testosterone Kit': { itemNumber:'TEK', partNumber:'TEKT-001',                  supplier:'Eli Health',              category:'A', abbrev:'TEKT', type:'Finished',     materialType:'Finished Product', chemistry:'Testosterone', retainTarget:0 },
+  'Testosterone Transfer Strip': { itemNumber:'TEC-S1-C1', partNumber:'TTSC-001',            supplier:'Eli Health',              category:'A', abbrev:'TTSC', type:'Finished',     materialType:'Finished Product', chemistry:'Testosterone', retainTarget:0 },
+  'Testosterone Upper Handle': { itemNumber:'TEC-S1-C2', partNumber:'TUHC-001',            supplier:'Eli Health',              category:'A', abbrev:'TUHC', type:'Finished',     materialType:'Finished Product', chemistry:'Testosterone', retainTarget:0 },
+  'Testosterone Lower Handle': { itemNumber:'TEC-S1-C3', partNumber:'TLHC-001',            supplier:'Eli Health',              category:'A', abbrev:'TLHC', type:'Finished',     materialType:'Finished Product', chemistry:'Testosterone', retainTarget:0 },
+  'Testosterone Test': { itemNumber:'TT', partNumber:'TTST-001',                   supplier:'Eli Health',              category:'A', abbrev:'TTST', type:'Finished',     materialType:'Finished Product', chemistry:'Testosterone', retainTarget:2 },
   // ── Nitrocellulose (Raw from Sartorius — per chemistry) ─
-  'Cortisol Nitrocellulose (Raw)':   { number:'LFC-S1',               supplier:'Sartorius',               category:'A', abbrev:'CNCS', type:'Material',     materialType:'Raw Material', chemistry:'Cortisol' },
-  'Progesterone Nitrocellulose (Raw)':{ number:'LFP-S1',              supplier:'Sartorius',               category:'A', abbrev:'PNCS', type:'Material',     materialType:'Raw Material', chemistry:'Progesterone' },
-  'Testosterone Nitrocellulose (Raw)':{ number:'LFT-S1',              supplier:'Sartorius',               category:'A', abbrev:'TNCS', type:'Material',     materialType:'Raw Material', chemistry:'Testosterone' },
+  'Cortisol Nitrocellulose (Raw)': { itemNumber:'LFC-S1', partNumber:'CNCS-001',               supplier:'Sartorius',               category:'A', abbrev:'CNCS', type:'Material',     materialType:'Raw Material', chemistry:'Cortisol' },
+  'Progesterone Nitrocellulose (Raw)': { itemNumber:'LFP-S1', partNumber:'PNCS-001',              supplier:'Sartorius',               category:'A', abbrev:'PNCS', type:'Material',     materialType:'Raw Material', chemistry:'Progesterone' },
+  'Testosterone Nitrocellulose (Raw)': { itemNumber:'LFT-S1', partNumber:'TNCS-001',              supplier:'Sartorius',               category:'A', abbrev:'TNCS', type:'Material',     materialType:'Raw Material', chemistry:'Testosterone' },
 };
+
+// Backward compatibility: ensure p.number = p.itemNumber for legacy code
+Object.values(PARTS).forEach(p => { if (!p.number && p.itemNumber) p.number = p.itemNumber; });
 
 // ─────────────────────────────────────────────────────────
 // STATE
@@ -1913,6 +2294,8 @@ let currentInspCat  = null; // 'A', 'B', or 'C'
 let currentModalRow = null;
 let currentDept     = 'All'; // active department tab
 let currentXferRow  = null;  // row being transferred
+let catalogDirtyParts = new Set(); // tracks which parts have been edited
+let currentPartForEdit = null; // part being edited in the edit card
 
 const DEPT_CLASS = {
   'Assay R&D':    'dept-rd',
@@ -2211,6 +2594,9 @@ function showPage(name) {
   if (name === 'production') {
     renderTraceGroups();
   }
+  if (name === 'batchtrace') {
+    loadBatchTrace();
+  }
   if (name === 'catalog') {
     loadCatalogPage();
   }
@@ -2224,9 +2610,18 @@ function showPage(name) {
   }
   // Enforce catalog access
   if (name === 'catalog' && currentUser) {
-    if (currentUser.role !== 'admin' && currentUser.role !== 'catalog') {
+    const hasCatalogAccess = currentUser.role === 'admin' || currentUser.adminAccess?.catalog;
+    if (!hasCatalogAccess) {
       showPage('inventory');
       showToast('You need admin access to view the Parts Catalog', 'error');
+    }
+  }
+  // Enforce admin/users access
+  if (name === 'admin' && currentUser) {
+    const hasUsersAccess = currentUser.role === 'admin' || currentUser.adminAccess?.users;
+    if (!hasUsersAccess) {
+      showPage('inventory');
+      showToast('You need admin access to manage users', 'error');
     }
   }
 }
@@ -3604,6 +3999,7 @@ function updateTopbar() {
 function applyPermissions() {
   if (!currentUser) return;
   const access = currentUser.access || {};
+  const adminAccess = currentUser.adminAccess || {};
   const allDepts = ['Assay R&D', 'Hardware R&D', 'Manufacturing', 'Marketing', 'Office'];
 
   // Filter department tabs — only show depts user has access to
@@ -3613,13 +4009,26 @@ function applyPermissions() {
     if (tab) tab.style.display = access[dept] ? '' : 'none';
   });
 
-  // Show/hide admin nav link
-  const adminLink = document.getElementById('nav-admin');
-  if (adminLink) adminLink.style.display = currentUser.role === 'admin' ? '' : 'none';
+  // Determine admin section visibility based on granular adminAccess
+  const isSuperAdmin = currentUser.role === 'admin';
+  const hasCatalogAccess = isSuperAdmin || adminAccess.catalog;
+  const hasUsersAccess = isSuperAdmin || adminAccess.users;
+  const hasForecastAccess = isSuperAdmin || adminAccess.forecast;
 
-  // Show/hide catalog nav link (admin or catalog role)
+  // Show/hide individual admin nav links
+  const adminLink = document.getElementById('nav-admin');
+  if (adminLink) adminLink.style.display = hasUsersAccess ? '' : 'none';
+
   const catalogLink = document.getElementById('nav-catalog');
-  if (catalogLink) catalogLink.style.display = (currentUser.role === 'admin' || currentUser.role === 'catalog') ? '' : 'none';
+  if (catalogLink) catalogLink.style.display = hasCatalogAccess ? '' : 'none';
+
+  const forecastLink = document.getElementById('nav-forecast');
+  if (forecastLink) forecastLink.style.display = hasForecastAccess ? '' : 'none';
+
+  // Show/hide Admin section label only if ANY admin item is visible
+  const adminLabel = document.getElementById('sidebar-admin-label');
+  const showAdminLabel = hasCatalogAccess || hasUsersAccess || hasForecastAccess;
+  if (adminLabel) adminLabel.style.display = showAdminLabel ? '' : 'none';
 
   // Show/hide "Receive New Item" button based on whether user has edit in ANY dept
   const receiveBtn = document.getElementById('receiveBtnMain');
@@ -3787,12 +4196,29 @@ function renderAdminUsers(users) {
       </div>`;
     }).join('');
 
+    // Admin access checkboxes
+    const adminAccess = u.adminAccess || {};
+    const adminAccessCells = [
+      { key: 'catalog', label: 'Catalog' },
+      { key: 'users', label: 'Users' },
+      { key: 'forecast', label: 'Forecast' }
+    ].map(item => {
+      const chkId = `admin_${u.email.replace(/[@.]/g,'_')}_${item.key}`;
+      const checked = adminAccess[item.key] ? 'checked' : '';
+      return `<label style="display:flex;align-items:center;gap:6px;font-size:12px;padding:2px 6px;">
+        <input type="checkbox" id="${chkId}" ${checked} onchange="saveUserAdminAccess('${u.email}','${item.key}',this.checked)" />
+        <span>${item.label}</span>
+      </label>`;
+    }).join('');
+
     return `<div class="user-row" id="urow_${u.email.replace(/[@.]/g,'_')}">
       <div class="user-info">
         <div class="user-info-name">${u.name||'—'}${rolePill}</div>
         <div class="user-info-email">${u.email}</div>
       </div>
       <div class="user-access-chips" style="gap:8px;">${deptCells}</div>
+      <div style="display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--soft-hash);font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin:0 8px;">Admin Access</div>
+      <div style="display:flex;flex-direction:column;gap:2px;">${adminAccessCells}</div>
       <div style="display:flex;gap:4px;flex-shrink:0;align-items:center;">${pinBtn}${removeBtn}</div>
     </div>`;
   }).join('');
@@ -3828,6 +4254,27 @@ async function saveUserAccess(email, dept, perm, selectEl) {
     showToast('Failed to save: ' + e.message, 'error');
     // Revert UI
     if (selectEl) loadAdminUsers();
+  }
+}
+
+async function saveUserAdminAccess(email, key, value) {
+  try {
+    const res = await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify({
+        action: 'updateUserAdminAccess',
+        adminEmail: currentUser.email,
+        targetEmail: email,
+        key: key,
+        value: value
+      })
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error || 'Save failed');
+    showToast(`✓ ${email} admin access updated`);
+  } catch(e) {
+    showToast('Failed to save: ' + e.message, 'error');
+    loadAdminUsers();
   }
 }
 
@@ -3873,6 +4320,7 @@ function toggleAddUserForm() {
 async function submitAddUser() {
   const name  = document.getElementById('newUserName').value.trim();
   const email = document.getElementById('newUserEmail').value.trim().toLowerCase();
+  const role  = document.getElementById('newUserRole')?.value || 'user';
   if (!name)  { showToast('Please enter a name', 'error'); return; }
   if (!email) { showToast('Please enter an email', 'error'); return; }
 
@@ -3882,13 +4330,20 @@ async function submitAddUser() {
     if (val) access[d] = val;
   });
 
+  // Build adminAccess object
+  const adminAccess = {
+    catalog: document.getElementById('newUserCatalogAccess')?.checked || false,
+    users: document.getElementById('newUserUsersAccess')?.checked || false,
+    forecast: document.getElementById('newUserForecastAccess')?.checked || false
+  };
+
   try {
     const res  = await fetch(APPS_SCRIPT_URL, {
       method: 'POST',
       body: JSON.stringify({
         action: 'addUser',
         adminEmail: currentUser.email,
-        email, name, role: document.getElementById('newUserRole')?.value || 'user', access
+        email, name, role, access, adminAccess
       })
     });
     const data = await res.json();
@@ -4145,136 +4600,378 @@ function filterNcLog() {
 // ─────────────────────────────────────────────────────────
 // PARTS CATALOG PAGE
 // ─────────────────────────────────────────────────────────
-let catalogOverrides = {};   // { partName: { minQty, leadTime, updatedBy, updatedAt } }
-let catalogPending   = {};   // { partName: { minQty, leadTime } }  unsaved changes
+let catalogParts = {};  // merged PARTS + backend overrides
+let showArchived = false;
+let currentPartForModal = null;
 
 async function loadCatalogPage() {
-  renderCatalogTable(); // render from PARTS first (instant)
-  // Then fetch saved overrides from backend
+  catalogParts = JSON.parse(JSON.stringify(PARTS)); // deep copy
+  // Fetch catalog data from backend
   try {
-    const res  = await fetch(`${APPS_SCRIPT_URL}?action=getCatalog`);
+    const res = await fetch(`${APPS_SCRIPT_URL}?action=getCatalog`);
     const json = await res.json();
-    if (json.catalog) {
-      catalogOverrides = {};
-      json.catalog.forEach(row => { catalogOverrides[row.partName] = row; });
+    if (json.catalog && Array.isArray(json.catalog)) {
+      json.catalog.forEach(row => {
+        if (catalogParts[row.partName]) {
+          catalogParts[row.partName] = { ...catalogParts[row.partName], ...row };
+        }
+      });
     }
-  } catch(e) { /* offline / demo — use defaults */ }
+  } catch(e) { /* offline */ }
   renderCatalogTable();
+}
+
+function openPartCard(partName) {
+  currentPartForEdit = partName;
+  const p = catalogParts[partName] || {};
+
+  // Load all fields into the form
+  document.getElementById('pe-name').value = p.name || '';
+  document.getElementById('pe-partNumber').value = p.partNumber || '';
+  document.getElementById('pe-itemNumber').value = p.itemNumber || '';
+  document.getElementById('pe-abbrev').value = p.abbrev || '';
+  document.getElementById('pe-supplier').value = p.supplier || '';
+  document.getElementById('pe-chemistry').value = p.chemistry || 'N/A';
+  document.getElementById('pe-category').value = p.category || 'A';
+  document.getElementById('pe-type').value = p.type || '';
+  document.getElementById('pe-materialType').value = p.materialType || '';
+  document.getElementById('pe-unit').value = p.unit || 'each';
+  document.getElementById('pe-minQty').value = p.minQty || '';
+  document.getElementById('pe-leadTime').value = p.leadTime || '';
+
+  // Set title and version display
+  document.getElementById('pe-title').textContent = `Edit Part — ${partName}`;
+  document.getElementById('pe-version-display').textContent = `v${p.version || 1}`;
+
+  // Show status bar
+  const statusBar = document.getElementById('pe-status-bar');
+  if (p.archived) {
+    statusBar.innerHTML = `<span class="archive-badge">Archived</span><div class="archive-note" style="margin-top:8px;">${p.archiveNote || 'This part is archived.'}</div>`;
+  } else {
+    statusBar.innerHTML = '<span class="active-badge">Active</span>';
+  }
+
+  // Update archive button
+  const archiveBtn = document.getElementById('pe-archive-btn');
+  if (p.archived) {
+    archiveBtn.textContent = '↺ Restore Part';
+    archiveBtn.className = 'cat-action-btn restore';
+  } else {
+    archiveBtn.textContent = 'Archive Part';
+    archiveBtn.className = 'cat-action-btn archive';
+  }
+
+  // Clear error
+  document.getElementById('pe-error').style.display = 'none';
+
+  // Open modal
+  document.getElementById('partEditModal').classList.add('open');
+}
+
+function savePartCard() {
+  const errEl = document.getElementById('pe-error');
+  const partName = currentPartForEdit;
+  const p = catalogParts[partName] || {};
+
+  // Read all form values
+  const newValues = {
+    name: document.getElementById('pe-name').value.trim(),
+    partNumber: document.getElementById('pe-partNumber').value.trim(),
+    itemNumber: document.getElementById('pe-itemNumber').value.trim(),
+    abbrev: document.getElementById('pe-abbrev').value.trim().toUpperCase(),
+    supplier: document.getElementById('pe-supplier').value.trim(),
+    chemistry: document.getElementById('pe-chemistry').value,
+    category: document.getElementById('pe-category').value,
+    type: document.getElementById('pe-type').value,
+    materialType: document.getElementById('pe-materialType').value,
+    unit: document.getElementById('pe-unit').value,
+    minQty: parseInt(document.getElementById('pe-minQty').value) || 0,
+    leadTime: parseInt(document.getElementById('pe-leadTime').value) || 0
+  };
+
+  // Track changes and log to edit history
+  const changes = [];
+  Object.keys(newValues).forEach(field => {
+    const oldValue = p[field];
+    const newValue = newValues[field];
+    if (oldValue !== newValue) {
+      changes.push({ field, oldValue: oldValue || '', newValue });
+      if (!p.editHistory) p.editHistory = [];
+      p.editHistory.push({ field, oldValue: oldValue || '', newValue, by: currentUser?.email || 'Unknown', date: new Date().toISOString() });
+    }
+  });
+
+  // Update the part
+  Object.assign(p, newValues);
+  p.lastEditedBy = currentUser?.email || 'Unknown';
+  p.lastEditedAt = new Date().toISOString();
+
+  // Update PARTS for backward compat
+  PARTS[partName] = { ...catalogParts[partName] };
+
+  // Persist to backend
+  saveCatalogRow(partName);
+
+  // Close modal and re-render
+  closeModal('partEditModal');
+  showToast('✓ Part updated');
+  renderCatalogTable();
+}
+
+function downloadPartMapping() {
+  let csv = 'Part Name,Part Number (Eli),Item Number (Supplier),Supplier,Chemistry,Status\n';
+  Object.entries(catalogParts).forEach(([name, p]) => {
+    const status = p.archived ? 'Archived' : 'Active';
+    const csvLine = `"${name}","${p.partNumber || ''}","${p.itemNumber || ''}","${p.supplier || ''}","${p.chemistry || 'N/A'}","${status}"`;
+    csv += csvLine + '\n';
+  });
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `Eli_Part_Number_Mapping_${new Date().toISOString().split('T')[0]}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
 }
 
 function renderCatalogTable() {
   const searchVal = (document.getElementById('catalogSearch')?.value || '').toLowerCase();
-  const chemFil   = document.getElementById('catalogChemFilter')?.value || '';
-  const typeFil   = document.getElementById('catalogTypeFilter')?.value || '';
-
-  const typeGroups = [
-    { label: 'Raw Material',    key: 'Raw Material' },
-    { label: 'In-House Material', key: 'In-House Material' },
-    { label: 'Finished Product', key: 'Finished Product' },
-    { label: 'Buffer',          key: 'Buffer' },
-  ];
+  const chemFil = document.getElementById('catalogChemFilter')?.value || '';
+  const typeFil = document.getElementById('catalogTypeFilter')?.value || '';
+  const showArch = document.getElementById('showArchivedToggle')?.checked || false;
 
   let rows = '';
   let visibleCount = 0;
 
-  typeGroups.forEach(grp => {
-    if (typeFil && typeFil !== grp.key) return;
-    const partsInGroup = Object.entries(PARTS).filter(([name, p]) => {
-      if (p.materialType !== grp.key) return false;
-      if (chemFil && p.chemistry !== chemFil) return false;
-      if (searchVal && !name.toLowerCase().includes(searchVal) && !(p.number||'').toLowerCase().includes(searchVal)) return false;
-      return true;
-    });
-    if (!partsInGroup.length) return;
-    rows += `<tr class="catalog-section-row"><td colspan="9">${grp.label}</td></tr>`;
-    partsInGroup.forEach(([name, p]) => {
-      visibleCount++;
-      const ov        = catalogOverrides[name] || {};
-      const pend      = catalogPending[name]   || {};
-      const minQtyVal = pend.minQty    !== undefined ? pend.minQty    : (ov.minQty    !== null && ov.minQty    !== undefined ? ov.minQty    : (p.minQty    || ''));
-      const ltVal     = pend.leadTime  !== undefined ? pend.leadTime  : (ov.leadTime  !== null && ov.leadTime  !== undefined ? ov.leadTime  : (p.leadTime  || ''));
-      const isDirty   = pend.minQty !== undefined || pend.leadTime !== undefined;
-      const updatedStr = ov.updatedAt ? `<span style="font-size:10px;color:var(--soft-hash);">${ov.updatedBy ? ov.updatedBy.split('@')[0] : ''}<br>${ov.updatedAt.split('T')[0]}</span>` : '<span style="color:var(--soft-hash);font-size:11px;">—</span>';
-      const chemClass  = p.chemistry==='Cortisol'?'cortisol':p.chemistry==='Progesterone'?'progesterone':p.chemistry==='Testosterone'?'testosterone':'na';
-      const chemPill   = p.chemistry && p.chemistry!=='N/A' ? `<span class="chem-pill ${chemClass}">${p.chemistry}</span>` : '<span style="color:var(--soft-hash);font-size:11px;">—</span>';
-      rows += `<tr data-partname="${name}" data-mtype="${p.materialType}" data-chem="${p.chemistry}">
-        <td style="font-weight:500;">${isDirty?'<span class="catalog-unsaved-dot"></span>':''}${name}</td>
-        <td style="color:var(--soft-hash);font-size:12px;font-family:monospace;">${p.number||'—'}</td>
-        <td style="font-size:12px;">${p.supplier||'—'}</td>
-        <td>${chemPill}</td>
-        <td><span style="font-size:11px;color:var(--soft-hash);">${p.type||''}</span></td>
-        <td style="text-align:center;"><input type="number" class="catalog-edit-input" id="cmin-${name.replace(/[^a-zA-Z0-9]/g,'_')}" value="${minQtyVal}" min="0" placeholder="—" oninput="markCatalogDirty('${name}')" /></td>
-        <td style="text-align:center;"><input type="number" class="catalog-edit-input" id="clt-${name.replace(/[^a-zA-Z0-9]/g,'_')}" value="${ltVal}" min="0" placeholder="—" oninput="markCatalogDirty('${name}')" /></td>
-        <td style="text-align:center;"><button class="catalog-save-btn" id="csave-${name.replace(/[^a-zA-Z0-9]/g,'_')}" onclick="saveCatalogRow('${name}')">Save</button></td>
-        <td>${updatedStr}</td>
-      </tr>`;
-    });
+  Object.entries(catalogParts).forEach(([name, p]) => {
+    // Filter archived
+    if (p.archived && !showArch) return;
+    // Filter chemistry, material type
+    if (chemFil && p.chemistry !== chemFil) return;
+    if (typeFil && p.materialType !== typeFil) return;
+    // Filter search - now searches both itemNumber and partNumber
+    if (searchVal && !name.toLowerCase().includes(searchVal) &&
+        !(p.itemNumber || '').toLowerCase().includes(searchVal) &&
+        !(p.partNumber || '').toLowerCase().includes(searchVal)) return;
+
+    visibleCount++;
+
+    const statusBadge = p.archived
+      ? `<span class="archive-badge">Archived</span>`
+      : `<span class="active-badge">Active</span>`;
+    const versionBadge = p.version ? `<span class="version-badge">v${p.version}</span>` : '<span class="version-badge">v1</span>';
+
+    // Chemistry with colored pill
+    const chemClass = p.chemistry === 'Cortisol' ? 'cortisol' : p.chemistry === 'Progesterone' ? 'progesterone' : p.chemistry === 'Testosterone' ? 'testosterone' : 'na';
+    const chemPill = `<span class="chem-pill ${chemClass}">${p.chemistry || 'N/A'}</span>`;
+
+    // Min qty and lead time display
+    const minQtyDisplay = p.minQty ? p.minQty : '—';
+    const leadTimeDisplay = p.leadTime ? p.leadTime : '—';
+
+    rows += `<tr data-partname="${name}" data-archived="${p.archived || false}" class="catalog-row" style="cursor:pointer;">
+      <td>${name}</td>
+      <td class="mono">${p.partNumber || ''}</td>
+      <td class="mono">${p.itemNumber || ''}</td>
+      <td>${versionBadge}</td>
+      <td>${p.supplier || ''}</td>
+      <td>${chemPill}</td>
+      <td>${p.type || ''}</td>
+      <td style="text-align:center;">${minQtyDisplay}</td>
+      <td style="text-align:center;">${leadTimeDisplay}</td>
+      <td>${statusBadge}</td>
+    </tr>`;
   });
 
-  if (!visibleCount) rows = `<tr><td colspan="9" style="text-align:center;padding:30px;color:var(--soft-hash);">No parts match the current filters</td></tr>`;
+  if (!visibleCount) rows = `<tr><td colspan="10" style="text-align:center;padding:30px;color:var(--soft-hash);">No parts match the current filters</td></tr>`;
   document.getElementById('catalogTbody').innerHTML = rows;
+
+  // Add event listeners to catalog rows
+  document.querySelectorAll('.catalog-row').forEach(row => {
+    row.addEventListener('click', function() {
+      const partName = this.getAttribute('data-partname');
+      openPartCard(partName);
+    });
+  });
 }
 
 function filterCatalogTable() { renderCatalogTable(); }
 
-function markCatalogDirty(partName) {
-  const key = partName.replace(/[^a-zA-Z0-9]/g,'_');
-  const minEl = document.getElementById('cmin-'+key);
-  const ltEl  = document.getElementById('clt-'+key);
-  catalogPending[partName] = {
-    minQty:   minEl  ? minEl.value  : '',
-    leadTime: ltEl   ? ltEl.value   : ''
+function toggleShowArchived() { renderCatalogTable(); }
+
+function openAddPartModal() {
+  document.getElementById('np-error').style.display = 'none';
+  document.getElementById('np-error').textContent = '';
+  // Clear form
+  ['np-name', 'np-itemNumber', 'np-partNumber', 'np-abbrev', 'np-supplier', 'np-chemistry', 'np-category', 'np-type', 'np-materialType', 'np-unit', 'np-minQty', 'np-leadTime'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = el.tagName === 'SELECT' ? el.options[0].value : '';
+  });
+  document.getElementById('addPartModal').classList.add('open');
+}
+
+function submitNewPart() {
+  const errEl = document.getElementById('np-error');
+  errEl.style.display = 'none';
+  const name = document.getElementById('np-name').value.trim();
+  const itemNumber = document.getElementById('np-itemNumber').value.trim();
+  const partNumber = document.getElementById('np-partNumber').value.trim();
+  const abbrev = document.getElementById('np-abbrev').value.trim().toUpperCase();
+  const supplier = document.getElementById('np-supplier').value.trim();
+  const chemistry = document.getElementById('np-chemistry').value;
+  const category = document.getElementById('np-category').value;
+  const type = document.getElementById('np-type').value;
+  const materialType = document.getElementById('np-materialType').value;
+  const unit = document.getElementById('np-unit').value;
+  const minQty = parseInt(document.getElementById('np-minQty').value) || 0;
+  const leadTime = parseInt(document.getElementById('np-leadTime').value) || 0;
+
+  if (!name) { errEl.textContent = 'Part Name is required'; errEl.style.display = ''; return; }
+  if (!itemNumber) { errEl.textContent = 'Item Number is required'; errEl.style.display = ''; return; }
+  if (!partNumber) { errEl.textContent = 'Part Number (Eli) is required'; errEl.style.display = ''; return; }
+  if (!abbrev) { errEl.textContent = 'Abbreviation is required'; errEl.style.display = ''; return; }
+  if (catalogParts[name]) { errEl.textContent = 'This part already exists'; errEl.style.display = ''; return; }
+
+  // Add to catalog
+  catalogParts[name] = {
+    name, itemNumber, partNumber, abbrev, supplier, chemistry, category, type, materialType, unit, minQty, leadTime,
+    version: 1, versionHistory: [], archived: false, editHistory: [], lastEditedBy: currentUser.email, lastEditedAt: new Date().toISOString()
   };
-  const badge   = document.getElementById('catalogUnsavedBadge');
-  const saveAll = document.getElementById('catalogSaveAllBtn');
-  if (badge)   badge.style.display   = '';
-  if (saveAll) saveAll.style.display = '';
+  PARTS[name] = { ...catalogParts[name] };
+  closeModal('addPartModal');
+  showToast('✓ Part added');
+  renderCatalogTable();
+}
+
+function openVersionModal(partName) {
+  currentPartForModal = partName;
+  const p = catalogParts[partName] || {};
+  document.getElementById('vm-title').textContent = `Version History — ${partName}`;
+  document.getElementById('vm-error').style.display = 'none';
+  document.getElementById('vm-newNumber').value = '';
+  document.getElementById('vm-changes').value = '';
+
+  const timeline = document.getElementById('vm-timeline');
+  if (!p.versionHistory || !p.versionHistory.length) {
+    timeline.innerHTML = `<div class="version-entry current"><div class="version-entry-header">v1</div><div class="version-entry-meta">Current version</div></div>`;
+  } else {
+    timeline.innerHTML = p.versionHistory.map((entry, i) => `
+      <div class="version-entry ${i === p.versionHistory.length - 1 ? 'current' : ''}">
+        <div class="version-entry-header">v${entry.version}</div>
+        <div class="version-entry-meta">${entry.by || 'Unknown'} · ${new Date(entry.date).toLocaleString()}</div>
+        <div class="version-entry-changes">${entry.changes || entry.note || 'No changelog'}</div>
+      </div>
+    `).join('');
+  }
+  document.getElementById('versionModal').classList.add('open');
+}
+
+function submitNewVersion() {
+  const errEl = document.getElementById('vm-error');
+  const changes = document.getElementById('vm-changes').value.trim();
+  const newNumber = document.getElementById('vm-newNumber').value.trim();
+
+  if (!changes) { errEl.textContent = 'Please describe what changed'; errEl.style.display = ''; return; }
+
+  const p = catalogParts[currentPartForModal] || {};
+  const newVer = (p.version || 1) + 1;
+  if (!p.versionHistory) p.versionHistory = [];
+  p.versionHistory.push({ version: newVer, date: new Date().toISOString(), by: currentUser.email, changes, note: changes });
+  p.version = newVer;
+  if (newNumber) p.number = newNumber;
+  p.lastEditedBy = currentUser.email;
+  p.lastEditedAt = new Date().toISOString();
+
+  saveCatalogRow(currentPartForModal);
+  closeModal('versionModal');
+  // Update the edit card's version display if it's open
+  if (currentPartForEdit === currentPartForModal) {
+    document.getElementById('pe-version-display').textContent = `v${newVer}`;
+  }
+  showToast('✓ Version created');
+  renderCatalogTable();
+}
+
+function openArchiveModal(partName) {
+  currentPartForModal = partName;
+  const p = catalogParts[partName] || {};
+  document.getElementById('am-title').textContent = p.archived ? 'Restore Part' : 'Archive Part';
+  document.getElementById('am-subtitle').textContent = p.archived ? 'This will make the part visible in active catalog views.' : 'This will hide the part from active catalog views.';
+  document.getElementById('am-reason').value = p.archiveNote || '';
+  document.getElementById('am-error').style.display = 'none';
+  document.getElementById('archiveModal').classList.add('open');
+}
+
+function submitArchive() {
+  const errEl = document.getElementById('am-error');
+  const p = catalogParts[currentPartForModal] || {};
+  const reason = document.getElementById('am-reason').value.trim();
+
+  if (!p.archived && !reason) { errEl.textContent = 'Please provide a reason for archiving'; errEl.style.display = ''; return; }
+
+  if (!p.archived) {
+    p.archived = true;
+    p.archiveNote = reason;
+    p.archivedBy = currentUser.email;
+    p.archivedDate = new Date().toISOString();
+    delete PARTS[currentPartForModal]; // Remove from active parts so inventory doesn't use it
+  } else {
+    p.archived = false;
+    p.archiveNote = '';
+    PARTS[currentPartForModal] = { ...catalogParts[currentPartForModal] }; // Restore to PARTS
+  }
+  p.lastEditedBy = currentUser.email;
+  p.lastEditedAt = new Date().toISOString();
+
+  saveCatalogRow(currentPartForModal);
+  closeModal('archiveModal');
+  if (currentPartForEdit === currentPartForModal) closeModal('partEditModal');
+  showToast(`✓ Part ${p.archived ? 'archived' : 'restored'}`);
+  renderCatalogTable();
+}
+
+function openEditHistoryModal(partName) {
+  currentPartForModal = partName;
+  const p = catalogParts[partName] || {};
+  document.getElementById('eh-title').textContent = `Edit History — ${partName}`;
+  const body = document.getElementById('eh-body');
+
+  if (!p.editHistory || !p.editHistory.length) {
+    body.innerHTML = '<p style="color:var(--soft-hash);font-size:13px;padding:20px;text-align:center;">No edit history</p>';
+  } else {
+    body.innerHTML = p.editHistory.map(entry => `
+      <div class="edit-log-entry">
+        <strong>${entry.field}</strong>: ${entry.oldValue} → ${entry.newValue}<br/>
+        <span style="font-size:10px;color:var(--soft-hash);">${entry.by || 'Unknown'} · ${new Date(entry.date).toLocaleString()}</span>
+      </div>
+    `).join('');
+  }
+  document.getElementById('editHistoryModal').classList.add('open');
+}
+
+async function saveAllCatalogChanges() {
+  for (const [partName, p] of Object.entries(catalogParts)) {
+    await saveCatalogRow(partName);
+  }
 }
 
 async function saveCatalogRow(partName) {
   if (!currentUser) { showToast('Not logged in', 'error'); return; }
-  const key   = partName.replace(/[^a-zA-Z0-9]/g,'_');
-  const minEl = document.getElementById('cmin-'+key);
-  const ltEl  = document.getElementById('clt-'+key);
-  const btn   = document.getElementById('csave-'+key);
-  const minQty   = minEl ? Number(minEl.value) : 0;
-  const leadTime = ltEl  ? Number(ltEl.value)  : 0;
-  if (btn) { btn.textContent = '…'; btn.disabled = true; }
+  const p = catalogParts[partName] || {};
+  const payload = {
+    action: 'updateCatalog', partName, abbrev: p.abbrev || '', itemNumber: p.itemNumber || '', partNumber: p.partNumber || '', supplier: p.supplier || '',
+    chemistry: p.chemistry || 'N/A', category: p.category || 'A', type: p.type || '', materialType: p.materialType || '',
+    unit: p.unit || 'each', minQty: p.minQty || 0, leadTime: p.leadTime || 0,
+    version: p.version || 1, versionHistory: JSON.stringify(p.versionHistory || []),
+    archived: p.archived || false, archiveNote: p.archiveNote || '', archivedBy: p.archivedBy || '',
+    archivedDate: p.archivedDate || '', editHistory: JSON.stringify(p.editHistory || []),
+    lastEditedBy: currentUser.email, lastEditedAt: new Date().toISOString(), userEmail: currentUser.email
+  };
   try {
-    const p = PARTS[partName] || {};
-    const res  = await fetch(APPS_SCRIPT_URL, { method:'POST', body: JSON.stringify({
-      action:'updateCatalog', partName, partNumber: p.number||'', minQty, leadTime, userEmail: currentUser.email
-    })});
+    const res = await fetch(APPS_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
     const json = await res.json();
-    if (json.ok) {
-      catalogOverrides[partName] = { minQty, leadTime, updatedBy: currentUser.email, updatedAt: new Date().toISOString() };
-      delete catalogPending[partName];
-      // Also update the in-memory PARTS defaults so incoming form picks it up
-      if (PARTS[partName]) { PARTS[partName].minQty = minQty; PARTS[partName].leadTime = leadTime; }
-      if (btn) { btn.textContent = '✓ Saved'; btn.classList.add('saved'); setTimeout(()=>{btn.textContent='Save';btn.classList.remove('saved');btn.disabled=false;},1800); }
-      // Check if any more pending
-      if (!Object.keys(catalogPending).length) {
-        const badge   = document.getElementById('catalogUnsavedBadge');
-        const saveAll = document.getElementById('catalogSaveAllBtn');
-        if (badge)   badge.style.display   = 'none';
-        if (saveAll) saveAll.style.display = 'none';
-      }
-    } else {
-      showToast(json.error || 'Save failed', 'error');
-      if (btn) { btn.textContent = 'Save'; btn.disabled = false; }
-    }
-  } catch(e) {
-    showToast('Network error saving catalog', 'error');
-    if (btn) { btn.textContent = 'Save'; btn.disabled = false; }
-  }
-}
-
-async function saveAllCatalogChanges() {
-  const pending = Object.keys(catalogPending);
-  if (!pending.length) return;
-  for (const partName of pending) {
-    await saveCatalogRow(partName);
-  }
+    if (!json.ok) showToast(json.error || 'Save failed', 'error');
+  } catch(e) { showToast('Network error', 'error'); }
 }
 
 // ─────────────────────────────────────────────────────────
@@ -4440,6 +5137,486 @@ function renderTraceGroups() {
 function toggleTraceBatch(id) {
   const card = document.getElementById(id);
   if (card) card.classList.toggle('collapsed');
+}
+
+// ─────────────────────────────────────────────────────────────
+// BATCH TRACEABILITY — Manufacturing Finished Batches
+// ─────────────────────────────────────────────────────────────
+let batchTraceData = []; // array of batch objects
+let batchLogCurrentBatch = null;
+
+async function loadBatchTrace() {
+  // Build batch data from inventoryData + fetch batch logs from backend
+  buildBatchTraceData();
+
+  // Try to fetch enriched batch data (daily logs, shipments) from backend
+  try {
+    const res = await fetch(`${APPS_SCRIPT_URL}?action=getBatchLogs`);
+    const json = await res.json();
+    if (json.batchLogs) {
+      // Merge backend logs into batchTraceData
+      json.batchLogs.forEach(log => {
+        const batch = batchTraceData.find(b => b.batchNumber === log.batchNumber);
+        if (batch) {
+          if (log.dailyLogs) batch.dailyLogs = log.dailyLogs;
+          if (log.shipments) batch.shipments = log.shipments;
+          if (log.status) batch.status = log.status;
+        }
+      });
+    }
+  } catch(e) { /* offline — use computed data only */ }
+
+  renderBatchTrace();
+}
+
+function buildBatchTraceData() {
+  // Group finished products by batch number
+  const batchMap = {};
+
+  inventoryData.forEach(row => {
+    const bnum = row['Batch Number'] || '';
+    if (!bnum) return; // skip items with no batch
+
+    if (!batchMap[bnum]) {
+      batchMap[bnum] = {
+        batchNumber: bnum,
+        chemistry: 'N/A',
+        status: 'in-progress',
+        totalQty: 0,
+        finishedItems: [],
+        rawMaterials: [],
+        inHouseItems: [],
+        bufferItems: [],
+        dailyLogs: [],
+        shipments: [],
+        scrapEntries: [],
+        location: '',
+        startDate: '',
+        endDate: ''
+      };
+    }
+
+    const batch = batchMap[bnum];
+    const mtype = row['Material Type'] || 'Raw Material';
+    const chem = row['Chemistry'] || 'N/A';
+    if (chem !== 'N/A') batch.chemistry = chem;
+
+    if (mtype === 'Finished Product') {
+      batch.finishedItems.push(row);
+      const qty = parseInt(row['Quantity']) || 0;
+      batch.totalQty += qty;
+      if (row['Location']) batch.location = row['Location'];
+      // Try to determine dates
+      const dateRec = row['Date Received'] || row['Timestamp'] || '';
+      if (dateRec) {
+        if (!batch.startDate || dateRec < batch.startDate) batch.startDate = dateRec;
+        if (!batch.endDate || dateRec > batch.endDate) batch.endDate = dateRec;
+      }
+    } else if (mtype === 'Raw Material') {
+      batch.rawMaterials.push(row);
+    } else if (mtype === 'In-House Material') {
+      batch.inHouseItems.push(row);
+    } else if (mtype === 'Buffer') {
+      batch.bufferItems.push(row);
+    }
+  });
+
+  // Also link raw materials that are referenced in Source Lots of finished/in-house items
+  Object.values(batchMap).forEach(batch => {
+    const srcLots = new Set();
+    [...batch.finishedItems, ...batch.inHouseItems].forEach(row => {
+      (row['Source Lots'] || '').split(',').map(s => s.trim()).filter(Boolean).forEach(l => srcLots.add(l));
+    });
+
+    if (srcLots.size) {
+      inventoryData.forEach(row => {
+        const lot = row['Lot Number'] || '';
+        if (srcLots.has(lot) && !batch.rawMaterials.find(r => r['Lot Number'] === lot)) {
+          batch.rawMaterials.push(row);
+        }
+      });
+    }
+  });
+
+  // Compute statuses
+  Object.values(batchMap).forEach(batch => {
+    const totalShipped = batch.shipments.reduce((s, sh) => s + (parseInt(sh.qty) || 0), 0);
+    if (totalShipped >= batch.totalQty && batch.totalQty > 0) {
+      batch.status = 'shipped';
+    } else if (totalShipped > 0) {
+      batch.status = 'partial';
+    } else if (batch.totalQty > 0) {
+      batch.status = 'complete';
+    }
+  });
+
+  batchTraceData = Object.values(batchMap).sort((a, b) => {
+    // Sort by batch number descending (newest first)
+    return b.batchNumber.localeCompare(a.batchNumber);
+  });
+}
+
+function renderBatchTrace() {
+  const container = document.getElementById('btContainer');
+  if (!container) return;
+
+  const q = (document.getElementById('btSearch')?.value || '').toLowerCase();
+  const chemFil = document.getElementById('btChemFilter')?.value || '';
+  const statusFil = document.getElementById('btStatusFilter')?.value || '';
+
+  let filtered = batchTraceData.filter(b => {
+    if (chemFil && b.chemistry !== chemFil) return false;
+    if (statusFil && b.status !== statusFil) return false;
+    if (q) {
+      const searchStr = [b.batchNumber, b.chemistry,
+        ...b.finishedItems.map(r => (r['Part Name']||'') + ' ' + (r['Lot Number']||'')),
+        ...b.rawMaterials.map(r => (r['Part Name']||'') + ' ' + (r['Lot Number']||''))
+      ].join(' ').toLowerCase();
+      if (!searchStr.includes(q)) return false;
+    }
+    return true;
+  });
+
+  // Stats
+  const totalStat = batchTraceData.length;
+  const activeStat = batchTraceData.filter(b => b.status === 'in-progress').length;
+  const completeStat = batchTraceData.filter(b => b.status === 'complete').length;
+  const shippedStat = batchTraceData.filter(b => b.status === 'shipped' || b.status === 'partial').length;
+  document.getElementById('bt-stat-total').textContent = totalStat;
+  document.getElementById('bt-stat-active').textContent = activeStat;
+  document.getElementById('bt-stat-complete').textContent = completeStat;
+  document.getElementById('bt-stat-shipped').textContent = shippedStat;
+
+  if (!filtered.length) {
+    container.innerHTML = '<div class="trace-empty">📭 No batches found. Try adjusting your filters.</div>';
+    return;
+  }
+
+  container.innerHTML = filtered.map((b, i) => {
+    const chemClass = b.chemistry === 'Cortisol' ? 'cortisol' : b.chemistry === 'Progesterone' ? 'progesterone' : b.chemistry === 'Testosterone' ? 'testosterone' : 'na';
+    const statusLabel = {
+      'in-progress': 'In Progress', 'complete': 'Complete', 'shipped': 'Shipped', 'partial': 'Partial Ship'
+    }[b.status] || b.status;
+
+    const totalShipped = b.shipments.reduce((s, sh) => s + (parseInt(sh.qty) || 0), 0);
+    const remaining = b.totalQty - totalShipped;
+    const totalScrap = b.dailyLogs.reduce((s, d) => s + (parseInt(d.scrap) || 0), 0);
+    const totalBuilt = b.dailyLogs.reduce((s, d) => s + (parseInt(d.qty) || 0), 0);
+
+    return `<div class="bt-batch-card" id="btc-${i}">
+      <div class="bt-batch-header" onclick="toggleBtBatch('btc-${i}')">
+        <span class="bt-chevron">▶</span>
+        <span class="bt-batch-id">${b.batchNumber}</span>
+        <div class="bt-batch-pills">
+          ${b.chemistry !== 'N/A' ? `<span class="chem-pill ${chemClass}">${b.chemistry}</span>` : ''}
+          <span class="bt-status-pill ${b.status}">${statusLabel}</span>
+        </div>
+        <span class="bt-batch-meta">
+          <span>Total: <strong>${b.totalQty.toLocaleString()}</strong></span>
+          ${totalShipped ? `<span>Shipped: <strong>${totalShipped.toLocaleString()}</strong></span>` : ''}
+          ${remaining > 0 && totalShipped > 0 ? `<span>Remaining: <strong>${remaining.toLocaleString()}</strong></span>` : ''}
+          <span>Raw lots: <strong>${b.rawMaterials.length}</strong></span>
+        </span>
+      </div>
+      <div class="bt-batch-body">
+        <!-- Sub-tabs inside batch -->
+        <div class="bt-body-tabs">
+          <div class="bt-body-tab active" onclick="switchBtTab('btc-${i}','overview')">Overview</div>
+          <div class="bt-body-tab" onclick="switchBtTab('btc-${i}','raw')">Raw Materials (${b.rawMaterials.length})</div>
+          <div class="bt-body-tab" onclick="switchBtTab('btc-${i}','daily')">Daily Log (${b.dailyLogs.length})</div>
+          <div class="bt-body-tab" onclick="switchBtTab('btc-${i}','shipments')">Shipments (${b.shipments.length})</div>
+          <div class="bt-body-tab" onclick="switchBtTab('btc-${i}','location')">Location</div>
+        </div>
+
+        <!-- OVERVIEW TAB -->
+        <div class="bt-tab-panel active" data-tab="overview" data-batch="btc-${i}">
+          <div class="bt-overview-grid">
+            <div class="bt-overview-card">
+              <h4>Batch Details</h4>
+              <div class="bt-kv-row"><span class="bt-kv-key">Batch #</span><span class="bt-kv-val" style="font-family:'Chivo Mono',monospace;">${b.batchNumber}</span></div>
+              <div class="bt-kv-row"><span class="bt-kv-key">Chemistry</span><span class="bt-kv-val">${b.chemistry}</span></div>
+              <div class="bt-kv-row"><span class="bt-kv-key">Total Qty</span><span class="bt-kv-val">${b.totalQty.toLocaleString()}</span></div>
+              <div class="bt-kv-row"><span class="bt-kv-key">Status</span><span class="bt-kv-val"><span class="bt-status-pill ${b.status}">${statusLabel}</span></span></div>
+              <div class="bt-kv-row"><span class="bt-kv-key">Start Date</span><span class="bt-kv-val">${b.startDate ? formatDate(b.startDate) : '—'}</span></div>
+              <div class="bt-kv-row"><span class="bt-kv-key">Location</span><span class="bt-kv-val">${b.location || '—'}</span></div>
+            </div>
+            <div class="bt-overview-card">
+              <h4>Production Summary</h4>
+              <div class="bt-kv-row"><span class="bt-kv-key">Days Logged</span><span class="bt-kv-val">${b.dailyLogs.length}</span></div>
+              <div class="bt-kv-row"><span class="bt-kv-key">Total Built (logged)</span><span class="bt-kv-val">${totalBuilt.toLocaleString()}</span></div>
+              <div class="bt-kv-row"><span class="bt-kv-key">Total Scrap</span><span class="bt-kv-val" style="color:${totalScrap > 0 ? '#991b1b' : 'inherit'}">${totalScrap.toLocaleString()}</span></div>
+              <div class="bt-kv-row"><span class="bt-kv-key">Shipped</span><span class="bt-kv-val">${totalShipped.toLocaleString()}</span></div>
+              <div class="bt-kv-row"><span class="bt-kv-key">In Inventory</span><span class="bt-kv-val">${remaining.toLocaleString()}</span></div>
+              <div class="bt-kv-row"><span class="bt-kv-key">Raw Material Lots</span><span class="bt-kv-val">${b.rawMaterials.length}</span></div>
+            </div>
+          </div>
+          <!-- Finished lot list -->
+          ${b.finishedItems.length ? `<div style="margin-top:16px;">
+            <div style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--soft-hash);margin-bottom:8px;">Finished Lots in Batch</div>
+            ${b.finishedItems.map(fi => `<div class="bt-loc-card">
+              <span class="bt-loc-icon">📦</span>
+              <div class="bt-loc-info"><strong>${fi['Part Name'] || '—'}</strong><br><span style="font-family:'Chivo Mono',monospace;font-size:11px;color:var(--soft-hash);">Lot: ${fi['Lot Number'] || '—'}</span> · ${fi['Location'] || 'No location'}</div>
+              <div class="bt-loc-qty">${parseInt(fi['Quantity']).toLocaleString()}<div class="bt-ship-qty-lbl">units</div></div>
+            </div>`).join('')}
+          </div>` : ''}
+          <div style="display:flex;gap:8px;margin-top:16px;">
+            <button class="btn btn-primary btn-sm" onclick="openLogBuildModal('${b.batchNumber}')">📝 Log Daily Build</button>
+            <button class="btn btn-secondary btn-sm" onclick="openLogShipModal('${b.batchNumber}')">🚚 Log Shipment</button>
+          </div>
+        </div>
+
+        <!-- RAW MATERIALS TAB -->
+        <div class="bt-tab-panel" data-tab="raw" data-batch="btc-${i}">
+          ${b.rawMaterials.length ? `<table class="bt-raw-table">
+            <thead><tr><th>QR</th><th>Part Name</th><th>Lot #</th><th>Item #</th><th>Supplier</th><th>Qty</th><th>Status</th><th>Location</th></tr></thead>
+            <tbody>
+              ${b.rawMaterials.map(rm => {
+                const rmQty = parseInt(rm['Quantity']) || 0;
+                const rmSl = stockLevel(rm);
+                const rmSlClass = rmSl === 'In Stock' ? 'sl-in' : rmSl === 'Low Stock' ? 'sl-low' : 'sl-out';
+                return `<tr>
+                  <td><div class="bt-qr-mini" id="btqr-${(rm['Lot Number']||'').replace(/[^a-zA-Z0-9]/g,'_')}"></div></td>
+                  <td style="font-weight:500;">${rm['Part Name'] || '—'}</td>
+                  <td style="font-family:'Chivo Mono',monospace;font-size:11px;">${rm['Lot Number'] || '—'}</td>
+                  <td style="font-size:11px;color:var(--soft-hash);">${rm['Item Number'] || rm['Part Number'] || '—'}</td>
+                  <td style="font-size:12px;">${rm['Supplier'] || '—'}</td>
+                  <td><strong>${rmQty.toLocaleString()}</strong></td>
+                  <td><span class="sl-pill ${rmSlClass}">${rmSl}</span></td>
+                  <td>${rm['Location'] ? `<span class="location-badge">${rm['Location']}</span>` : '—'}</td>
+                </tr>`;
+              }).join('')}
+            </tbody>
+          </table>` : '<div class="trace-empty">No raw materials linked to this batch</div>'}
+        </div>
+
+        <!-- DAILY LOG TAB -->
+        <div class="bt-tab-panel" data-tab="daily" data-batch="btc-${i}">
+          <div style="display:flex;justify-content:flex-end;margin-bottom:12px;">
+            <button class="btn btn-primary btn-sm" onclick="openLogBuildModal('${b.batchNumber}')">📝 Log Daily Build</button>
+          </div>
+          ${b.dailyLogs.length ? b.dailyLogs.sort((a,b) => (b.date||'').localeCompare(a.date||'')).map(dl => `<div class="bt-day-card">
+            <div class="bt-day-header">
+              <span class="bt-day-badge">${formatDate(dl.date)}</span>
+              <span>Operator: <strong>${dl.operator || '—'}</strong></span>
+              <span style="margin-left:auto;">Built: <strong>${parseInt(dl.qty).toLocaleString()}</strong></span>
+              ${parseInt(dl.scrap) > 0 ? `<span style="color:#991b1b;">Scrap: <strong>${parseInt(dl.scrap).toLocaleString()}</strong></span>` : ''}
+            </div>
+            <div class="bt-day-body">
+              ${dl.parts ? `<div class="bt-day-row"><span class="bt-day-action consumed">CONSUMED</span><span>${dl.parts}</span></div>` : ''}
+              ${dl.notes ? `<div class="bt-day-row"><span class="bt-day-action updated">NOTE</span><span>${dl.notes}</span></div>` : ''}
+            </div>
+          </div>`).join('') : '<div class="trace-empty">No daily logs yet. Click "Log Daily Build" to start tracking.</div>'}
+        </div>
+
+        <!-- SHIPMENTS TAB -->
+        <div class="bt-tab-panel" data-tab="shipments" data-batch="btc-${i}">
+          <div style="display:flex;justify-content:flex-end;margin-bottom:12px;">
+            <button class="btn btn-secondary btn-sm" onclick="openLogShipModal('${b.batchNumber}')">🚚 Log Shipment</button>
+          </div>
+          ${b.shipments.length ? b.shipments.map(sh => `<div class="bt-shipment-card">
+            <span class="bt-ship-icon">🚚</span>
+            <div class="bt-ship-info">
+              <div class="bt-ship-dest">${sh.destination || '—'}</div>
+              <div class="bt-ship-meta">${formatDate(sh.date)} · Shipped by: ${sh.shippedBy || '—'}${sh.tracking ? ` · Tracking: ${sh.tracking}` : ''}${sh.notes ? ` · ${sh.notes}` : ''}</div>
+            </div>
+            <div style="text-align:right;"><div class="bt-ship-qty">${parseInt(sh.qty).toLocaleString()}</div><div class="bt-ship-qty-lbl">units</div></div>
+          </div>`).join('') : '<div class="trace-empty">No shipments logged yet. Click "Log Shipment" to record.</div>'}
+        </div>
+
+        <!-- LOCATION TAB -->
+        <div class="bt-tab-panel" data-tab="location" data-batch="btc-${i}">
+          <div style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--soft-hash);margin-bottom:12px;">Current Distribution</div>
+          ${(() => {
+            const totalShippedAmt = b.shipments.reduce((s, sh) => s + (parseInt(sh.qty) || 0), 0);
+            const inStorage = b.totalQty - totalShippedAmt;
+            let cards = '';
+            if (inStorage > 0) {
+              cards += `<div class="bt-loc-card">
+                <span class="bt-loc-icon">🏭</span>
+                <div class="bt-loc-info"><strong>In Storage</strong><br><span style="font-size:12px;color:var(--soft-hash);">${b.location || 'Finished Goods Storage'} · Awaiting fulfillment or shipment</span></div>
+                <div style="text-align:right;"><div class="bt-loc-qty" style="color:#065f46;">${inStorage.toLocaleString()}</div><div class="bt-ship-qty-lbl">units</div></div>
+              </div>`;
+            }
+            b.shipments.forEach(sh => {
+              cards += `<div class="bt-loc-card">
+                <span class="bt-loc-icon">${sh.destination?.toLowerCase().includes('internal') ? '🏢' : '🚚'}</span>
+                <div class="bt-loc-info"><strong>${sh.destination || '—'}</strong><br><span style="font-size:12px;color:var(--soft-hash);">Shipped ${formatDate(sh.date)} by ${sh.shippedBy || '—'}</span></div>
+                <div style="text-align:right;"><div class="bt-loc-qty" style="color:#6d28d9;">${parseInt(sh.qty).toLocaleString()}</div><div class="bt-ship-qty-lbl">shipped</div></div>
+              </div>`;
+            });
+            return cards || '<div class="trace-empty">No location data available</div>';
+          })()}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleBtBatch(id) {
+  const card = document.getElementById(id);
+  if (card) card.classList.toggle('expanded');
+}
+
+function switchBtTab(batchId, tabName) {
+  const card = document.getElementById(batchId);
+  if (!card) return;
+  card.querySelectorAll('.bt-body-tab').forEach(t => t.classList.remove('active'));
+  card.querySelectorAll('.bt-tab-panel').forEach(p => p.classList.remove('active'));
+  // Find the clicked tab
+  card.querySelectorAll('.bt-body-tab').forEach(t => {
+    if (t.textContent.toLowerCase().includes(tabName === 'raw' ? 'raw' : tabName === 'daily' ? 'daily' : tabName === 'shipments' ? 'shipment' : tabName === 'location' ? 'location' : 'overview')) {
+      t.classList.add('active');
+    }
+  });
+  const panel = card.querySelector(`.bt-tab-panel[data-tab="${tabName}"]`);
+  if (panel) panel.classList.add('active');
+}
+
+function openLogBuildModal(batchNum) {
+  batchLogCurrentBatch = batchNum;
+  document.getElementById('lb-batch-label').textContent = 'Batch: ' + batchNum;
+  document.getElementById('lb-date').value = todayISO();
+  document.getElementById('lb-operator').value = currentUser ? currentUser.name : '';
+  document.getElementById('lb-qty').value = '';
+  document.getElementById('lb-scrap').value = '';
+  document.getElementById('lb-parts').value = '';
+  document.getElementById('lb-notes').value = '';
+  document.getElementById('lb-error').style.display = 'none';
+  document.getElementById('logBuildModal').classList.add('open');
+}
+
+async function submitDailyBuild() {
+  const errEl = document.getElementById('lb-error');
+  errEl.style.display = 'none';
+  const date = document.getElementById('lb-date').value;
+  const operator = document.getElementById('lb-operator').value.trim();
+  const qty = document.getElementById('lb-qty').value;
+  const scrap = document.getElementById('lb-scrap').value || '0';
+  const parts = document.getElementById('lb-parts').value.trim();
+  const notes = document.getElementById('lb-notes').value.trim();
+
+  if (!date || !operator || !qty) {
+    errEl.textContent = 'Date, operator, and qty built are required.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  const logEntry = { date, operator, qty, scrap, parts, notes, loggedBy: currentUser?.email || '', loggedAt: new Date().toISOString() };
+
+  try {
+    const res = await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify({
+        action: 'logDailyBuild',
+        batchNumber: batchLogCurrentBatch,
+        log: logEntry,
+        userEmail: currentUser?.email || ''
+      })
+    });
+    const json = await res.json();
+    if (json.ok || json.success) {
+      // Add to local data
+      const batch = batchTraceData.find(b => b.batchNumber === batchLogCurrentBatch);
+      if (batch) batch.dailyLogs.push(logEntry);
+      closeModal('logBuildModal');
+      showToast('Daily build logged for ' + batchLogCurrentBatch);
+      renderBatchTrace();
+    } else {
+      // Still add locally for demo mode
+      const batch = batchTraceData.find(b => b.batchNumber === batchLogCurrentBatch);
+      if (batch) batch.dailyLogs.push(logEntry);
+      closeModal('logBuildModal');
+      showToast('Build logged (offline mode)');
+      renderBatchTrace();
+    }
+  } catch(e) {
+    // Offline — add locally
+    const batch = batchTraceData.find(b => b.batchNumber === batchLogCurrentBatch);
+    if (batch) batch.dailyLogs.push(logEntry);
+    closeModal('logBuildModal');
+    showToast('Build logged (offline)');
+    renderBatchTrace();
+  }
+}
+
+function openLogShipModal(batchNum) {
+  batchLogCurrentBatch = batchNum;
+  document.getElementById('ls-batch-label').textContent = 'Batch: ' + batchNum;
+  document.getElementById('ls-date').value = todayISO();
+  document.getElementById('ls-by').value = currentUser ? currentUser.name : '';
+  document.getElementById('ls-qty').value = '';
+  document.getElementById('ls-dest').value = '';
+  document.getElementById('ls-tracking').value = '';
+  document.getElementById('ls-notes').value = '';
+  document.getElementById('ls-error').style.display = 'none';
+  document.getElementById('logShipModal').classList.add('open');
+}
+
+async function submitShipment() {
+  const errEl = document.getElementById('ls-error');
+  errEl.style.display = 'none';
+  const qty = document.getElementById('ls-qty').value;
+  const date = document.getElementById('ls-date').value;
+  const destination = document.getElementById('ls-dest').value.trim();
+  const shippedBy = document.getElementById('ls-by').value.trim();
+  const tracking = document.getElementById('ls-tracking').value.trim();
+  const notes = document.getElementById('ls-notes').value.trim();
+
+  if (!qty || !date || !destination || !shippedBy) {
+    errEl.textContent = 'Qty, date, destination, and shipped by are required.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  const shipEntry = { qty, date, destination, shippedBy, tracking, notes, loggedBy: currentUser?.email || '', loggedAt: new Date().toISOString() };
+
+  try {
+    const res = await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify({
+        action: 'logShipment',
+        batchNumber: batchLogCurrentBatch,
+        shipment: shipEntry,
+        userEmail: currentUser?.email || ''
+      })
+    });
+    const json = await res.json();
+    if (json.ok || json.success) {
+      const batch = batchTraceData.find(b => b.batchNumber === batchLogCurrentBatch);
+      if (batch) {
+        batch.shipments.push(shipEntry);
+        // Recompute status
+        const totalShipped = batch.shipments.reduce((s, sh) => s + (parseInt(sh.qty) || 0), 0);
+        if (totalShipped >= batch.totalQty) batch.status = 'shipped';
+        else if (totalShipped > 0) batch.status = 'partial';
+      }
+      closeModal('logShipModal');
+      showToast('Shipment logged for ' + batchLogCurrentBatch);
+      renderBatchTrace();
+    } else {
+      const batch = batchTraceData.find(b => b.batchNumber === batchLogCurrentBatch);
+      if (batch) {
+        batch.shipments.push(shipEntry);
+        const totalShipped = batch.shipments.reduce((s, sh) => s + (parseInt(sh.qty) || 0), 0);
+        if (totalShipped >= batch.totalQty) batch.status = 'shipped';
+        else if (totalShipped > 0) batch.status = 'partial';
+      }
+      closeModal('logShipModal');
+      showToast('Shipment logged (offline mode)');
+      renderBatchTrace();
+    }
+  } catch(e) {
+    const batch = batchTraceData.find(b => b.batchNumber === batchLogCurrentBatch);
+    if (batch) {
+      batch.shipments.push(shipEntry);
+      const totalShipped = batch.shipments.reduce((s, sh) => s + (parseInt(sh.qty) || 0), 0);
+      if (totalShipped >= batch.totalQty) batch.status = 'shipped';
+      else if (totalShipped > 0) batch.status = 'partial';
+    }
+    closeModal('logShipModal');
+    showToast('Shipment logged (offline)');
+    renderBatchTrace();
+  }
 }
 
 // ─────────────────────────────────────────────────────────
