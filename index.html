@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&family=Chivo+Mono:wght@400;500&display=swap" rel="stylesheet" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
 <style>
 /* ── Reset & Base ─────────────────────────────────── */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
@@ -719,6 +720,8 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:20px 0;}
   <button class="nav-link" onclick="showPage('production')" id="nav-production"><span class="nav-icon">🧪</span> Production Lots</button>
   <button class="nav-link" onclick="showPage('ncscrap')" id="nav-ncscrap"><span class="nav-icon">⚠️</span> NC &amp; Scrap Log</button>
   <button class="nav-link" onclick="showPage('quarantine')" id="nav-quarantine"><span class="nav-icon">🔒</span> Quarantine Hold</button>
+  <button class="nav-link" onclick="showPage('inhouseprod')" id="nav-inhouseprod"><span class="nav-icon">🏭</span> In-House Production</button>
+  <button class="nav-link" onclick="showPage('cyclecounts')" id="nav-cyclecounts"><span class="nav-icon">📋</span> Cycle Counts</button>
   <button class="nav-link" onclick="showPage('batchtrace')" id="nav-batchtrace"><span class="nav-icon">📊</span> Batch Traceability</button>
   <button class="nav-link" onclick="showPage('sds')" id="nav-sds"><span class="nav-icon">📄</span> SDS &amp; COA Register</button>
   <button class="nav-link" onclick="showPage('suppliers')" id="nav-suppliers"><span class="nav-icon">🏢</span> Supplier Directory</button>
@@ -838,11 +841,12 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:20px 0;}
             <th>On Hand</th>
             <th>Date Received</th>
             <th>Status</th>
+            <th>Signed</th>
             <th></th>
           </tr>
         </thead>
         <tbody id="inventoryBody">
-          <tr><td colspan="12"><div class="table-placeholder"><div class="spinner"></div><p>Loading inventory…</p></div></td></tr>
+          <tr><td colspan="14"><div class="table-placeholder"><div class="spinner"></div><p>Loading inventory…</p></div></td></tr>
         </tbody>
       </table>
     </div>
@@ -2306,6 +2310,263 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:20px 0;}
   </div>
 </div>
 
+<!-- ══ IN-HOUSE PRODUCTION PAGE ═════════════════════════ -->
+<div class="page" id="page-inhouseprod">
+  <div class="page-header">
+    <div>
+      <h1>🏭 In-House Production</h1>
+      <p class="subtitle">Record batches of reagents and components made in-house · Track raw material usage</p>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-primary btn-sm" onclick="openNewBatchModal()">+ New Batch</button>
+    </div>
+  </div>
+
+  <!-- Dept tabs -->
+  <div style="display:flex;gap:4px;margin-bottom:16px;flex-wrap:wrap;">
+    <button class="dept-tab active" id="ihp-tab-All" onclick="switchIhpTab('All')">All</button>
+    <button class="dept-tab" id="ihp-tab-Manufacturing" onclick="switchIhpTab('Manufacturing')">🏭 Manufacturing</button>
+    <button class="dept-tab" id="ihp-tab-AssayRD" onclick="switchIhpTab('Assay R&amp;D')">🔬 Assay R&amp;D</button>
+    <button class="dept-tab" id="ihp-tab-HardwareRD" onclick="switchIhpTab('Hardware R&amp;D')">🔧 Hardware R&amp;D</button>
+  </div>
+
+  <!-- Stats strip -->
+  <div id="ihpStats" style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px;"></div>
+
+  <!-- Batch log table -->
+  <div class="table-card">
+    <div style="padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+      <span style="font-size:12px;font-weight:600;color:var(--soft-hash);letter-spacing:.05em;text-transform:uppercase;">Production Batch Log</span>
+      <input type="text" id="ihpSearchInput" class="form-input" style="width:220px;padding:6px 10px;font-size:12px;" placeholder="Filter by product, batch…" oninput="renderIhpTable()" />
+    </div>
+    <div class="table-wrap">
+      <table class="catalog-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Batch #</th>
+            <th>Product</th>
+            <th>Dept</th>
+            <th>Qty Produced</th>
+            <th>Remaining</th>
+            <th>Raw Materials Used</th>
+            <th>Produced By</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="ihpBody">
+          <tr><td colspan="9"><div class="table-placeholder"><p>No batches recorded yet</p></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══ NEW BATCH MODAL ═════════════════════════════════ -->
+<div class="modal-overlay" id="newBatchModal">
+  <div class="modal-box" style="max-width:640px;max-height:calc(100vh - 32px);overflow-y:auto;">
+    <button class="modal-close" onclick="closeModal('newBatchModal')">✕</button>
+    <div class="modal-title">🏭 Record New In-House Batch</div>
+
+    <div class="form-grid" style="grid-template-columns:1fr 1fr;">
+      <div class="form-group">
+        <label class="form-label">Department <span class="req">*</span></label>
+        <select id="ihp-dept" class="form-select" onchange="onIhpDeptChange()">
+          <option value="">— Select —</option>
+          <option value="Manufacturing">Manufacturing</option>
+          <option value="Assay R&D">Assay R&D</option>
+          <option value="Hardware R&D">Hardware R&D</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Product Made <span class="req">*</span></label>
+        <select id="ihp-product" class="form-select">
+          <option value="">— Select department first —</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Batch Number <span class="req">*</span></label>
+        <input type="text" class="form-input" id="ihp-batchNum" placeholder="e.g. IH-COR-2026-001" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Date Produced <span class="req">*</span></label>
+        <input type="date" class="form-input" id="ihp-date" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Quantity Produced <span class="req">*</span></label>
+        <input type="number" class="form-input" id="ihp-qty" min="1" placeholder="e.g. 100" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Unit</label>
+        <select id="ihp-unit" class="form-select">
+          <option value="units">Units</option>
+          <option value="mL">mL</option>
+          <option value="L">L</option>
+          <option value="g">g</option>
+          <option value="strips">Strips</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Expiration Date</label>
+        <input type="date" class="form-input" id="ihp-expDate" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Produced By</label>
+        <input type="text" class="form-input" id="ihp-producedBy" placeholder="e.g. Jocelyn Meyer" />
+      </div>
+    </div>
+
+    <!-- Raw Materials Used -->
+    <div style="margin-top:16px;border:1px solid var(--border);border-radius:10px;padding:14px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <span style="font-weight:700;font-size:13px;color:var(--graphite);">Raw Materials Used</span>
+        <button class="btn btn-secondary btn-sm" onclick="addRawMaterialRow()">+ Add Material</button>
+      </div>
+      <div class="form-hint" style="margin-bottom:10px;">System will pre-fill available lots. You can change lot, quantity, or remove rows before submitting.</div>
+      <div id="ihp-rawMaterials">
+        <!-- Dynamic rows added here -->
+      </div>
+    </div>
+
+    <div style="margin-top:14px;">
+      <div class="form-group">
+        <label class="form-label">Notes</label>
+        <textarea class="form-input" id="ihp-notes" rows="2" style="resize:vertical;" placeholder="Any observations, deviations, or comments…"></textarea>
+      </div>
+    </div>
+
+    <div id="ihp-error" style="color:#c0392b;font-size:13px;margin-top:8px;display:none;"></div>
+    <div style="display:flex;gap:8px;margin-top:18px;justify-content:flex-end;">
+      <button class="btn btn-secondary btn-sm" onclick="closeModal('newBatchModal')">Cancel</button>
+      <button class="btn btn-primary btn-sm" onclick="submitNewBatch()">✓ Record Batch</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ CYCLE COUNTS PAGE ═══════════════════════════════ -->
+<div class="page" id="page-cyclecounts">
+  <div class="page-header">
+    <div>
+      <h1>📋 Cycle Counts</h1>
+      <p class="subtitle">Scheduled inventory counts by frequency · Manufacturing &amp; R&amp;D</p>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-primary btn-sm" onclick="openBulkCountSheet()">📝 Start Count Sheet</button>
+      <button class="btn btn-secondary btn-sm" onclick="openQuickCount()">⚡ Quick Count</button>
+    </div>
+  </div>
+
+  <!-- Dept tabs -->
+  <div style="display:flex;gap:4px;margin-bottom:16px;flex-wrap:wrap;">
+    <button class="dept-tab active" id="cc-tab-Manufacturing" onclick="switchCcTab('Manufacturing')">🏭 Manufacturing</button>
+    <button class="dept-tab" id="cc-tab-AssayRD" onclick="switchCcTab('Assay R&amp;D')">🔬 Assay R&amp;D</button>
+    <button class="dept-tab" id="cc-tab-HardwareRD" onclick="switchCcTab('Hardware R&amp;D')">🔧 Hardware R&amp;D</button>
+  </div>
+
+  <!-- Frequency filter -->
+  <div style="display:flex;gap:4px;margin-bottom:16px;flex-wrap:wrap;">
+    <button class="dept-tab active" id="cc-freq-All" onclick="switchCcFreq('All')">All</button>
+    <button class="dept-tab" id="cc-freq-Weekly" onclick="switchCcFreq('Weekly')">Weekly</button>
+    <button class="dept-tab" id="cc-freq-Monthly" onclick="switchCcFreq('Monthly')">Monthly</button>
+    <button class="dept-tab" id="cc-freq-Quarterly" onclick="switchCcFreq('Quarterly')">Quarterly</button>
+    <button class="dept-tab" id="cc-freq-Bi-Yearly" onclick="switchCcFreq('Bi-Yearly')">Bi-Yearly</button>
+    <button class="dept-tab" id="cc-freq-Yearly" onclick="switchCcFreq('Yearly')">Yearly</button>
+  </div>
+
+  <!-- Stats strip -->
+  <div id="ccStats" style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px;"></div>
+
+  <!-- Items table with count freq settings -->
+  <div class="table-card">
+    <div style="padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+      <span style="font-size:12px;font-weight:600;color:var(--soft-hash);letter-spacing:.05em;text-transform:uppercase;">Count Schedule &amp; History</span>
+      <input type="text" id="ccSearchInput" class="form-input" style="width:220px;padding:6px 10px;font-size:12px;" placeholder="Filter by part name…" oninput="renderCcTable()" />
+    </div>
+    <div class="table-wrap">
+      <table class="catalog-table">
+        <thead>
+          <tr>
+            <th>Part Name</th>
+            <th>Lot #</th>
+            <th>System Qty</th>
+            <th>Last Counted</th>
+            <th>Count Freq</th>
+            <th>Next Due</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="ccBody">
+          <tr><td colspan="8"><div class="table-placeholder"><p>Select a department to view items</p></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Recent count history -->
+  <div style="margin-top:20px;">
+    <h3 style="font-size:14px;font-weight:700;color:var(--graphite);margin-bottom:12px;">Recent Counts</h3>
+    <div id="ccHistory" style="display:flex;flex-direction:column;gap:6px;"></div>
+  </div>
+</div>
+
+<!-- ══ QUICK COUNT MODAL ═══════════════════════════════ -->
+<div class="modal-overlay" id="quickCountModal">
+  <div class="modal-box" style="max-width:440px;">
+    <button class="modal-close" onclick="closeModal('quickCountModal')">✕</button>
+    <div class="modal-title">⚡ Quick Count — Single Item</div>
+    <div class="form-grid" style="grid-template-columns:1fr;">
+      <div class="form-group">
+        <label class="form-label">Item</label>
+        <select id="qc-item" class="form-select" onchange="prefillQuickCount()">
+          <option value="">— Select item —</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">System Qty</label>
+        <input type="text" class="form-input" id="qc-systemQty" readonly style="background:var(--neutral);" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Counted Qty <span class="req">*</span></label>
+        <input type="number" class="form-input" id="qc-countedQty" min="0" placeholder="Physical count" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Counted By</label>
+        <input type="text" class="form-input" id="qc-countedBy" placeholder="e.g. Jocelyn Meyer" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Notes</label>
+        <input type="text" class="form-input" id="qc-notes" placeholder="Optional" />
+      </div>
+    </div>
+    <div id="qc-variance" style="display:none;margin-top:8px;padding:8px 14px;border-radius:8px;font-size:13px;font-weight:600;"></div>
+    <div style="display:flex;gap:8px;margin-top:18px;justify-content:flex-end;">
+      <button class="btn btn-secondary btn-sm" onclick="closeModal('quickCountModal')">Cancel</button>
+      <button class="btn btn-primary btn-sm" onclick="submitQuickCount()">✓ Submit Count</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ BULK COUNT SHEET MODAL ══════════════════════════ -->
+<div class="modal-overlay" id="bulkCountModal">
+  <div class="modal-box" style="max-width:720px;max-height:calc(100vh - 32px);overflow-y:auto;">
+    <button class="modal-close" onclick="closeModal('bulkCountModal')">✕</button>
+    <div class="modal-title">📝 Bulk Count Sheet</div>
+    <div class="form-hint" style="margin-bottom:12px;">Items due for counting based on their frequency. Enter physical counts for each.</div>
+    <div id="bulkCountItems">
+      <!-- Dynamic rows -->
+    </div>
+    <div class="form-group" style="margin-top:14px;">
+      <label class="form-label">Counted By</label>
+      <input type="text" class="form-input" id="bc-countedBy" placeholder="e.g. Jocelyn Meyer" />
+    </div>
+    <div style="display:flex;gap:8px;margin-top:18px;justify-content:flex-end;">
+      <button class="btn btn-secondary btn-sm" onclick="closeModal('bulkCountModal')">Cancel</button>
+      <button class="btn btn-primary btn-sm" onclick="submitBulkCount()">✓ Submit All Counts</button>
+    </div>
+  </div>
+</div>
+
 </main>
 </div><!-- /layout -->
 
@@ -2544,10 +2805,16 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:20px 0;}
     <div class="modal-title">✅ Inspection Complete — QR Code Ready</div>
     <div class="modal-qr-center"><div class="modal-qr-wrap" id="successQrCanvas"></div></div>
     <div class="modal-meta" id="successModalMeta"></div>
-    <div class="modal-actions">
-      <button class="btn btn-primary btn-sm" onclick="downloadSuccessQR()">↓ Download QR</button>
+    <div class="modal-actions" style="flex-wrap:wrap;">
+      <button class="btn btn-primary btn-sm" onclick="downloadInspectionPDF()">📄 Download Inspection PDF</button>
+      <button class="btn btn-secondary btn-sm" onclick="sendToAdobeSign()" style="border-color:#e8453c;color:#e8453c;">✍️ Send to Adobe Sign</button>
+      <button class="btn btn-secondary btn-sm" onclick="downloadSuccessQR()">↓ Download QR</button>
       <button class="btn btn-secondary btn-sm" onclick="printSuccessQR()">🖨 Print Label</button>
       <button class="btn btn-ghost btn-sm" onclick="closeModal('successModal');showPage('inventory');">View Inventory</button>
+    </div>
+    <div id="sigStatusBar" style="margin-top:10px;padding:8px 14px;border-radius:8px;background:#f9fafb;border:1px solid var(--border);display:flex;align-items:center;gap:8px;font-size:12px;">
+      <span style="font-weight:600;color:var(--graphite);">Signature:</span>
+      <span id="sigStatusLabel" style="font-weight:600;">● Pending</span>
     </div>
   </div>
 </div>
@@ -3099,6 +3366,12 @@ function showPage(name) {
   if (name === 'quarantine') {
     renderQuarantineTable();
   }
+  if (name === 'inhouseprod') {
+    renderIhpTable();
+  }
+  if (name === 'cyclecounts') {
+    renderCcTable();
+  }
   if (name === 'catalog') {
     loadCatalogPage();
   }
@@ -3237,7 +3510,7 @@ function switchDept(dept) {
 
 async function loadInventory() {
   document.getElementById('inventoryBody').innerHTML =
-    `<tr><td colspan="13"><div class="table-placeholder"><div class="spinner"></div><p>Loading inventory…</p></div></td></tr>`;
+    `<tr><td colspan="14"><div class="table-placeholder"><div class="spinner"></div><p>Loading inventory…</p></div></td></tr>`;
   updateStats([]);
 
   if (APPS_SCRIPT_URL === 'YOUR_APPS_SCRIPT_URL_HERE') { loadDemoData(); return; }
@@ -3257,19 +3530,19 @@ async function loadInventory() {
     }
   } catch(err) {
     document.getElementById('inventoryBody').innerHTML =
-      `<tr><td colspan="11"><div class="table-placeholder"><div style="font-size:28px;">⚠️</div><p>Could not load inventory</p><small>${err.message}</small></div></td></tr>`;
+      `<tr><td colspan="14"><div class="table-placeholder"><div style="font-size:28px;">⚠️</div><p>Could not load inventory</p><small>${err.message}</small></div></td></tr>`;
     showToast('Failed to load: '+err.message,'error');
   }
 }
 
 function loadDemoData() {
   const demo = [
-    {'Department':'Assay R&D','Part Name':'Collection Pad','Part Number':'S020226','Lot Number':'S021062','Quantity':120,'Initial Quantity':150,'Date Received':'2026-03-01','Expiration Date':'2027-03-01','Status':'Approved for Production Use','QR URL':'https://ims.eli.health/lot/S021062','Inspection Category':'A','Disposition':'Approved for Production Use','Inspected By':'Jocelyn Meyer','_dept':'Assay R&D','_rowIndex':2},
-    {'Department':'Assay R&D','Part Name':'40nm Unconjugated Gold','Part Number':'','Lot Number':'20260210-AUGN','Quantity':0,'Initial Quantity':25,'Date Received':'2026-02-10','Expiration Date':'','Status':'Do Not Use','QR URL':'https://ims.eli.health/lot/20260210-AUGN','Inspection Category':'C','Disposition':'Do Not Use','Inspected By':'Jocelyn Meyer','_dept':'Assay R&D','_rowIndex':3},
-    {'Department':'Manufacturing','Part Name':'Cartridge Parts','Part Number':'CAR-S1-C1','Lot Number':'20260215-CAR-S1-C1','Quantity':8,'Initial Quantity':50,'Date Received':'2026-02-15','Expiration Date':'','Status':'Quarantine','QR URL':'https://ims.eli.health/lot/20260215-CAR','Inspection Category':'B','Disposition':'Quarantine','Inspected By':'Jocelyn Meyer','_dept':'Manufacturing','_rowIndex':2},
-    {'Department':'Manufacturing','Part Name':'HEPES','Part Number':'H3375-100G','Lot Number':'H2026-001','Quantity':300,'Initial Quantity':300,'Date Received':'2026-03-05','Expiration Date':'2028-01-01','Status':'Approved for Production Use','QR URL':'https://ims.eli.health/lot/H2026-001','Inspection Category':'A','Disposition':'Approved for Production Use','Inspected By':'Jocelyn Meyer','_dept':'Manufacturing','_rowIndex':3},
-    {'Department':'Office','Part Name':'Nitrile Gloves — Medium','Part Number':'S-13046M','Lot Number':'20260301-S-13046M','Quantity':5,'Initial Quantity':200,'Date Received':'2026-03-01','Expiration Date':'','Status':'Approved for Production Use','QR URL':'https://ims.eli.health/lot/20260301-S-13046M','Inspection Category':'A','Disposition':'Approved for Production Use','Inspected By':'Jocelyn Meyer','_dept':'Office','_rowIndex':2},
-    {'Department':'Hardware R&D','Part Name':'Formlabs Clear Resin','Part Number':'FLB-RSN-STD-CLR-100','Lot Number':'20260310-FLB-RSN-STD-CLR-100','Quantity':12,'Initial Quantity':12,'Date Received':'2026-03-10','Expiration Date':'2027-06-01','Status':'Approved for Calibration','QR URL':'https://ims.eli.health/lot/20260310-FLB','Inspection Category':'A','Disposition':'Approved for Calibration','Inspected By':'Jocelyn Meyer','_dept':'Hardware R&D','_rowIndex':2},
+    {'Department':'Assay R&D','Part Name':'Collection Pad','Part Number':'S020226','Lot Number':'S021062','Quantity':120,'Initial Quantity':150,'Date Received':'2026-03-01','Expiration Date':'2027-03-01','Status':'Approved for Production Use','QR URL':'https://ims.eli.health/lot/S021062','Inspection Category':'A','Disposition':'Approved for Production Use','Inspected By':'Jocelyn Meyer','Signature Status':'Signed','_dept':'Assay R&D','_rowIndex':2},
+    {'Department':'Assay R&D','Part Name':'40nm Unconjugated Gold','Part Number':'','Lot Number':'20260210-AUGN','Quantity':0,'Initial Quantity':25,'Date Received':'2026-02-10','Expiration Date':'','Status':'Do Not Use','QR URL':'https://ims.eli.health/lot/20260210-AUGN','Inspection Category':'C','Disposition':'Do Not Use','Inspected By':'Jocelyn Meyer','Signature Status':'Signed','_dept':'Assay R&D','_rowIndex':3},
+    {'Department':'Manufacturing','Part Name':'Cartridge Parts','Part Number':'CAR-S1-C1','Lot Number':'20260215-CAR-S1-C1','Quantity':8,'Initial Quantity':50,'Date Received':'2026-02-15','Expiration Date':'','Status':'Quarantine','QR URL':'https://ims.eli.health/lot/20260215-CAR','Inspection Category':'B','Disposition':'Quarantine','Inspected By':'Jocelyn Meyer','Signature Status':'Sent','_dept':'Manufacturing','_rowIndex':2},
+    {'Department':'Manufacturing','Part Name':'HEPES','Part Number':'H3375-100G','Lot Number':'H2026-001','Quantity':300,'Initial Quantity':300,'Date Received':'2026-03-05','Expiration Date':'2028-01-01','Status':'Approved for Production Use','QR URL':'https://ims.eli.health/lot/H2026-001','Inspection Category':'A','Disposition':'Approved for Production Use','Inspected By':'Jocelyn Meyer','Signature Status':'Signed','_dept':'Manufacturing','_rowIndex':3},
+    {'Department':'Office','Part Name':'Nitrile Gloves — Medium','Part Number':'S-13046M','Lot Number':'20260301-S-13046M','Quantity':5,'Initial Quantity':200,'Date Received':'2026-03-01','Expiration Date':'','Status':'Approved for Production Use','QR URL':'https://ims.eli.health/lot/20260301-S-13046M','Inspection Category':'A','Disposition':'Approved for Production Use','Inspected By':'Jocelyn Meyer','Signature Status':'Pending','_dept':'Office','_rowIndex':2},
+    {'Department':'Hardware R&D','Part Name':'Formlabs Clear Resin','Part Number':'FLB-RSN-STD-CLR-100','Lot Number':'20260310-FLB-RSN-STD-CLR-100','Quantity':12,'Initial Quantity':12,'Date Received':'2026-03-10','Expiration Date':'2027-06-01','Status':'Approved for Calibration','QR URL':'https://ims.eli.health/lot/20260310-FLB','Inspection Category':'A','Disposition':'Approved for Calibration','Inspected By':'Jocelyn Meyer','Signature Status':'Signed','_dept':'Hardware R&D','_rowIndex':2},
   ];
   inventoryData = demo; filteredData = [...demo];
   renderTable(filteredData); updateStats(inventoryData);
@@ -3279,6 +3552,14 @@ function loadDemoData() {
 function deptBadgeHTML(dept) {
   const cls = DEPT_CLASS[dept] || 'dept-other';
   return dept ? `<span class="dept-badge ${cls}">${dept}</span>` : '—';
+}
+
+function sigBadgeHTML(sig) {
+  if (!sig || sig === 'N/A') return '<span style="color:var(--soft-hash);font-size:11px;">—</span>';
+  if (sig === 'Signed')  return '<span style="display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600;background:#dcfce7;color:#166534;">✓ Signed</span>';
+  if (sig === 'Sent')    return '<span style="display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600;background:#fef3c7;color:#854d04;">⏳ Sent</span>';
+  if (sig === 'Pending') return '<span style="display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600;background:#f3f4f6;color:#6b7280;">● Pending</span>';
+  return `<span style="font-size:11px;color:var(--soft-hash);">${sig}</span>`;
 }
 
 function locationBadgeHTML(loc) {
@@ -3292,7 +3573,7 @@ function locationBadgeHTML(loc) {
 function renderTable(rows) {
   const tbody = document.getElementById('inventoryBody');
   if (!rows||!rows.length) {
-    tbody.innerHTML=`<tr><td colspan="13"><div class="table-placeholder"><div style="font-size:28px">📭</div><p>No items found</p><small>Try adjusting your search or filters</small></div></td></tr>`;
+    tbody.innerHTML=`<tr><td colspan="14"><div class="table-placeholder"><div style="font-size:28px">📭</div><p>No items found</p><small>Try adjusting your search or filters</small></div></td></tr>`;
     return;
   }
   tbody.innerHTML = rows.map((row,idx) => {
@@ -3343,6 +3624,7 @@ function renderTable(rows) {
       <td><strong>${currentQty}</strong> <span class="sl-pill ${slClass}">${sl}</span></td>
       <td>${formatDate(row['Date Received'])}</td>
       <td>${statusBadgeHTML(status)}</td>
+      <td>${sigBadgeHTML(row['Signature Status'])}</td>
       <td style="white-space:nowrap;display:flex;gap:4px;align-items:center;">
         <button class="btn btn-ghost btn-sm" title="View lot history" onclick="openHistoryPanel('${partSafe}')">📋</button>
         <button class="btn btn-ghost btn-sm" onclick='openQRModal(${rowSafe})'>QR</button>
@@ -4054,11 +4336,13 @@ async function submitIncoming(e) {
   const retainQty     = document.getElementById('in-retainQty')     ? document.getElementById('in-retainQty').value     : '0';
   const retainTarget  = document.getElementById('in-retainTarget')  ? document.getElementById('in-retainTarget').value  : '0';
 
-  // SDS & COA documentation
+  // SDS, COA & COO documentation
   const sdsReceived = getRadioValue('sdsReceived') || 'N/A';
   const sdsDate     = document.getElementById('in-sdsDate')?.value || '';
   const coaReceived = getRadioValue('coaReceived') || 'N/A';
   const coaLotRef   = document.getElementById('in-coaLotRef')?.value?.trim() || '';
+  const cooReceived = getRadioValue('cooReceived') || 'N/A';
+  const cooCountry  = document.getElementById('in-cooCountry')?.value?.trim() || '';
 
   // Auto-add SDS record from incoming inspection
   if (sdsReceived === 'Yes' || coaReceived === 'Yes') {
@@ -4079,7 +4363,7 @@ async function submitIncoming(e) {
   if (APPS_SCRIPT_URL === 'YOUR_APPS_SCRIPT_URL_HERE') {
     // Demo mode
     const status = qualityStatus;
-    openSuccessModal({ lotNumber, partName, partNumber, lotType, quantity, inspectionCategory:currentInspCat, status, qrUrl:`https://ims.eli.health/lot/${lotNumber}`, dateReceived:date, disposition });
+    openSuccessModal({ lotNumber, partName, partNumber, lotType, quantity, inspectionCategory:currentInspCat, status, qrUrl:`https://ims.eli.health/lot/${lotNumber}`, dateReceived:date, disposition, supplier, department, location, expirationDate, materialType, chemistry, inspectedBy:inspBy, signDate, sdsReceived, coaReceived, cooReceived, cooCountry, inspData });
     btn.disabled=false; btn.textContent='✓ Complete Inspection & Add to Inventory';
     return;
   }
@@ -4088,7 +4372,7 @@ async function submitIncoming(e) {
     const res  = await fetch(APPS_SCRIPT_URL, { method:'POST', body:JSON.stringify(payload) });
     const json = await res.json();
     if (!json.success) throw new Error(json.error||'Submission failed');
-    openSuccessModal({ lotNumber, partName, partNumber, lotType, quantity, inspectionCategory:currentInspCat, status:json.status, qrUrl:json.qrUrl, dateReceived:date, disposition });
+    openSuccessModal({ lotNumber, partName, partNumber, lotType, quantity, inspectionCategory:currentInspCat, status:json.status, qrUrl:json.qrUrl, dateReceived:date, disposition, supplier, department, location, expirationDate, materialType, chemistry, inspectedBy:inspBy, signDate, sdsReceived, coaReceived, cooReceived, cooCountry, inspData });
     await loadInventory();
     resetIncomingForm();
   } catch(err) {
@@ -4099,6 +4383,7 @@ async function submitIncoming(e) {
 }
 
 function openSuccessModal(d) {
+  d.signatureStatus = d.signatureStatus || 'Pending';
   document.getElementById('successModalMeta').innerHTML = `
     <div class="modal-meta-row"><span class="key">Part Name</span><span class="val">${d.partName}</span></div>
     <div class="modal-meta-row"><span class="key">Lot Number</span><span class="val mono">${d.lotNumber}</span></div>
@@ -4109,7 +4394,64 @@ function openSuccessModal(d) {
   `;
   makeQR('successQrCanvas', d.qrUrl, 180);
   document.getElementById('successModal')._data = d;
+  updateSigStatusBar(d.signatureStatus);
   document.getElementById('successModal').classList.add('open');
+}
+
+function updateSigStatusBar(status) {
+  const label = document.getElementById('sigStatusLabel');
+  if (!label) return;
+  if (status === 'Signed') {
+    label.innerHTML = '✓ Signed'; label.style.color = '#166534';
+  } else if (status === 'Sent') {
+    label.innerHTML = '⏳ Sent to Adobe Sign'; label.style.color = '#854d04';
+  } else {
+    label.innerHTML = '● Pending'; label.style.color = '#6b7280';
+  }
+}
+
+function sendToAdobeSign() {
+  const d = document.getElementById('successModal')._data;
+  if (!d || !d.lotNumber) { showToast('No inspection data','error'); return; }
+
+  // Check if Adobe Sign API is configured
+  const ADOBE_SIGN_URL = typeof ADOBE_SIGN_API_URL !== 'undefined' ? ADOBE_SIGN_API_URL : '';
+  if (!ADOBE_SIGN_URL) {
+    // Demo mode — simulate sending
+    d.signatureStatus = 'Sent';
+    updateSigStatusBar('Sent');
+    // Update inventory record if it exists
+    const inv = inventoryData.find(r => r['Lot Number'] === d.lotNumber);
+    if (inv) inv['Signature Status'] = 'Sent';
+    showToast('Inspection form sent to Adobe Sign for signature','success');
+    return;
+  }
+
+  // Production mode — POST to Apps Script which proxies to Adobe Sign API
+  fetch(APPS_SCRIPT_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      action: 'sendToAdobeSign',
+      lotNumber: d.lotNumber,
+      inspectedBy: d.inspectedBy,
+      partName: d.partName,
+      partNumber: d.partNumber,
+      department: d.department,
+    })
+  }).then(r => r.json()).then(json => {
+    if (json.success) {
+      d.signatureStatus = 'Sent';
+      updateSigStatusBar('Sent');
+      const inv = inventoryData.find(r => r['Lot Number'] === d.lotNumber);
+      if (inv) inv['Signature Status'] = 'Sent';
+      showToast('Sent to Adobe Sign — check email for signing link','success');
+    } else {
+      showToast('Adobe Sign error: '+(json.error||'Unknown'),'error');
+    }
+  }).catch(err => {
+    showToast('Failed to send: '+err.message,'error');
+  });
 }
 
 function downloadSuccessQR() {
@@ -4119,6 +4461,217 @@ function downloadSuccessQR() {
 function printSuccessQR() {
   const d = document.getElementById('successModal')._data||{};
   printLabelData(d.lotNumber, d.partName, d.partNumber, d.qrUrl);
+}
+
+function downloadInspectionPDF() {
+  const d = document.getElementById('successModal')._data||{};
+  if (!d.lotNumber) { showToast('No inspection data available','error'); return; }
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation:'portrait', unit:'mm', format:'letter' });
+  const W = doc.internal.pageSize.getWidth();
+  const H = doc.internal.pageSize.getHeight();
+  const LM = 18, RM = W - 18;
+  const CW = RM - LM;
+  let y = 16;
+
+  // ─── Helpers ───
+  const gray = [100,100,100], black = [35,35,35], white = [255,255,255];
+  const headerBg = [55,48,82], accentBg = [243,240,255];
+  function drawCell(x, yy, w, h, text, opts={}) {
+    if (opts.fill) { doc.setFillColor(...opts.fill); doc.rect(x, yy, w, h, 'F'); }
+    doc.setDrawColor(200,200,200); doc.rect(x, yy, w, h);
+    doc.setFontSize(opts.fontSize||9);
+    doc.setFont('helvetica', opts.bold ? 'bold' : 'normal');
+    doc.setTextColor(...(opts.color||black));
+    const tx = opts.align==='center' ? x+w/2 : x+2;
+    const ty = yy + h/2 + (opts.fontSize||9)*0.12;
+    doc.text(String(text||''), tx, ty, { align: opts.align||'left', maxWidth: w-4 });
+  }
+  function sectionHeader(label) {
+    doc.setFillColor(...headerBg); doc.rect(LM, y, CW, 7, 'F');
+    doc.setFontSize(9); doc.setFont('helvetica','bold'); doc.setTextColor(...white);
+    doc.text(label, LM+3, y+5);
+    y += 7;
+  }
+  function labelRow(label, value, labelW) {
+    labelW = labelW || 45;
+    drawCell(LM, y, labelW, 7, label, { bold:true, fill:accentBg, fontSize:8 });
+    drawCell(LM+labelW, y, CW-labelW, 7, value, { fontSize:9 });
+    y += 7;
+  }
+  function passFailCell(x, yy, w, h, val) {
+    const isPass = val==='Pass'||val==='Yes'||val==='Accept';
+    const isFail = val==='Fail'||val==='No'||val==='Reject';
+    const fill = isPass ? [220,252,231] : isFail ? [254,226,226] : undefined;
+    const color = isPass ? [22,101,52] : isFail ? [153,27,27] : black;
+    drawCell(x, yy, w, h, val||'—', { fill, color, align:'center', bold:true, fontSize:9 });
+  }
+
+  // ─── Header Bar ───
+  doc.setFillColor(...headerBg); doc.rect(0, 0, W, 28, 'F');
+  doc.setFontSize(18); doc.setFont('helvetica','bold'); doc.setTextColor(...white);
+  doc.text('Eli Health', LM, 12);
+  doc.setFontSize(8); doc.setFont('helvetica','normal');
+  doc.text('INCOMING INSPECTION FORM', LM, 18);
+  doc.setFontSize(9); doc.setFont('helvetica','bold');
+  doc.text('FRM-07-01', RM, 10, { align:'right' });
+  doc.setFontSize(7); doc.setFont('helvetica','normal');
+  doc.text('WORK FORM  |  Version 0', RM, 16, { align:'right' });
+  const inspDate = d.dateReceived || new Date().toISOString().slice(0,10);
+  doc.text('Date: ' + inspDate, RM, 22, { align:'right' });
+  y = 34;
+
+  // ─── Item / Lot Details ───
+  sectionHeader('ITEM & LOT DETAILS');
+  const col1W = CW * 0.5, col2W = CW * 0.5;
+  // Row 1
+  drawCell(LM, y, 30, 7, 'Part Name', { bold:true, fill:accentBg, fontSize:8 });
+  drawCell(LM+30, y, col1W-30, 7, d.partName, { fontSize:9 });
+  drawCell(LM+col1W, y, 30, 7, 'Part #', { bold:true, fill:accentBg, fontSize:8 });
+  drawCell(LM+col1W+30, y, col2W-30, 7, d.partNumber, { fontSize:9 });
+  y += 7;
+  // Row 2
+  drawCell(LM, y, 30, 7, 'Lot Number', { bold:true, fill:accentBg, fontSize:8 });
+  drawCell(LM+30, y, col1W-30, 7, d.lotNumber, { fontSize:9 });
+  drawCell(LM+col1W, y, 30, 7, 'Lot Type', { bold:true, fill:accentBg, fontSize:8 });
+  drawCell(LM+col1W+30, y, col2W-30, 7, d.lotType, { fontSize:9 });
+  y += 7;
+  // Row 3
+  drawCell(LM, y, 30, 7, 'Supplier', { bold:true, fill:accentBg, fontSize:8 });
+  drawCell(LM+30, y, col1W-30, 7, d.supplier, { fontSize:9 });
+  drawCell(LM+col1W, y, 30, 7, 'Quantity', { bold:true, fill:accentBg, fontSize:8 });
+  drawCell(LM+col1W+30, y, col2W-30, 7, d.quantity, { fontSize:9 });
+  y += 7;
+  // Row 4
+  drawCell(LM, y, 30, 7, 'Department', { bold:true, fill:accentBg, fontSize:8 });
+  drawCell(LM+30, y, col1W-30, 7, d.department, { fontSize:9 });
+  drawCell(LM+col1W, y, 30, 7, 'Location', { bold:true, fill:accentBg, fontSize:8 });
+  drawCell(LM+col1W+30, y, col2W-30, 7, d.location, { fontSize:9 });
+  y += 7;
+  // Row 5
+  drawCell(LM, y, 30, 7, 'Material Type', { bold:true, fill:accentBg, fontSize:8 });
+  drawCell(LM+30, y, col1W-30, 7, d.materialType, { fontSize:9 });
+  drawCell(LM+col1W, y, 30, 7, 'Expiration', { bold:true, fill:accentBg, fontSize:8 });
+  drawCell(LM+col1W+30, y, col2W-30, 7, d.expirationDate||'N/A', { fontSize:9 });
+  y += 7;
+  // Row 6 - chemistry
+  if (d.chemistry && d.chemistry !== 'N/A') {
+    drawCell(LM, y, 30, 7, 'Chemistry', { bold:true, fill:accentBg, fontSize:8 });
+    drawCell(LM+30, y, CW-30, 7, d.chemistry, { fontSize:9 });
+    y += 7;
+  }
+  y += 3;
+
+  // ─── Inspection Category ───
+  const cat = d.inspectionCategory;
+  const ip = d.inspData || {};
+  sectionHeader('INSPECTION — CATEGORY ' + (cat||'N/A'));
+
+  if (cat === 'A') {
+    const checks = [
+      ['Packaging Condition', ip.packagingCondition],
+      ['PO Match', ip.poMatch],
+      ['Packaging Intact', ip.packagingIntact],
+      ['Functionality Test', ip.functionalityTest],
+    ];
+    // Header row
+    drawCell(LM, y, CW*0.6, 6, 'Check', { bold:true, fill:headerBg, color:white, fontSize:8 });
+    drawCell(LM+CW*0.6, y, CW*0.4, 6, 'Result', { bold:true, fill:headerBg, color:white, fontSize:8, align:'center' });
+    y += 6;
+    checks.forEach(([label, val]) => {
+      drawCell(LM, y, CW*0.6, 7, label, { fontSize:9 });
+      passFailCell(LM+CW*0.6, y, CW*0.4, 7, val);
+      y += 7;
+    });
+    if (ip.rejectQty && ip.rejectQty !== '0') {
+      y += 2;
+      labelRow('Reject Qty', ip.rejectQty);
+      labelRow('Reject Type', ip.rejectType);
+    }
+    if (ip.rejectDescriptions?.length) {
+      labelRow('Reject Desc.', ip.rejectDescriptions.join('; '));
+    }
+    if (ip.ncrNumber) { labelRow('NCR #', ip.ncrNumber); }
+  } else if (cat === 'B') {
+    labelRow('Inspection Level', ip.inspectionLevel);
+    labelRow('Sample Size', ip.sampleSize);
+    // Result
+    drawCell(LM, y, 45, 7, 'Result', { bold:true, fill:accentBg, fontSize:8 });
+    passFailCell(LM+45, y, CW-45, 7, ip.result);
+    y += 7;
+    if (ip.rejectQty && ip.rejectQty !== '0') {
+      labelRow('Reject Qty', ip.rejectQty);
+      labelRow('Reject Type', ip.rejectType);
+    }
+    if (ip.rejectDescriptions?.length) {
+      labelRow('Reject Desc.', ip.rejectDescriptions.join('; '));
+    }
+    if (ip.ncrNumber) { labelRow('NCR #', ip.ncrNumber); }
+  } else if (cat === 'C') {
+    labelRow('Log Doc #', ip.logDocNumber);
+    labelRow('Inspection Date', ip.inspectionDate);
+    drawCell(LM, y, 45, 7, 'Functionality Test', { bold:true, fill:accentBg, fontSize:8 });
+    passFailCell(LM+45, y, CW-45, 7, ip.functionalityTest);
+    y += 7;
+  }
+  y += 3;
+
+  // ─── Documentation (SDS / COA / COO) ───
+  if (d.sdsReceived !== 'N/A' || d.coaReceived !== 'N/A' || (d.cooReceived && d.cooReceived !== 'N/A')) {
+    sectionHeader('DOCUMENTATION — SDS / COA / COO');
+    const docW = CW / 3;
+    drawCell(LM, y, docW, 6, 'SDS', { bold:true, fill:headerBg, color:white, fontSize:8, align:'center' });
+    drawCell(LM+docW, y, docW, 6, 'COA', { bold:true, fill:headerBg, color:white, fontSize:8, align:'center' });
+    drawCell(LM+docW*2, y, docW, 6, 'COO', { bold:true, fill:headerBg, color:white, fontSize:8, align:'center' });
+    y += 6;
+    drawCell(LM, y, docW, 7, d.sdsReceived||'N/A', { align:'center', fontSize:9 });
+    drawCell(LM+docW, y, docW, 7, d.coaReceived||'N/A', { align:'center', fontSize:9 });
+    const cooText = (d.cooReceived==='Yes' && d.cooCountry) ? 'Yes — '+d.cooCountry : (d.cooReceived||'N/A');
+    drawCell(LM+docW*2, y, docW, 7, cooText, { align:'center', fontSize:9 });
+    y += 7;
+    y += 3;
+  }
+
+  // ─── Disposition ───
+  sectionHeader('DISPOSITION');
+  drawCell(LM, y, 45, 8, 'Quality Status', { bold:true, fill:accentBg, fontSize:8 });
+  const statusVal = d.disposition==='Reject' ? 'Rejected' : (d.status||'Released');
+  const statusFill = statusVal==='Released' ? [220,252,231] : statusVal==='Quarantine' ? [254,243,199] : [254,226,226];
+  const statusColor = statusVal==='Released' ? [22,101,52] : statusVal==='Quarantine' ? [133,100,4] : [153,27,27];
+  drawCell(LM+45, y, CW-45, 8, statusVal, { fill:statusFill, color:statusColor, bold:true, fontSize:10, align:'center' });
+  y += 8;
+  labelRow('Disposition', d.disposition||'Accept');
+  y += 5;
+
+  // ─── Signature Block ───
+  sectionHeader('SIGN-OFF');
+  labelRow('Inspected By', d.inspectedBy||'');
+  labelRow('Sign Date', d.signDate||'');
+  y += 3;
+  // Signature line
+  doc.setDrawColor(150,150,150);
+  doc.setFontSize(8); doc.setFont('helvetica','normal'); doc.setTextColor(...gray);
+  doc.text('Signature:', LM, y+4);
+  doc.line(LM+22, y+5, LM+90, y+5);
+  doc.text('Date:', LM+100, y+4);
+  doc.line(LM+112, y+5, RM, y+5);
+  y += 14;
+
+  // Approver line
+  doc.text('Approved By:', LM, y+4);
+  doc.line(LM+26, y+5, LM+90, y+5);
+  doc.text('Date:', LM+100, y+4);
+  doc.line(LM+112, y+5, RM, y+5);
+  y += 14;
+
+  // ─── Footer ───
+  doc.setFontSize(7); doc.setFont('helvetica','normal'); doc.setTextColor(...gray);
+  doc.text('FRM-07-01  |  Eli Health Incoming Inspection Form  |  Generated ' + new Date().toLocaleString(), W/2, H-8, { align:'center' });
+
+  // ─── Save ───
+  const fname = `FRM-07-01_${d.lotNumber}_${inspDate}.pdf`;
+  doc.save(fname);
+  showToast('Inspection PDF downloaded','success');
 }
 
 function resetIncomingForm() {
@@ -5448,6 +6001,556 @@ function submitQuarantineAction() {
   closeModal('quarantineActionModal');
   renderQuarantineTable();
   renderTable(); // refresh main inventory table too
+}
+
+// ═════════════════════════════════════════════════════════
+// IN-HOUSE PRODUCTION
+// ═════════════════════════════════════════════════════════
+let ihpBatches = []; // local store of in-house production batches
+let ihpCurrentDept = 'All';
+
+// Demo batches
+function loadIhpDemoData() {
+  if (ihpBatches.length) return;
+  ihpBatches = [
+    { date:'2026-03-18', batchNum:'IH-COR-RB-001', product:'Cortisol Running Buffer', dept:'Manufacturing', qty:500, unit:'mL', remaining:320, expDate:'2026-09-18', producedBy:'Jocelyn Meyer', rawMaterials:[{name:'HEPES',lot:'H2026-001',qtyUsed:50,unit:'g'},{name:'Sodium Chloride',lot:'NACL-001',qtyUsed:20,unit:'g'},{name:'DI Water',lot:'DIWT-001',qtyUsed:450,unit:'mL'}], notes:'' },
+    { date:'2026-03-15', batchNum:'IH-COR-GC-001', product:'Cortisol Gold Conjugate Pad', dept:'Manufacturing', qty:200, unit:'strips', remaining:145, expDate:'2026-06-15', producedBy:'Jocelyn Meyer', rawMaterials:[{name:'40nm Unconjugated Gold',lot:'20260210-AUGN',qtyUsed:5,unit:'mL'},{name:'NCX Conjugate Diluent',lot:'NCDL-001',qtyUsed:10,unit:'mL'}], notes:'Lot used for validation run' },
+    { date:'2026-03-10', batchNum:'IH-BLK-001', product:'Blocking Buffer', dept:'Assay R&D', qty:1000, unit:'mL', remaining:800, expDate:'2026-06-10', producedBy:'James', rawMaterials:[{name:'Bovine Serum Albumin (BSA)',lot:'BSA-001',qtyUsed:10,unit:'g'},{name:'Tween 20',lot:'TW20-001',qtyUsed:5,unit:'mL'},{name:'DI Water',lot:'DIWT-001',qtyUsed:985,unit:'mL'}], notes:'R&D formulation v2' },
+  ];
+}
+
+function switchIhpTab(dept) {
+  ihpCurrentDept = dept;
+  document.querySelectorAll('[id^="ihp-tab-"]').forEach(b => b.classList.remove('active'));
+  const tabMap = {'All':'All','Manufacturing':'Manufacturing','Assay R&D':'AssayRD','Hardware R&D':'HardwareRD'};
+  const el = document.getElementById('ihp-tab-'+(tabMap[dept]||dept));
+  if (el) el.classList.add('active');
+  renderIhpTable();
+}
+
+function renderIhpTable() {
+  loadIhpDemoData();
+  const search = (document.getElementById('ihpSearchInput')?.value||'').toLowerCase();
+  let rows = ihpBatches.filter(b => {
+    if (ihpCurrentDept !== 'All' && b.dept !== ihpCurrentDept) return false;
+    if (search && !b.product.toLowerCase().includes(search) && !b.batchNum.toLowerCase().includes(search)) return false;
+    return true;
+  });
+
+  // Stats
+  const statsEl = document.getElementById('ihpStats');
+  const total = rows.length;
+  const thisMonth = rows.filter(b => b.date >= todayISO().slice(0,7)).length;
+  statsEl.innerHTML = `
+    <div class="stat-card" style="padding:10px 16px;border-radius:8px;background:var(--white);border:1px solid var(--border);font-size:12px;">
+      <span style="color:var(--soft-hash);">Total Batches</span><br><strong style="font-size:18px;">${total}</strong>
+    </div>
+    <div class="stat-card" style="padding:10px 16px;border-radius:8px;background:var(--white);border:1px solid var(--border);font-size:12px;">
+      <span style="color:var(--soft-hash);">This Month</span><br><strong style="font-size:18px;">${thisMonth}</strong>
+    </div>
+  `;
+
+  const tbody = document.getElementById('ihpBody');
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="9"><div class="table-placeholder"><p>No batches found</p></div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = rows.map((b, idx) => {
+    const rmSummary = b.rawMaterials.map(r => `${r.name} (${r.qtyUsed} ${r.unit})`).join(', ');
+    const rmShort = rmSummary.length > 60 ? rmSummary.slice(0,57)+'…' : rmSummary;
+    return `<tr>
+      <td>${formatDate(b.date)}</td>
+      <td class="td-mono">${b.batchNum}</td>
+      <td class="td-part-name">${b.product}</td>
+      <td>${deptBadgeHTML(b.dept)}</td>
+      <td>${b.qty} ${b.unit}</td>
+      <td><strong>${b.remaining}</strong> ${b.unit}</td>
+      <td title="${rmSummary}" style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px;color:var(--soft-hash);">${rmShort}</td>
+      <td>${b.producedBy}</td>
+      <td style="white-space:nowrap;">
+        <button class="btn btn-ghost btn-sm" title="Update remaining qty" onclick="openUpdateBatchQty(${idx})">✏️</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function openNewBatchModal() {
+  document.getElementById('ihp-date').value = todayISO();
+  document.getElementById('ihp-dept').value = '';
+  document.getElementById('ihp-product').innerHTML = '<option value="">— Select department first —</option>';
+  document.getElementById('ihp-batchNum').value = '';
+  document.getElementById('ihp-qty').value = '';
+  document.getElementById('ihp-unit').value = 'units';
+  document.getElementById('ihp-expDate').value = '';
+  document.getElementById('ihp-producedBy').value = currentUser?.name || '';
+  document.getElementById('ihp-notes').value = '';
+  document.getElementById('ihp-rawMaterials').innerHTML = '';
+  document.getElementById('ihp-error').style.display = 'none';
+  document.getElementById('newBatchModal').classList.add('open');
+}
+
+function onIhpDeptChange() {
+  const dept = document.getElementById('ihp-dept').value;
+  const sel = document.getElementById('ihp-product');
+  sel.innerHTML = '<option value="">— Select —</option>';
+  if (!dept) return;
+  // Populate with In-House Material items for this dept (or all for now)
+  const inHouseItems = Object.entries(PARTS).filter(([name, p]) =>
+    p.materialType === 'In-House Material'
+  );
+  inHouseItems.forEach(([name]) => {
+    sel.innerHTML += `<option value="${name}">${name}</option>`;
+  });
+}
+
+let rawMatRowId = 0;
+function addRawMaterialRow(prefill) {
+  rawMatRowId++;
+  const id = rawMatRowId;
+  const div = document.createElement('div');
+  div.id = 'rm-row-'+id;
+  div.style.cssText = 'display:grid;grid-template-columns:2fr 1fr 0.6fr 0.5fr auto;gap:6px;align-items:end;margin-bottom:8px;';
+
+  // Build reagent/material options from inventory
+  const matOpts = inventoryData
+    .filter(r => r['Material Type'] === 'Raw Material' || r['Material Type'] === 'In-House Material')
+    .map(r => `<option value="${r['Lot Number']}" ${prefill && prefill.lot === r['Lot Number'] ? 'selected' : ''}>${r['Part Name']} — Lot ${r['Lot Number']} (${r['Quantity']} on hand)</option>`);
+
+  div.innerHTML = `
+    <div>
+      <label class="form-label" style="font-size:10px;">Material & Lot</label>
+      <select class="form-select" id="rm-sel-${id}" style="font-size:11px;" onchange="onRmSelect(${id})">
+        <option value="">— Select —</option>
+        ${matOpts.join('')}
+      </select>
+    </div>
+    <div>
+      <label class="form-label" style="font-size:10px;">Available</label>
+      <input type="text" class="form-input" id="rm-avail-${id}" readonly style="background:var(--neutral);font-size:11px;" value="${prefill?.available||''}" />
+    </div>
+    <div>
+      <label class="form-label" style="font-size:10px;">Qty Used</label>
+      <input type="number" class="form-input" id="rm-qty-${id}" min="0" style="font-size:11px;" value="${prefill?.qtyUsed||''}" />
+    </div>
+    <div>
+      <label class="form-label" style="font-size:10px;">Unit</label>
+      <input type="text" class="form-input" id="rm-unit-${id}" style="font-size:11px;" value="${prefill?.unit||'units'}" />
+    </div>
+    <div>
+      <button class="btn btn-ghost btn-sm" onclick="document.getElementById('rm-row-${id}').remove()" style="color:#c0392b;padding:4px 8px;">✕</button>
+    </div>
+  `;
+  document.getElementById('ihp-rawMaterials').appendChild(div);
+}
+
+function onRmSelect(id) {
+  const lot = document.getElementById('rm-sel-'+id).value;
+  const item = inventoryData.find(r => r['Lot Number'] === lot);
+  if (item) {
+    document.getElementById('rm-avail-'+id).value = item['Quantity'] + ' on hand';
+  }
+}
+
+function submitNewBatch() {
+  const dept = document.getElementById('ihp-dept').value;
+  const product = document.getElementById('ihp-product').value;
+  const batchNum = document.getElementById('ihp-batchNum').value.trim();
+  const date = document.getElementById('ihp-date').value;
+  const qty = parseInt(document.getElementById('ihp-qty').value);
+  const unit = document.getElementById('ihp-unit').value;
+  const expDate = document.getElementById('ihp-expDate').value;
+  const producedBy = document.getElementById('ihp-producedBy').value.trim();
+  const notes = document.getElementById('ihp-notes').value.trim();
+  const errEl = document.getElementById('ihp-error');
+
+  if (!dept || !product || !batchNum || !date || !qty) {
+    errEl.textContent = 'Please fill in all required fields';
+    errEl.style.display = '';
+    return;
+  }
+
+  // Collect raw materials
+  const rawMaterials = [];
+  document.querySelectorAll('[id^="rm-row-"]').forEach(row => {
+    const id = row.id.replace('rm-row-','');
+    const sel = document.getElementById('rm-sel-'+id);
+    const qtyUsed = parseFloat(document.getElementById('rm-qty-'+id).value) || 0;
+    const rmUnit = document.getElementById('rm-unit-'+id).value || 'units';
+    if (sel.value && qtyUsed > 0) {
+      const invItem = inventoryData.find(r => r['Lot Number'] === sel.value);
+      rawMaterials.push({
+        name: invItem ? invItem['Part Name'] : sel.options[sel.selectedIndex].text,
+        lot: sel.value,
+        qtyUsed,
+        unit: rmUnit
+      });
+    }
+  });
+
+  // Auto-deduct from inventory (pre-filled, user already adjusted)
+  rawMaterials.forEach(rm => {
+    const invItem = inventoryData.find(r => r['Lot Number'] === rm.lot);
+    if (invItem) {
+      const currentQty = parseInt(invItem['Quantity']) || 0;
+      invItem['Quantity'] = Math.max(0, currentQty - rm.qtyUsed);
+    }
+  });
+
+  // Add batch to log
+  ihpBatches.unshift({
+    date, batchNum, product, dept, qty, unit, remaining: qty,
+    expDate, producedBy, rawMaterials, notes
+  });
+
+  // Also add the produced item to inventory
+  const partInfo = PARTS[product] || {};
+  inventoryData.push({
+    'Part Name': product,
+    'Part Number': partInfo.partNumber || '',
+    'Lot Number': batchNum,
+    'Quantity': qty,
+    'Initial Quantity': qty,
+    'Date Received': date,
+    'Expiration Date': expDate,
+    'Status': 'Approved for Production Use',
+    'Department': dept,
+    'Material Type': 'In-House Material',
+    'Supplier Name': 'Eli Health',
+    'Inspected By': producedBy,
+    'Inspection Category': 'A',
+    'Disposition': 'Approved for Production Use',
+    '_dept': dept,
+    '_ihpBatchNum': batchNum,
+  });
+
+  closeModal('newBatchModal');
+  renderIhpTable();
+  showToast(`✓ Batch ${batchNum} recorded — ${rawMaterials.length} material(s) deducted from inventory`, 'success');
+}
+
+function openUpdateBatchQty(idx) {
+  const batch = ihpBatches[idx];
+  if (!batch) return;
+  const newQty = prompt(`Update remaining quantity for ${batch.product} (Batch: ${batch.batchNum})\nCurrent: ${batch.remaining} ${batch.unit}`, batch.remaining);
+  if (newQty === null) return;
+  const parsed = parseInt(newQty);
+  if (isNaN(parsed) || parsed < 0) { showToast('Invalid quantity','error'); return; }
+  batch.remaining = parsed;
+  // Also update inventory qty
+  const invItem = inventoryData.find(r => r['Lot Number'] === batch.batchNum);
+  if (invItem) invItem['Quantity'] = parsed;
+  renderIhpTable();
+  showToast(`Updated ${batch.batchNum} → ${parsed} ${batch.unit} remaining`);
+}
+
+// ═════════════════════════════════════════════════════════
+// CYCLE COUNTS
+// ═════════════════════════════════════════════════════════
+let ccCurrentDept = 'Manufacturing';
+let ccCurrentFreq = 'All';
+let countHistory = []; // { date, lotNumber, partName, systemQty, countedQty, variance, countedBy, notes }
+
+function switchCcTab(dept) {
+  ccCurrentDept = dept;
+  document.querySelectorAll('[id^="cc-tab-"]').forEach(b => b.classList.remove('active'));
+  const tabMap = {'Manufacturing':'Manufacturing','Assay R&D':'AssayRD','Hardware R&D':'HardwareRD'};
+  const el = document.getElementById('cc-tab-'+(tabMap[dept]||dept));
+  if (el) el.classList.add('active');
+  renderCcTable();
+}
+
+function switchCcFreq(freq) {
+  ccCurrentFreq = freq;
+  document.querySelectorAll('[id^="cc-freq-"]').forEach(b => b.classList.remove('active'));
+  const el = document.getElementById('cc-freq-'+freq.replace('-',''));
+  // fix: Bi-Yearly maps to cc-freq-Bi-Yearly
+  document.querySelectorAll('[id^="cc-freq-"]').forEach(b => {
+    if (b.textContent.trim() === freq || (freq === 'All' && b.id === 'cc-freq-All')) b.classList.add('active');
+  });
+  renderCcTable();
+}
+
+const FREQ_DAYS = { 'Weekly':7, 'Monthly':30, 'Quarterly':90, 'Bi-Yearly':182, 'Yearly':365 };
+
+function getCountFreq(item) {
+  return item._countFreq || 'Monthly'; // default
+}
+
+function getLastCounted(item) {
+  return item._lastCounted || null;
+}
+
+function getNextDue(item) {
+  const last = getLastCounted(item);
+  const freq = getCountFreq(item);
+  if (!last) return 'Overdue';
+  const d = new Date(last);
+  d.setDate(d.getDate() + (FREQ_DAYS[freq] || 30));
+  return d.toISOString().slice(0,10);
+}
+
+function getCountStatus(item) {
+  const next = getNextDue(item);
+  if (next === 'Overdue') return 'overdue';
+  const today = todayISO();
+  if (next <= today) return 'overdue';
+  // Due within 3 days
+  const soon = new Date(); soon.setDate(soon.getDate() + 3);
+  if (next <= soon.toISOString().slice(0,10)) return 'due-soon';
+  return 'ok';
+}
+
+function renderCcTable() {
+  const search = (document.getElementById('ccSearchInput')?.value||'').toLowerCase();
+  // Get items for this department that are active (not Do Not Use, not returned)
+  let items = inventoryData.filter(r => {
+    const dept = r['Department'] || r['_dept'] || '';
+    if (dept !== ccCurrentDept) return false;
+    const status = r['Status'] || '';
+    if (status === 'Do Not Use' || status === 'Returned to Supplier') return false;
+    if (search && !(r['Part Name']||'').toLowerCase().includes(search)) return false;
+    if (ccCurrentFreq !== 'All' && getCountFreq(r) !== ccCurrentFreq) return false;
+    return true;
+  });
+
+  // Stats
+  const statsEl = document.getElementById('ccStats');
+  const overdue = items.filter(r => getCountStatus(r) === 'overdue').length;
+  const dueSoon = items.filter(r => getCountStatus(r) === 'due-soon').length;
+  const ok = items.filter(r => getCountStatus(r) === 'ok').length;
+  statsEl.innerHTML = `
+    <div class="stat-card" style="padding:10px 16px;border-radius:8px;background:#fef2f2;border:1px solid #fecaca;font-size:12px;">
+      <span style="color:#991b1b;">Overdue</span><br><strong style="font-size:18px;color:#991b1b;">${overdue}</strong>
+    </div>
+    <div class="stat-card" style="padding:10px 16px;border-radius:8px;background:#fffbeb;border:1px solid #fde68a;font-size:12px;">
+      <span style="color:#854d04;">Due Soon</span><br><strong style="font-size:18px;color:#854d04;">${dueSoon}</strong>
+    </div>
+    <div class="stat-card" style="padding:10px 16px;border-radius:8px;background:#f0fdf4;border:1px solid #bbf7d0;font-size:12px;">
+      <span style="color:#166534;">Up to Date</span><br><strong style="font-size:18px;color:#166534;">${ok}</strong>
+    </div>
+    <div class="stat-card" style="padding:10px 16px;border-radius:8px;background:var(--white);border:1px solid var(--border);font-size:12px;">
+      <span style="color:var(--soft-hash);">Total Tracked</span><br><strong style="font-size:18px;">${items.length}</strong>
+    </div>
+  `;
+
+  const tbody = document.getElementById('ccBody');
+  if (!items.length) {
+    tbody.innerHTML = '<tr><td colspan="8"><div class="table-placeholder"><p>No items to count</p></div></td></tr>';
+    renderCcHistory();
+    return;
+  }
+
+  tbody.innerHTML = items.map((r, i) => {
+    const freq = getCountFreq(r);
+    const last = getLastCounted(r);
+    const next = getNextDue(r);
+    const status = getCountStatus(r);
+    const statusBadge = status === 'overdue'
+      ? '<span style="display:inline-block;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600;background:#fef2f2;color:#991b1b;">Overdue</span>'
+      : status === 'due-soon'
+      ? '<span style="display:inline-block;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600;background:#fffbeb;color:#854d04;">Due Soon</span>'
+      : '<span style="display:inline-block;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600;background:#f0fdf4;color:#166534;">✓ OK</span>';
+    const lot = r['Lot Number'] || '';
+    const globalIdx = inventoryData.indexOf(r);
+
+    return `<tr>
+      <td class="td-part-name">${r['Part Name']||'—'}</td>
+      <td class="td-mono" style="font-size:11px;">${lot}</td>
+      <td><strong>${r['Quantity']||0}</strong></td>
+      <td style="font-size:12px;">${last ? formatDate(last) : '<span style="color:var(--soft-hash);">Never</span>'}</td>
+      <td>
+        <select class="form-select" style="font-size:11px;padding:3px 6px;min-width:90px;" onchange="setCountFreq(${globalIdx}, this.value)">
+          <option value="Weekly" ${freq==='Weekly'?'selected':''}>Weekly</option>
+          <option value="Monthly" ${freq==='Monthly'?'selected':''}>Monthly</option>
+          <option value="Quarterly" ${freq==='Quarterly'?'selected':''}>Quarterly</option>
+          <option value="Bi-Yearly" ${freq==='Bi-Yearly'?'selected':''}>Bi-Yearly</option>
+          <option value="Yearly" ${freq==='Yearly'?'selected':''}>Yearly</option>
+        </select>
+      </td>
+      <td style="font-size:12px;">${next === 'Overdue' ? '<span style="color:#991b1b;font-weight:600;">Overdue</span>' : formatDate(next)}</td>
+      <td>${statusBadge}</td>
+      <td>
+        <button class="btn btn-ghost btn-sm" onclick="openQuickCountFor(${globalIdx})" title="Count this item">📋 Count</button>
+      </td>
+    </tr>`;
+  }).join('');
+
+  renderCcHistory();
+}
+
+function setCountFreq(invIdx, freq) {
+  if (inventoryData[invIdx]) {
+    inventoryData[invIdx]._countFreq = freq;
+    renderCcTable();
+  }
+}
+
+function renderCcHistory() {
+  const el = document.getElementById('ccHistory');
+  const relevant = countHistory.filter(h => {
+    const item = inventoryData.find(r => r['Lot Number'] === h.lotNumber);
+    const dept = item ? (item['Department'] || item['_dept']) : '';
+    return dept === ccCurrentDept;
+  }).slice(0, 20);
+
+  if (!relevant.length) {
+    el.innerHTML = '<div style="font-size:12px;color:var(--soft-hash);padding:8px;">No count history yet for this department.</div>';
+    return;
+  }
+  el.innerHTML = relevant.map(h => {
+    const varColor = h.variance === 0 ? '#166534' : h.variance > 0 ? '#854d04' : '#991b1b';
+    const varSign = h.variance > 0 ? '+' : '';
+    return `<div style="display:flex;align-items:center;gap:12px;padding:8px 14px;background:var(--white);border:1px solid var(--border);border-radius:8px;font-size:12px;">
+      <span style="color:var(--soft-hash);min-width:75px;">${formatDate(h.date)}</span>
+      <strong style="flex:1;">${h.partName}</strong>
+      <span class="td-mono" style="font-size:11px;">${h.lotNumber}</span>
+      <span>System: ${h.systemQty}</span>
+      <span>Counted: <strong>${h.countedQty}</strong></span>
+      <span style="color:${varColor};font-weight:700;">${varSign}${h.variance}</span>
+      <span style="color:var(--soft-hash);">${h.countedBy}</span>
+    </div>`;
+  }).join('');
+}
+
+function openQuickCount() {
+  const sel = document.getElementById('qc-item');
+  sel.innerHTML = '<option value="">— Select item —</option>';
+  // Populate with active inventory items for Mfg/R&D
+  const depts = ['Manufacturing','Assay R&D','Hardware R&D'];
+  inventoryData.filter(r => {
+    const dept = r['Department'] || r['_dept'] || '';
+    const status = r['Status'] || '';
+    return depts.includes(dept) && status !== 'Do Not Use' && status !== 'Returned to Supplier';
+  }).forEach((r, i) => {
+    const idx = inventoryData.indexOf(r);
+    sel.innerHTML += `<option value="${idx}">${r['Part Name']} — Lot ${r['Lot Number']} (${r['Department']})</option>`;
+  });
+  document.getElementById('qc-systemQty').value = '';
+  document.getElementById('qc-countedQty').value = '';
+  document.getElementById('qc-countedBy').value = currentUser?.name || '';
+  document.getElementById('qc-notes').value = '';
+  document.getElementById('qc-variance').style.display = 'none';
+  document.getElementById('quickCountModal').classList.add('open');
+}
+
+function openQuickCountFor(invIdx) {
+  openQuickCount();
+  document.getElementById('qc-item').value = invIdx;
+  prefillQuickCount();
+}
+
+function prefillQuickCount() {
+  const idx = parseInt(document.getElementById('qc-item').value);
+  const item = inventoryData[idx];
+  if (item) {
+    document.getElementById('qc-systemQty').value = (item['Quantity'] || 0) + ' on hand';
+  }
+}
+
+function submitQuickCount() {
+  const idx = parseInt(document.getElementById('qc-item').value);
+  const item = inventoryData[idx];
+  if (!item) { showToast('Please select an item','error'); return; }
+  const countedQty = parseInt(document.getElementById('qc-countedQty').value);
+  if (isNaN(countedQty) || countedQty < 0) { showToast('Please enter a valid count','error'); return; }
+  const countedBy = document.getElementById('qc-countedBy').value.trim();
+  const notes = document.getElementById('qc-notes').value.trim();
+  const systemQty = parseInt(item['Quantity']) || 0;
+  const variance = countedQty - systemQty;
+
+  // Update inventory
+  item['Quantity'] = countedQty;
+  item._lastCounted = todayISO();
+
+  // Log it
+  countHistory.unshift({
+    date: todayISO(),
+    lotNumber: item['Lot Number'],
+    partName: item['Part Name'],
+    systemQty,
+    countedQty,
+    variance,
+    countedBy,
+    notes
+  });
+
+  closeModal('quickCountModal');
+  renderCcTable();
+  const varText = variance === 0 ? 'No variance' : (variance > 0 ? `+${variance} surplus` : `${variance} short`);
+  showToast(`✓ Count recorded for ${item['Part Name']} — ${varText}`, variance === 0 ? 'success' : 'warning');
+}
+
+function openBulkCountSheet() {
+  const container = document.getElementById('bulkCountItems');
+  // Get items due or overdue for current department
+  const dueItems = inventoryData.filter(r => {
+    const dept = r['Department'] || r['_dept'] || '';
+    if (dept !== ccCurrentDept) return false;
+    const status = r['Status'] || '';
+    if (status === 'Do Not Use' || status === 'Returned to Supplier') return false;
+    const cs = getCountStatus(r);
+    return cs === 'overdue' || cs === 'due-soon';
+  });
+
+  if (!dueItems.length) {
+    container.innerHTML = '<div style="padding:20px;text-align:center;color:var(--soft-hash);font-size:13px;">No items currently due for counting in ' + ccCurrentDept + '.<br>All counts are up to date!</div>';
+  } else {
+    container.innerHTML = `
+      <div style="display:grid;grid-template-columns:2fr 1fr 0.8fr 0.8fr;gap:6px;font-size:11px;font-weight:700;color:var(--soft-hash);padding:0 0 6px;border-bottom:1px solid var(--border);margin-bottom:8px;">
+        <span>Item</span><span>Lot</span><span>System Qty</span><span>Counted Qty</span>
+      </div>
+    ` + dueItems.map(r => {
+      const idx = inventoryData.indexOf(r);
+      return `<div style="display:grid;grid-template-columns:2fr 1fr 0.8fr 0.8fr;gap:6px;align-items:center;margin-bottom:6px;font-size:12px;" data-bc-idx="${idx}">
+        <span style="font-weight:600;">${r['Part Name']}</span>
+        <span class="td-mono" style="font-size:11px;">${r['Lot Number']}</span>
+        <span>${r['Quantity']||0}</span>
+        <input type="number" class="form-input bc-count-input" min="0" style="font-size:12px;padding:4px 8px;" data-idx="${idx}" />
+      </div>`;
+    }).join('');
+  }
+
+  document.getElementById('bc-countedBy').value = currentUser?.name || '';
+  document.getElementById('bulkCountModal').classList.add('open');
+}
+
+function submitBulkCount() {
+  const countedBy = document.getElementById('bc-countedBy').value.trim();
+  const inputs = document.querySelectorAll('.bc-count-input');
+  let counted = 0;
+
+  inputs.forEach(inp => {
+    const val = inp.value.trim();
+    if (val === '') return; // skip empty
+    const idx = parseInt(inp.dataset.idx);
+    const item = inventoryData[idx];
+    if (!item) return;
+    const countedQty = parseInt(val);
+    if (isNaN(countedQty) || countedQty < 0) return;
+    const systemQty = parseInt(item['Quantity']) || 0;
+    const variance = countedQty - systemQty;
+
+    item['Quantity'] = countedQty;
+    item._lastCounted = todayISO();
+
+    countHistory.unshift({
+      date: todayISO(),
+      lotNumber: item['Lot Number'],
+      partName: item['Part Name'],
+      systemQty,
+      countedQty,
+      variance,
+      countedBy,
+      notes: 'Bulk count'
+    });
+    counted++;
+  });
+
+  if (counted === 0) { showToast('No counts entered','error'); return; }
+
+  closeModal('bulkCountModal');
+  renderCcTable();
+  showToast(`✓ ${counted} item(s) counted and updated`, 'success');
 }
 
 // ══════════════════════════════════════════════════════
