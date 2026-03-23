@@ -710,6 +710,7 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:20px 0;}
     <span class="nav-icon">📦</span> Inventory
     <span class="nav-badge" id="pendingBadge" title="Items at Low Stock or Out of Stock — check inventory">0</span>
   </button>
+  <button class="nav-link" onclick="showPage('inhouseinv')" id="nav-inhouseinv"><span class="nav-icon">🧫</span> In-House Inventory</button>
   <button class="nav-link" onclick="showPage('incoming')" id="nav-incoming">
     <span class="nav-icon">📥</span> Incoming Inspection
   </button>
@@ -720,7 +721,6 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:20px 0;}
   <button class="nav-link" onclick="showPage('production')" id="nav-production"><span class="nav-icon">🧪</span> Production Lots</button>
   <button class="nav-link" onclick="showPage('ncscrap')" id="nav-ncscrap"><span class="nav-icon">⚠️</span> NC &amp; Scrap Log</button>
   <button class="nav-link" onclick="showPage('quarantine')" id="nav-quarantine"><span class="nav-icon">🔒</span> Quarantine Hold</button>
-  <button class="nav-link" onclick="showPage('inhouseprod')" id="nav-inhouseprod"><span class="nav-icon">🏭</span> In-House Production</button>
   <button class="nav-link" onclick="showPage('cyclecounts')" id="nav-cyclecounts"><span class="nav-icon">📋</span> Cycle Counts</button>
   <button class="nav-link" onclick="showPage('batchtrace')" id="nav-batchtrace"><span class="nav-icon">📊</span> Batch Traceability</button>
   <button class="nav-link" onclick="showPage('sds')" id="nav-sds"><span class="nav-icon">📄</span> SDS &amp; COA Register</button>
@@ -2311,14 +2311,15 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:20px 0;}
 </div>
 
 <!-- ══ IN-HOUSE PRODUCTION PAGE ═════════════════════════ -->
-<div class="page" id="page-inhouseprod">
+<!-- ══ IN-HOUSE INVENTORY PAGE ══════════════════════════ -->
+<div class="page" id="page-inhouseinv">
   <div class="page-header">
     <div>
-      <h1>🏭 In-House Production</h1>
-      <p class="subtitle">Record batches of reagents and components made in-house · Track raw material usage</p>
+      <h1>🧫 In-House Inventory</h1>
+      <p class="subtitle">Reagents, buffers, strips &amp; components made internally · Track raw materials, aliquots &amp; storage</p>
     </div>
     <div style="display:flex;gap:8px;">
-      <button class="btn btn-primary btn-sm" onclick="openNewBatchModal()">+ New Batch</button>
+      <button class="btn btn-primary btn-sm" onclick="openNewBatchModal()">+ Record New Batch</button>
     </div>
   </div>
 
@@ -2333,29 +2334,33 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:20px 0;}
   <!-- Stats strip -->
   <div id="ihpStats" style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px;"></div>
 
-  <!-- Batch log table -->
+  <!-- Inventory table -->
   <div class="table-card">
     <div style="padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
-      <span style="font-size:12px;font-weight:600;color:var(--soft-hash);letter-spacing:.05em;text-transform:uppercase;">Production Batch Log</span>
-      <input type="text" id="ihpSearchInput" class="form-input" style="width:220px;padding:6px 10px;font-size:12px;" placeholder="Filter by product, batch…" oninput="renderIhpTable()" />
+      <span style="font-size:12px;font-weight:600;color:var(--soft-hash);letter-spacing:.05em;text-transform:uppercase;">In-House Items</span>
+      <input type="text" id="ihpSearchInput" class="form-input" style="width:220px;padding:6px 10px;font-size:12px;" placeholder="Search by name, lot, location…" oninput="renderIhpTable()" />
     </div>
     <div class="table-wrap">
-      <table class="catalog-table">
+      <table id="ihpTable">
         <thead>
           <tr>
-            <th>Date</th>
-            <th>Batch #</th>
-            <th>Product</th>
+            <th>QR</th>
+            <th>Item Name</th>
+            <th>Lot / Batch #</th>
+            <th>Type</th>
             <th>Dept</th>
-            <th>Qty Produced</th>
-            <th>Remaining</th>
-            <th>Raw Materials Used</th>
+            <th>Location</th>
+            <th>Date Made</th>
+            <th>Initial Qty</th>
+            <th>Current Qty</th>
+            <th>Aliquots</th>
+            <th>Raw Materials</th>
             <th>Produced By</th>
-            <th>Actions</th>
+            <th></th>
           </tr>
         </thead>
         <tbody id="ihpBody">
-          <tr><td colspan="9"><div class="table-placeholder"><p>No batches recorded yet</p></div></td></tr>
+          <tr><td colspan="13"><div class="table-placeholder"><p>No in-house items yet</p></div></td></tr>
         </tbody>
       </table>
     </div>
@@ -2364,9 +2369,9 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:20px 0;}
 
 <!-- ══ NEW BATCH MODAL ═════════════════════════════════ -->
 <div class="modal-overlay" id="newBatchModal">
-  <div class="modal-box" style="max-width:640px;max-height:calc(100vh - 32px);overflow-y:auto;">
+  <div class="modal-box" style="max-width:680px;max-height:calc(100vh - 32px);overflow-y:auto;">
     <button class="modal-close" onclick="closeModal('newBatchModal')">✕</button>
-    <div class="modal-title">🏭 Record New In-House Batch</div>
+    <div class="modal-title">🧫 Record New In-House Batch</div>
 
     <div class="form-grid" style="grid-template-columns:1fr 1fr;">
       <div class="form-group">
@@ -2385,7 +2390,7 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:20px 0;}
         </select>
       </div>
       <div class="form-group">
-        <label class="form-label">Batch Number <span class="req">*</span></label>
+        <label class="form-label">Batch / Lot Number <span class="req">*</span></label>
         <input type="text" class="form-input" id="ihp-batchNum" placeholder="e.g. IH-COR-2026-001" />
       </div>
       <div class="form-group">
@@ -2401,8 +2406,10 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:20px 0;}
         <select id="ihp-unit" class="form-select">
           <option value="units">Units</option>
           <option value="mL">mL</option>
+          <option value="µL">µL</option>
           <option value="L">L</option>
           <option value="g">g</option>
+          <option value="mg">mg</option>
           <option value="strips">Strips</option>
         </select>
       </div>
@@ -2411,18 +2418,71 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:20px 0;}
         <input type="date" class="form-input" id="ihp-expDate" />
       </div>
       <div class="form-group">
-        <label class="form-label">Produced By</label>
+        <label class="form-label">Produced By (Full Name) <span class="req">*</span></label>
         <input type="text" class="form-input" id="ihp-producedBy" placeholder="e.g. Jocelyn Meyer" />
+      </div>
+    </div>
+
+    <!-- Storage Location -->
+    <div style="margin-top:16px;border:1px solid var(--border);border-radius:10px;padding:14px;">
+      <span style="font-weight:700;font-size:13px;color:var(--graphite);display:block;margin-bottom:10px;">📍 Storage Location</span>
+      <div class="form-grid" style="grid-template-columns:1fr 1fr 1fr;">
+        <div class="form-group">
+          <label class="form-label">Storage Type <span class="req">*</span></label>
+          <select id="ihp-storageType" class="form-select" onchange="toggleIhpStorageFields()">
+            <option value="">— Select —</option>
+            <option value="-80°C Freezer">-80°C Freezer</option>
+            <option value="-20°C Freezer">-20°C Freezer</option>
+            <option value="4°C Fridge">4°C Fridge</option>
+            <option value="Room Temp">Room Temp</option>
+            <option value="Chemical Cabinet">Chemical Cabinet</option>
+            <option value="Dry Storage">Dry Storage</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Shelf / Rack</label>
+          <input type="text" class="form-input" id="ihp-shelf" placeholder="e.g. Shelf 2, Rack B" oninput="toggleIhpStorageFields()" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Box / Position</label>
+          <input type="text" class="form-input" id="ihp-box" placeholder="e.g. Box 3, Pos A4" oninput="toggleIhpStorageFields()" />
+        </div>
+      </div>
+      <div id="ihp-locationPreview" style="margin-top:6px;font-size:11px;color:var(--soft-hash);font-style:italic;">Location: —</div>
+    </div>
+
+    <!-- Aliquot section -->
+    <div style="margin-top:16px;border:1px solid var(--border);border-radius:10px;padding:14px;">
+      <span style="font-weight:700;font-size:13px;color:var(--graphite);display:block;margin-bottom:10px;">🧪 Aliquot Information</span>
+      <div class="form-hint" style="margin-bottom:10px;">If this batch was split into aliquots, enter the details below. Leave blank if not applicable.</div>
+      <div class="form-grid" style="grid-template-columns:1fr 1fr 1fr;">
+        <div class="form-group">
+          <label class="form-label">Total Aliquots</label>
+          <input type="number" class="form-input" id="ihp-aliquotCount" min="0" placeholder="e.g. 10" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Volume / Mass per Aliquot</label>
+          <input type="number" class="form-input" id="ihp-aliquotSize" min="0" step="0.1" placeholder="e.g. 50" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Aliquot Unit</label>
+          <select id="ihp-aliquotUnit" class="form-select">
+            <option value="µL">µL</option>
+            <option value="mL">mL</option>
+            <option value="mg">mg</option>
+            <option value="g">g</option>
+          </select>
+        </div>
       </div>
     </div>
 
     <!-- Raw Materials Used -->
     <div style="margin-top:16px;border:1px solid var(--border);border-radius:10px;padding:14px;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-        <span style="font-weight:700;font-size:13px;color:var(--graphite);">Raw Materials Used</span>
+        <span style="font-weight:700;font-size:13px;color:var(--graphite);">📦 Raw Materials Used</span>
         <button class="btn btn-secondary btn-sm" onclick="addRawMaterialRow()">+ Add Material</button>
       </div>
-      <div class="form-hint" style="margin-bottom:10px;">System will pre-fill available lots. You can change lot, quantity, or remove rows before submitting.</div>
+      <div class="form-hint" style="margin-bottom:10px;">Select raw materials from inventory. Quantities will be auto-deducted on submit.</div>
       <div id="ihp-rawMaterials">
         <!-- Dynamic rows added here -->
       </div>
@@ -2439,6 +2499,18 @@ hr.divider{border:none;border-top:1px solid var(--border);margin:20px 0;}
     <div style="display:flex;gap:8px;margin-top:18px;justify-content:flex-end;">
       <button class="btn btn-secondary btn-sm" onclick="closeModal('newBatchModal')">Cancel</button>
       <button class="btn btn-primary btn-sm" onclick="submitNewBatch()">✓ Record Batch</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ IN-HOUSE ITEM DETAIL MODAL ══════════════════════ -->
+<div class="modal-overlay" id="ihpDetailModal">
+  <div class="modal-box" style="max-width:560px;max-height:calc(100vh - 32px);overflow-y:auto;">
+    <button class="modal-close" onclick="closeModal('ihpDetailModal')">✕</button>
+    <div class="modal-title" id="ihpd-title">Item Details</div>
+    <div id="ihpd-content"></div>
+    <div style="display:flex;gap:8px;margin-top:18px;justify-content:flex-end;">
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('ihpDetailModal')">Close</button>
     </div>
   </div>
 </div>
@@ -3366,7 +3438,7 @@ function showPage(name) {
   if (name === 'quarantine') {
     renderQuarantineTable();
   }
-  if (name === 'inhouseprod') {
+  if (name === 'inhouseinv') {
     renderIhpTable();
   }
   if (name === 'cyclecounts') {
@@ -6004,18 +6076,18 @@ function submitQuarantineAction() {
 }
 
 // ═════════════════════════════════════════════════════════
-// IN-HOUSE PRODUCTION
+// IN-HOUSE INVENTORY
 // ═════════════════════════════════════════════════════════
-let ihpBatches = []; // local store of in-house production batches
+let ihpBatches = []; // local store of in-house batches
 let ihpCurrentDept = 'All';
 
-// Demo batches
 function loadIhpDemoData() {
   if (ihpBatches.length) return;
   ihpBatches = [
-    { date:'2026-03-18', batchNum:'IH-COR-RB-001', product:'Cortisol Running Buffer', dept:'Manufacturing', qty:500, unit:'mL', remaining:320, expDate:'2026-09-18', producedBy:'Jocelyn Meyer', rawMaterials:[{name:'HEPES',lot:'H2026-001',qtyUsed:50,unit:'g'},{name:'Sodium Chloride',lot:'NACL-001',qtyUsed:20,unit:'g'},{name:'DI Water',lot:'DIWT-001',qtyUsed:450,unit:'mL'}], notes:'' },
-    { date:'2026-03-15', batchNum:'IH-COR-GC-001', product:'Cortisol Gold Conjugate Pad', dept:'Manufacturing', qty:200, unit:'strips', remaining:145, expDate:'2026-06-15', producedBy:'Jocelyn Meyer', rawMaterials:[{name:'40nm Unconjugated Gold',lot:'20260210-AUGN',qtyUsed:5,unit:'mL'},{name:'NCX Conjugate Diluent',lot:'NCDL-001',qtyUsed:10,unit:'mL'}], notes:'Lot used for validation run' },
-    { date:'2026-03-10', batchNum:'IH-BLK-001', product:'Blocking Buffer', dept:'Assay R&D', qty:1000, unit:'mL', remaining:800, expDate:'2026-06-10', producedBy:'James', rawMaterials:[{name:'Bovine Serum Albumin (BSA)',lot:'BSA-001',qtyUsed:10,unit:'g'},{name:'Tween 20',lot:'TW20-001',qtyUsed:5,unit:'mL'},{name:'DI Water',lot:'DIWT-001',qtyUsed:985,unit:'mL'}], notes:'R&D formulation v2' },
+    { date:'2026-03-18', batchNum:'IH-COR-RB-001', product:'Cortisol Running Buffer', dept:'Manufacturing', qty:500, unit:'mL', remaining:320, expDate:'2026-09-18', producedBy:'Jocelyn Meyer', location:'-80°C Freezer · Shelf 2 · Box A3', storageType:'-80°C Freezer', shelf:'Shelf 2', box:'Box A3', aliquotCount:10, aliquotRemaining:7, aliquotSize:50, aliquotUnit:'mL', rawMaterials:[{name:'HEPES',lot:'H2026-001',qtyUsed:50,unit:'g'},{name:'Sodium Chloride',lot:'NACL-001',qtyUsed:20,unit:'g'},{name:'DI Water',lot:'DIWT-001',qtyUsed:450,unit:'mL'}], notes:'', qrUrl:'https://ims.eli.health/lot/IH-COR-RB-001' },
+    { date:'2026-03-15', batchNum:'IH-COR-GC-001', product:'Cortisol Gold Conjugate Pad', dept:'Manufacturing', qty:200, unit:'strips', remaining:145, expDate:'2026-06-15', producedBy:'Jocelyn Meyer', location:'Room Temp · Shelf 1', storageType:'Room Temp', shelf:'Shelf 1', box:'', aliquotCount:0, aliquotRemaining:0, aliquotSize:0, aliquotUnit:'µL', rawMaterials:[{name:'40nm Unconjugated Gold',lot:'20260210-AUGN',qtyUsed:5,unit:'mL'},{name:'NCX Conjugate Diluent',lot:'NCDL-001',qtyUsed:10,unit:'mL'}], notes:'Lot used for validation run', qrUrl:'https://ims.eli.health/lot/IH-COR-GC-001' },
+    { date:'2026-03-10', batchNum:'IH-BLK-001', product:'Blocking Buffer', dept:'Assay R&D', qty:1000, unit:'mL', remaining:800, expDate:'2026-06-10', producedBy:'James Whitaker', location:'4°C Fridge · Shelf 3 · Rack B', storageType:'4°C Fridge', shelf:'Shelf 3', box:'Rack B', aliquotCount:20, aliquotRemaining:16, aliquotSize:50, aliquotUnit:'mL', rawMaterials:[{name:'Bovine Serum Albumin (BSA)',lot:'BSA-001',qtyUsed:10,unit:'g'},{name:'Tween 20',lot:'TW20-001',qtyUsed:5,unit:'mL'},{name:'DI Water',lot:'DIWT-001',qtyUsed:985,unit:'mL'}], notes:'R&D formulation v2', qrUrl:'https://ims.eli.health/lot/IH-BLK-001' },
+    { date:'2026-03-05', batchNum:'IH-PRG-NC-001', product:'Progesterone Nitrocellulose Strip', dept:'Assay R&D', qty:100, unit:'strips', remaining:62, expDate:'2026-09-05', producedBy:'James Whitaker', location:'-20°C Freezer · Shelf 1 · Box 2', storageType:'-20°C Freezer', shelf:'Shelf 1', box:'Box 2', aliquotCount:0, aliquotRemaining:0, aliquotSize:0, aliquotUnit:'µL', rawMaterials:[{name:'CN95 Nitrocellulose',lot:'CN95-001',qtyUsed:2,unit:'strips'}], notes:'', qrUrl:'https://ims.eli.health/lot/IH-PRG-NC-001' },
   ];
 }
 
@@ -6033,45 +6105,122 @@ function renderIhpTable() {
   const search = (document.getElementById('ihpSearchInput')?.value||'').toLowerCase();
   let rows = ihpBatches.filter(b => {
     if (ihpCurrentDept !== 'All' && b.dept !== ihpCurrentDept) return false;
-    if (search && !b.product.toLowerCase().includes(search) && !b.batchNum.toLowerCase().includes(search)) return false;
+    if (search && !b.product.toLowerCase().includes(search) && !b.batchNum.toLowerCase().includes(search) && !(b.location||'').toLowerCase().includes(search)) return false;
     return true;
   });
 
   // Stats
   const statsEl = document.getElementById('ihpStats');
   const total = rows.length;
-  const thisMonth = rows.filter(b => b.date >= todayISO().slice(0,7)).length;
+  const lowStock = rows.filter(b => b.remaining > 0 && b.remaining <= b.qty * 0.2).length;
+  const outOfStock = rows.filter(b => b.remaining <= 0).length;
+  const totalAliquots = rows.reduce((s,b) => s + (b.aliquotRemaining||0), 0);
   statsEl.innerHTML = `
     <div class="stat-card" style="padding:10px 16px;border-radius:8px;background:var(--white);border:1px solid var(--border);font-size:12px;">
-      <span style="color:var(--soft-hash);">Total Batches</span><br><strong style="font-size:18px;">${total}</strong>
+      <span style="color:var(--soft-hash);">Total Items</span><br><strong style="font-size:18px;">${total}</strong>
     </div>
-    <div class="stat-card" style="padding:10px 16px;border-radius:8px;background:var(--white);border:1px solid var(--border);font-size:12px;">
-      <span style="color:var(--soft-hash);">This Month</span><br><strong style="font-size:18px;">${thisMonth}</strong>
+    <div class="stat-card" style="padding:10px 16px;border-radius:8px;background:#fffbeb;border:1px solid #fde68a;font-size:12px;">
+      <span style="color:#854d04;">Low Stock</span><br><strong style="font-size:18px;color:#854d04;">${lowStock}</strong>
+    </div>
+    <div class="stat-card" style="padding:10px 16px;border-radius:8px;background:#fef2f2;border:1px solid #fecaca;font-size:12px;">
+      <span style="color:#991b1b;">Out of Stock</span><br><strong style="font-size:18px;color:#991b1b;">${outOfStock}</strong>
+    </div>
+    <div class="stat-card" style="padding:10px 16px;border-radius:8px;background:#f0fdf4;border:1px solid #bbf7d0;font-size:12px;">
+      <span style="color:#166534;">Aliquots</span><br><strong style="font-size:18px;color:#166534;">${totalAliquots}</strong>
     </div>
   `;
 
   const tbody = document.getElementById('ihpBody');
   if (!rows.length) {
-    tbody.innerHTML = '<tr><td colspan="9"><div class="table-placeholder"><p>No batches found</p></div></td></tr>';
+    tbody.innerHTML = '<tr><td colspan="13"><div class="table-placeholder"><div style="font-size:28px;">🧫</div><p>No in-house items found</p><small>Click "+ Record New Batch" to add one</small></div></td></tr>';
     return;
   }
   tbody.innerHTML = rows.map((b, idx) => {
     const rmSummary = b.rawMaterials.map(r => `${r.name} (${r.qtyUsed} ${r.unit})`).join(', ');
-    const rmShort = rmSummary.length > 60 ? rmSummary.slice(0,57)+'…' : rmSummary;
+    const rmShort = rmSummary.length > 40 ? rmSummary.slice(0,37)+'…' : rmSummary;
+    const sl = b.remaining <= 0 ? 'sl-out' : b.remaining <= b.qty * 0.2 ? 'sl-low' : 'sl-in';
+    const slText = b.remaining <= 0 ? 'Out' : b.remaining <= b.qty * 0.2 ? 'Low' : 'In Stock';
+    const partInfo = PARTS[b.product] || {};
+    const typeLabel = partInfo.type || 'In-House';
+    const aliquotHTML = (b.aliquotCount > 0)
+      ? `<span style="font-size:11px;"><strong>${b.aliquotRemaining}</strong>/${b.aliquotCount}<br><span style="color:var(--soft-hash);">${b.aliquotSize} ${b.aliquotUnit} ea</span></span>`
+      : '<span style="color:var(--soft-hash);font-size:11px;">—</span>';
+    const locParts = [];
+    if (b.storageType) locParts.push(b.storageType);
+    if (b.shelf) locParts.push(b.shelf);
+    if (b.box) locParts.push(b.box);
+    const locStr = locParts.join(' · ') || '—';
+    const locBadge = b.storageType
+      ? `<span class="location-badge" title="${locStr}" style="font-size:10px;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:inline-block;">📍 ${locStr}</span>`
+      : '<span style="color:var(--soft-hash);font-size:11px;">—</span>';
+
     return `<tr>
-      <td>${formatDate(b.date)}</td>
-      <td class="td-mono">${b.batchNum}</td>
+      <td><div class="qr-thumb-wrap" id="ihpqr-${idx}"></div></td>
       <td class="td-part-name">${b.product}</td>
+      <td class="td-mono" style="font-size:11px;">${b.batchNum}</td>
+      <td><span class="mtype-badge inhouse">${typeLabel}</span></td>
       <td>${deptBadgeHTML(b.dept)}</td>
-      <td>${b.qty} ${b.unit}</td>
-      <td><strong>${b.remaining}</strong> ${b.unit}</td>
-      <td title="${rmSummary}" style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px;color:var(--soft-hash);">${rmShort}</td>
-      <td>${b.producedBy}</td>
-      <td style="white-space:nowrap;">
-        <button class="btn btn-ghost btn-sm" title="Update remaining qty" onclick="openUpdateBatchQty(${idx})">✏️</button>
+      <td>${locBadge}</td>
+      <td style="font-size:12px;">${formatDate(b.date)}</td>
+      <td style="color:var(--soft-hash);">${b.qty} ${b.unit}</td>
+      <td><strong>${b.remaining}</strong> ${b.unit} <span class="sl-pill ${sl}">${slText}</span></td>
+      <td>${aliquotHTML}</td>
+      <td title="${rmSummary}" style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px;color:var(--soft-hash);">${rmShort || '—'}</td>
+      <td style="font-size:12px;">${b.producedBy}</td>
+      <td style="white-space:nowrap;display:flex;gap:4px;align-items:center;">
+        <button class="btn btn-ghost btn-sm" title="View details" onclick="openIhpDetail(${idx})">📋</button>
+        <button class="btn btn-ghost btn-sm" title="Update quantity" onclick="openUpdateBatchQty(${idx})">✏️</button>
+        ${b.aliquotCount > 0 ? `<button class="btn btn-ghost btn-sm" title="Update aliquots" onclick="openUpdateAliquots(${idx})">🧪</button>` : ''}
       </td>
     </tr>`;
   }).join('');
+
+  // Render QR codes
+  requestAnimationFrame(() => {
+    rows.forEach((b, idx) => {
+      makeQR(`ihpqr-${idx}`, b.qrUrl || `https://ims.eli.health/lot/${b.batchNum}`, 40);
+    });
+  });
+}
+
+function openIhpDetail(idx) {
+  const b = ihpBatches[idx];
+  if (!b) return;
+  document.getElementById('ihpd-title').textContent = b.product;
+  const locStr = [b.storageType, b.shelf, b.box].filter(Boolean).join(' · ') || '—';
+  const rmHTML = b.rawMaterials.length
+    ? b.rawMaterials.map(r => `<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);font-size:12px;">
+        <span>${r.name}</span><span class="td-mono" style="font-size:11px;">Lot ${r.lot} — ${r.qtyUsed} ${r.unit}</span>
+      </div>`).join('')
+    : '<span style="color:var(--soft-hash);font-size:12px;">No raw materials recorded</span>';
+
+  document.getElementById('ihpd-content').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 16px;margin-bottom:14px;">
+      <div><span style="font-size:11px;color:var(--soft-hash);">Batch / Lot #</span><br><strong class="td-mono">${b.batchNum}</strong></div>
+      <div><span style="font-size:11px;color:var(--soft-hash);">Department</span><br>${deptBadgeHTML(b.dept)}</div>
+      <div><span style="font-size:11px;color:var(--soft-hash);">Date Produced</span><br>${formatDate(b.date)}</div>
+      <div><span style="font-size:11px;color:var(--soft-hash);">Expiration</span><br>${b.expDate ? formatDate(b.expDate) : '—'}</div>
+      <div><span style="font-size:11px;color:var(--soft-hash);">Supplier</span><br><strong>Eli Health (In-House)</strong></div>
+      <div><span style="font-size:11px;color:var(--soft-hash);">Produced By</span><br>${b.producedBy}</div>
+      <div><span style="font-size:11px;color:var(--soft-hash);">Initial Qty</span><br>${b.qty} ${b.unit}</div>
+      <div><span style="font-size:11px;color:var(--soft-hash);">Current Qty</span><br><strong>${b.remaining} ${b.unit}</strong></div>
+      <div style="grid-column:1/-1;"><span style="font-size:11px;color:var(--soft-hash);">📍 Storage Location</span><br><strong>${locStr}</strong></div>
+      ${b.aliquotCount > 0 ? `
+      <div><span style="font-size:11px;color:var(--soft-hash);">Aliquots Remaining</span><br><strong>${b.aliquotRemaining}</strong> of ${b.aliquotCount}</div>
+      <div><span style="font-size:11px;color:var(--soft-hash);">Per Aliquot</span><br><strong>${b.aliquotSize} ${b.aliquotUnit}</strong></div>` : ''}
+    </div>
+    <div style="border-top:1px solid var(--border);padding-top:12px;">
+      <span style="font-weight:700;font-size:13px;color:var(--graphite);display:block;margin-bottom:8px;">📦 Raw Materials Used</span>
+      ${rmHTML}
+    </div>
+    ${b.notes ? `<div style="margin-top:12px;padding:10px;background:var(--neutral);border-radius:8px;font-size:12px;"><strong>Notes:</strong> ${b.notes}</div>` : ''}
+    <div style="margin-top:14px;text-align:center;">
+      <div class="qr-thumb-wrap" id="ihpd-qr" style="margin:0 auto;"></div>
+      <div style="font-size:10px;color:var(--soft-hash);margin-top:4px;">${b.qrUrl||''}</div>
+    </div>
+  `;
+  document.getElementById('ihpDetailModal').classList.add('open');
+  requestAnimationFrame(() => makeQR('ihpd-qr', b.qrUrl || `https://ims.eli.health/lot/${b.batchNum}`, 120));
 }
 
 function openNewBatchModal() {
@@ -6085,8 +6234,23 @@ function openNewBatchModal() {
   document.getElementById('ihp-producedBy').value = currentUser?.name || '';
   document.getElementById('ihp-notes').value = '';
   document.getElementById('ihp-rawMaterials').innerHTML = '';
+  document.getElementById('ihp-storageType').value = '';
+  document.getElementById('ihp-shelf').value = '';
+  document.getElementById('ihp-box').value = '';
+  document.getElementById('ihp-locationPreview').textContent = 'Location: —';
+  document.getElementById('ihp-aliquotCount').value = '';
+  document.getElementById('ihp-aliquotSize').value = '';
+  document.getElementById('ihp-aliquotUnit').value = 'µL';
   document.getElementById('ihp-error').style.display = 'none';
   document.getElementById('newBatchModal').classList.add('open');
+}
+
+function toggleIhpStorageFields() {
+  const st = document.getElementById('ihp-storageType').value;
+  const shelf = document.getElementById('ihp-shelf').value;
+  const box = document.getElementById('ihp-box').value;
+  const parts = [st, shelf, box].filter(Boolean);
+  document.getElementById('ihp-locationPreview').textContent = parts.length ? 'Location: ' + parts.join(' · ') : 'Location: —';
 }
 
 function onIhpDeptChange() {
@@ -6094,7 +6258,6 @@ function onIhpDeptChange() {
   const sel = document.getElementById('ihp-product');
   sel.innerHTML = '<option value="">— Select —</option>';
   if (!dept) return;
-  // Populate with In-House Material items for this dept (or all for now)
   const inHouseItems = Object.entries(PARTS).filter(([name, p]) =>
     p.materialType === 'In-House Material'
   );
@@ -6111,7 +6274,6 @@ function addRawMaterialRow(prefill) {
   div.id = 'rm-row-'+id;
   div.style.cssText = 'display:grid;grid-template-columns:2fr 1fr 0.6fr 0.5fr auto;gap:6px;align-items:end;margin-bottom:8px;';
 
-  // Build reagent/material options from inventory
   const matOpts = inventoryData
     .filter(r => r['Material Type'] === 'Raw Material' || r['Material Type'] === 'In-House Material')
     .map(r => `<option value="${r['Lot Number']}" ${prefill && prefill.lot === r['Lot Number'] ? 'selected' : ''}>${r['Part Name']} — Lot ${r['Lot Number']} (${r['Quantity']} on hand)</option>`);
@@ -6163,8 +6325,24 @@ function submitNewBatch() {
   const notes = document.getElementById('ihp-notes').value.trim();
   const errEl = document.getElementById('ihp-error');
 
-  if (!dept || !product || !batchNum || !date || !qty) {
-    errEl.textContent = 'Please fill in all required fields';
+  // Storage
+  const storageType = document.getElementById('ihp-storageType').value;
+  const shelf = document.getElementById('ihp-shelf').value.trim();
+  const box = document.getElementById('ihp-box').value.trim();
+  const locationStr = [storageType, shelf, box].filter(Boolean).join(' · ');
+
+  // Aliquots
+  const aliquotCount = parseInt(document.getElementById('ihp-aliquotCount').value) || 0;
+  const aliquotSize = parseFloat(document.getElementById('ihp-aliquotSize').value) || 0;
+  const aliquotUnit = document.getElementById('ihp-aliquotUnit').value;
+
+  if (!dept || !product || !batchNum || !date || !qty || !producedBy) {
+    errEl.textContent = 'Please fill in all required fields (including Produced By with full name)';
+    errEl.style.display = '';
+    return;
+  }
+  if (!storageType) {
+    errEl.textContent = 'Please select a storage location';
     errEl.style.display = '';
     return;
   }
@@ -6187,7 +6365,7 @@ function submitNewBatch() {
     }
   });
 
-  // Auto-deduct from inventory (pre-filled, user already adjusted)
+  // Auto-deduct from inventory
   rawMaterials.forEach(rm => {
     const invItem = inventoryData.find(r => r['Lot Number'] === rm.lot);
     if (invItem) {
@@ -6196,13 +6374,17 @@ function submitNewBatch() {
     }
   });
 
-  // Add batch to log
+  const qrUrl = `https://ims.eli.health/lot/${batchNum}`;
+
+  // Add batch to IHP store
   ihpBatches.unshift({
     date, batchNum, product, dept, qty, unit, remaining: qty,
-    expDate, producedBy, rawMaterials, notes
+    expDate, producedBy, location: locationStr, storageType, shelf, box,
+    aliquotCount, aliquotRemaining: aliquotCount, aliquotSize, aliquotUnit,
+    rawMaterials, notes, qrUrl
   });
 
-  // Also add the produced item to inventory
+  // Also add to main inventory
   const partInfo = PARTS[product] || {};
   inventoryData.push({
     'Part Name': product,
@@ -6215,10 +6397,12 @@ function submitNewBatch() {
     'Status': 'Approved for Production Use',
     'Department': dept,
     'Material Type': 'In-House Material',
+    'Location': locationStr,
     'Supplier Name': 'Eli Health',
     'Inspected By': producedBy,
     'Inspection Category': 'A',
     'Disposition': 'Approved for Production Use',
+    'QR URL': qrUrl,
     '_dept': dept,
     '_ihpBatchNum': batchNum,
   });
@@ -6231,16 +6415,27 @@ function submitNewBatch() {
 function openUpdateBatchQty(idx) {
   const batch = ihpBatches[idx];
   if (!batch) return;
-  const newQty = prompt(`Update remaining quantity for ${batch.product} (Batch: ${batch.batchNum})\nCurrent: ${batch.remaining} ${batch.unit}`, batch.remaining);
+  const newQty = prompt(`Update remaining quantity for ${batch.product}\nBatch: ${batch.batchNum}\nCurrent: ${batch.remaining} ${batch.unit}`, batch.remaining);
   if (newQty === null) return;
   const parsed = parseInt(newQty);
   if (isNaN(parsed) || parsed < 0) { showToast('Invalid quantity','error'); return; }
   batch.remaining = parsed;
-  // Also update inventory qty
   const invItem = inventoryData.find(r => r['Lot Number'] === batch.batchNum);
   if (invItem) invItem['Quantity'] = parsed;
   renderIhpTable();
   showToast(`Updated ${batch.batchNum} → ${parsed} ${batch.unit} remaining`);
+}
+
+function openUpdateAliquots(idx) {
+  const batch = ihpBatches[idx];
+  if (!batch) return;
+  const newCount = prompt(`Update aliquots remaining for ${batch.product}\nBatch: ${batch.batchNum}\nCurrent: ${batch.aliquotRemaining} of ${batch.aliquotCount} (${batch.aliquotSize} ${batch.aliquotUnit} each)`, batch.aliquotRemaining);
+  if (newCount === null) return;
+  const parsed = parseInt(newCount);
+  if (isNaN(parsed) || parsed < 0) { showToast('Invalid count','error'); return; }
+  batch.aliquotRemaining = parsed;
+  renderIhpTable();
+  showToast(`Updated aliquots for ${batch.batchNum} → ${parsed} remaining`);
 }
 
 // ═════════════════════════════════════════════════════════
