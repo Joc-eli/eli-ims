@@ -4149,11 +4149,13 @@ function openQRModal(row) {
   currentModalRow = row;
   const lot   = row['Lot Number']||'';
   const qrUrl = row['QR URL']||`https://ims.eli.health/lot/${lot}`;
-  document.getElementById('qrModalTitle').textContent = lot||'Lot QR Code';
+  document.getElementById('qrModalTitle').innerHTML = `<span style="display:block;font-size:16px;font-weight:700;">${row['Part Name']||'—'}</span><span style="font-size:12px;color:var(--soft-hash);font-weight:500;">${row['Part Number']||''} · ${lot}</span>`;
   document.getElementById('qrModalMeta').innerHTML = `
     <div class="modal-meta-row"><span class="key">Part Name</span><span class="val">${row['Part Name']||'—'}</span></div>
     <div class="modal-meta-row"><span class="key">Item Number</span><span class="val mono">${row['Part Number']||'—'}</span></div>
     <div class="modal-meta-row"><span class="key">Lot Number</span><span class="val mono">${lot}</span></div>
+    <div class="modal-meta-row"><span class="key">Dept</span><span class="val">${deptBadgeHTML(row['Department']||row['_dept']||'')}</span></div>
+    <div class="modal-meta-row"><span class="key">Location</span><span class="val">${row['Location']||'—'}</span></div>
     <div class="modal-meta-row"><span class="key">Inspection Cat.</span><span class="val">${catBadgeHTML(row['Inspection Category'])}</span></div>
     <div class="modal-meta-row"><span class="key">Qty on Hand</span><span class="val">${row['Quantity']??'—'}</span></div>
     <div class="modal-meta-row"><span class="key">Date Received</span><span class="val">${formatDate(row['Date Received'])}</span></div>
@@ -6142,8 +6144,9 @@ function renderIhpTable() {
     const slText = b.remaining <= 0 ? 'Out' : b.remaining <= b.qty * 0.2 ? 'Low' : 'In Stock';
     const partInfo = PARTS[b.product] || {};
     const typeLabel = partInfo.type || 'In-House';
+    const aliqTotal = (b.aliquotRemaining||0) * (b.aliquotSize||0);
     const aliquotHTML = (b.aliquotCount > 0)
-      ? `<span style="font-size:11px;"><strong>${b.aliquotRemaining}</strong>/${b.aliquotCount}<br><span style="color:var(--soft-hash);">${b.aliquotSize} ${b.aliquotUnit} ea</span></span>`
+      ? `<span style="font-size:11px;"><strong>${b.aliquotRemaining} remaining</strong><br><span style="color:var(--soft-hash);">${b.aliquotSize} ${b.aliquotUnit} ea</span><br><span style="font-weight:700;color:var(--graphite);">${aliqTotal} ${b.aliquotUnit} total</span></span>`
       : '<span style="color:var(--soft-hash);font-size:11px;">—</span>';
     const locParts = [];
     if (b.storageType) locParts.push(b.storageType);
@@ -6168,6 +6171,7 @@ function renderIhpTable() {
       <td title="${rmSummary}" style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px;color:var(--soft-hash);">${rmShort || '—'}</td>
       <td style="font-size:12px;">${b.producedBy}</td>
       <td style="white-space:nowrap;display:flex;gap:4px;align-items:center;">
+        <button class="btn btn-ghost btn-sm" title="QR Code" onclick="openIhpQR(${idx})">QR</button>
         <button class="btn btn-ghost btn-sm" title="View details" onclick="openIhpDetail(${idx})">📋</button>
         <button class="btn btn-ghost btn-sm" title="Update quantity" onclick="openUpdateBatchQty(${idx})">✏️</button>
         ${b.aliquotCount > 0 ? `<button class="btn btn-ghost btn-sm" title="Update aliquots" onclick="openUpdateAliquots(${idx})">🧪</button>` : ''}
@@ -6189,9 +6193,17 @@ function openIhpDetail(idx) {
   document.getElementById('ihpd-title').textContent = b.product;
   const locStr = [b.storageType, b.shelf, b.box].filter(Boolean).join(' · ') || '—';
   const rmHTML = b.rawMaterials.length
-    ? b.rawMaterials.map(r => `<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);font-size:12px;">
-        <span>${r.name}</span><span class="td-mono" style="font-size:11px;">Lot ${r.lot} — ${r.qtyUsed} ${r.unit}</span>
-      </div>`).join('')
+    ? b.rawMaterials.map(r => {
+        const invItem = inventoryData.find(i => i['Lot Number'] === r.lot);
+        const invIdx = invItem ? inventoryData.indexOf(invItem) : -1;
+        const linkStyle = invItem ? 'cursor:pointer;color:#6d28d9;text-decoration:underline;' : '';
+        const clickAttr = invItem ? `onclick="closeModal('ihpDetailModal');openQRModal(inventoryData[${invIdx}])"` : '';
+        const onHandText = invItem ? ` · ${invItem['Quantity']} on hand` : '';
+        return `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);font-size:12px;">
+          <span style="${linkStyle}" ${clickAttr}>${r.name}</span>
+          <span class="td-mono" style="font-size:11px;">Lot ${r.lot} — ${r.qtyUsed} ${r.unit} used${onHandText}</span>
+        </div>`;
+      }).join('')
     : '<span style="color:var(--soft-hash);font-size:12px;">No raw materials recorded</span>';
 
   document.getElementById('ihpd-content').innerHTML = `
@@ -6206,8 +6218,13 @@ function openIhpDetail(idx) {
       <div><span style="font-size:11px;color:var(--soft-hash);">Current Qty</span><br><strong>${b.remaining} ${b.unit}</strong></div>
       <div style="grid-column:1/-1;"><span style="font-size:11px;color:var(--soft-hash);">📍 Storage Location</span><br><strong>${locStr}</strong></div>
       ${b.aliquotCount > 0 ? `
-      <div><span style="font-size:11px;color:var(--soft-hash);">Aliquots Remaining</span><br><strong>${b.aliquotRemaining}</strong> of ${b.aliquotCount}</div>
-      <div><span style="font-size:11px;color:var(--soft-hash);">Per Aliquot</span><br><strong>${b.aliquotSize} ${b.aliquotUnit}</strong></div>` : ''}
+      <div><span style="font-size:11px;color:var(--soft-hash);">Aliquots Remaining</span><br><strong>${b.aliquotRemaining} remaining</strong></div>
+      <div><span style="font-size:11px;color:var(--soft-hash);">Per Aliquot</span><br><strong>${b.aliquotSize} ${b.aliquotUnit}</strong></div>
+      <div style="grid-column:1/-1;padding:8px 12px;background:#f0fdf4;border-radius:8px;border:1px solid #bbf7d0;">
+        <span style="font-size:11px;color:#166534;">Total Remaining</span><br>
+        <strong style="font-size:18px;color:#166534;">${(b.aliquotRemaining||0) * (b.aliquotSize||0)} ${b.aliquotUnit}</strong>
+        <span style="font-size:11px;color:var(--soft-hash);"> (${b.aliquotRemaining} × ${b.aliquotSize} ${b.aliquotUnit})</span>
+      </div>` : ''}
     </div>
     <div style="border-top:1px solid var(--border);padding-top:12px;">
       <span style="font-weight:700;font-size:13px;color:var(--graphite);display:block;margin-bottom:8px;">📦 Raw Materials Used</span>
@@ -6429,13 +6446,37 @@ function openUpdateBatchQty(idx) {
 function openUpdateAliquots(idx) {
   const batch = ihpBatches[idx];
   if (!batch) return;
-  const newCount = prompt(`Update aliquots remaining for ${batch.product}\nBatch: ${batch.batchNum}\nCurrent: ${batch.aliquotRemaining} of ${batch.aliquotCount} (${batch.aliquotSize} ${batch.aliquotUnit} each)`, batch.aliquotRemaining);
+  const newCount = prompt(`Update aliquots remaining for ${batch.product}\nBatch: ${batch.batchNum}\nCurrent: ${batch.aliquotRemaining} of ${batch.aliquotCount} (${batch.aliquotSize} ${batch.aliquotUnit} each)\n\nTotal remaining: ${(batch.aliquotRemaining||0) * (batch.aliquotSize||0)} ${batch.aliquotUnit}`, batch.aliquotRemaining);
   if (newCount === null) return;
   const parsed = parseInt(newCount);
   if (isNaN(parsed) || parsed < 0) { showToast('Invalid count','error'); return; }
   batch.aliquotRemaining = parsed;
   renderIhpTable();
-  showToast(`Updated aliquots for ${batch.batchNum} → ${parsed} remaining`);
+  const newTotal = parsed * (batch.aliquotSize||0);
+  showToast(`Updated: ${parsed} aliquots remaining → ${newTotal} ${batch.aliquotUnit} total`);
+}
+
+function openIhpQR(idx) {
+  const b = ihpBatches[idx];
+  if (!b) return;
+  const partInfo = PARTS[b.product] || {};
+  // Build a row object compatible with openQRModal
+  const row = {
+    'Part Name': b.product,
+    'Part Number': partInfo.partNumber || '',
+    'Lot Number': b.batchNum,
+    'Department': b.dept,
+    '_dept': b.dept,
+    'Location': b.location || [b.storageType, b.shelf, b.box].filter(Boolean).join(' · '),
+    'Inspection Category': 'A',
+    'Quantity': b.remaining,
+    'Date Received': b.date,
+    'Status': 'Approved for Production Use',
+    'QR URL': b.qrUrl || `https://ims.eli.health/lot/${b.batchNum}`,
+    'Material Type': 'In-House Material',
+    'Supplier Name': 'Eli Health',
+  };
+  openQRModal(row);
 }
 
 // ═════════════════════════════════════════════════════════
